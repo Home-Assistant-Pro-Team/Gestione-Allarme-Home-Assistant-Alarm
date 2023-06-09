@@ -1,7 +1,6 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
         Led o luce stato allarme: &led switch.led_allarme
 
 ##############################################################
@@ -12,12 +11,11 @@ automation:
   id: led_state_alarm
   mode: single
   trigger:
-  - platform: state
-    entity_id: *alarm
-    to: 
-      - arming
-      - disarmed
-      - triggered
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {%set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{( is_state(alarm,'arming') or is_state(alarm,'triggered') or is_state(alarm,'disarmed')) and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
     - choose:
 
@@ -44,9 +42,10 @@ automation:
         - repeat:
             until:
             - or:
-              - condition: state
-                entity_id: *alarm
-                state: disarmed
+              - condition: template
+                value_template: > 
+                  {% from 'alarm.jinja' import state_alarm %}
+                  {{ states[alarm].state == 'disarmed' }}
                 for: '00:10:00'
               - "{{ trigger.to_state.state == 'disarmed' and trigger.from_state.state == 'triggered'}}"
             sequence:

@@ -40,8 +40,11 @@ automation:
               duration: 30
             target:
               entity_id: "{{camera[var_index]}}"
-              
-          - variables:
+          - alias: INVIA NOTIFICA
+            event: customizations
+            event_data:
+              types: notify_alarm
+              notify: cctv
               for_each: >
                 {% from 'alarm.jinja' import person_alarm %}
                 {% set output = namespace(state_home=[]) %}
@@ -49,12 +52,6 @@ automation:
                     {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
                   {% endfor %}
                   {{output.state_home}}
-          - alias: INVIA NOTIFICA
-            event: customizations
-            event_data:
-              types: notify_alarm
-              notify: cctv
-              for_each: "{{for_each}}"
               message: "{{ states[camera[var_index]].name }}"
               title: '---CCTV---'
               notification_icon: "mdi:cctv"

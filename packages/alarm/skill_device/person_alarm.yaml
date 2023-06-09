@@ -125,14 +125,6 @@ automation:
           service: input_boolean.turn_on
           target:
             entity_id: input_boolean.check_active_presence_person_active_alarm
-        - variables:
-            for_each: >
-              {% from 'alarm.jinja' import person_alarm %}
-              {% set output = namespace(state_home=[]) %}
-                {%for dict in person_alarm()|from_json if states[dict.person].state == 'home'%}
-                  {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-                {% endfor %}
-                {{output.state_home}}
         - alias: Invia notifica push SOLO alla persone che si trovano in casa con telefono scarico solo PUSH
           event: customizations
           event_data:
@@ -140,7 +132,13 @@ automation:
             notify: persona_in_casa_tel_scarico
             tag: state_alarm
             critical: 1.0
-            for_each: "{{for_each}}"
+            for_each: >
+              {% from 'alarm.jinja' import person_alarm %}
+              {% set output = namespace(state_home=[]) %}
+                {%for dict in person_alarm()|from_json if states[dict.person].state == 'home'%}
+                  {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
+                {% endfor %}
+                {{output.state_home}}
             action1: None
             action2: None
             message: >
@@ -236,7 +234,12 @@ automation:
       to: "home"
   condition: "{{is_state( alarm , 'armed_night')}}"
   action:
-    - variables:
+    - alias: Invia notifica SOLO alla persona che rientra in casa
+      event: customizations
+      event_data:
+        types: notify_alarm
+        notify: rientro_in_casa_con_allarme_notte
+        tag: state_person
         for_each: >
           {% from 'alarm.jinja' import person_alarm %}
           {% set output = namespace(state_home=[]) %}
@@ -244,13 +247,6 @@ automation:
               {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
             {% endfor %}
             {{output.state_home}}
-    - alias: Invia notifica SOLO alla persona che rientra in casa
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: rientro_in_casa_con_allarme_notte
-        tag: state_person
-        for_each: "{{for_each}}"
         title: "--ALLARME RIENTRO--"
         message: "{{trigger.to_state.name}}, disattivo l'allarme notte preventivamente per il tuo rientro."
     - service: alarm_control_panel.alarm_disarm

@@ -1,7 +1,6 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
         Campanello: &siren 
                         - switch.sirena_esterna
                         - switch.sirena_interna
@@ -14,14 +13,15 @@ automation:
   id: siren_alarm
   mode: restart
   variables:
-    alarm: *alarm
+    alarm: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ (state_alarm()|from_json)['alarm']}}
   trigger:
-  - entity_id: *alarm
-    platform: state
-    to: 
-      - triggered
-      - disarmed
-      - pending
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {%set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{( is_state(alarm,'pending') or is_state(alarm,'triggered') or is_state(alarm,'disarmed')) and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
   - choose:
       - alias: Primo avviso sensore scattato

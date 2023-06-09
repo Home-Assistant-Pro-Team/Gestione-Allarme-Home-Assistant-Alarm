@@ -1,12 +1,7 @@
-homeassistant:
-  customize:
-    package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
-# Requisito importante: per i sensori finestra impostare corretto device class (window)
-
-##############################################################
-#         DA QUESTO PUNTO NON MODIFICARE
-##############################################################
+#################################################################
+#                       Requisito importante:                   #
+#   i sensori finestra impostare corretto device class (window) #
+##############################################################  #
 template:
   - select:
       - name: "Aggiungi o rimuovi sensore allarme globale"
@@ -81,13 +76,15 @@ automation:
   alias: Allarme globale
   initial_state: true
   trigger:
-    - entity_id: *alarm
-      platform: state
-      to: 
-        - 'arming'
-        - 'armed_away'
-        - 'triggered'
-        - 'disarmed'
+    - platform: template
+      value_template: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {%set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{(is_state(alarm,'armed_away') or
+        is_state(alarm,'arming') or
+        is_state(alarm,'triggered') or
+        is_state(alarm,'disarmed'))
+        and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
   - choose: 
     - alias: Inserimento allarme
@@ -189,19 +186,22 @@ automation:
     - platform: event
       event_type: state_changed
   condition:
-      - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_globale_attiv' , 'print_list_group') }}"
-      - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }} "
-      - condition: state
-        entity_id: *alarm
-        state: armed_away
+    - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_globale_attiv' , 'print_list_group') }}"
+    - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }} "
+    - >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ states[alarm].state == 'armed_away' }}
   action: 
       - service: alarm_control_panel.alarm_trigger
         target:
-          entity_id: *alarm
+          entity_id: >
+            {% from 'alarm.jinja' import state_alarm %}
+            {{ (state_alarm()|from_json)['alarm']}}
       - alias: INVIA NOTIFICA
         event: customizations
         event_data:
           types: notify_alarm
+          critical: 1.0
           notify: allarme_globale_sensore_rilevato
           message: >
             {%- set last_time = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|map(attribute='last_changed')|max -%}

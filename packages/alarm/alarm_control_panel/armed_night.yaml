@@ -1,12 +1,7 @@
-homeassistant:
-  customize:
-    package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
-# Requisito importante: per i sensori finestra impostare corretto device class (window)
-
-##############################################################
-#         DA QUESTO PUNTO NON MODIFICARE
-##############################################################
+#################################################################
+#                       Requisito importante:                   #
+#   i sensori finestra impostare corretto device class (window) #
+##############################################################  #
 template:     
   - select:
       - name: "Aggiungi o rimuovi sensore allarme notte"
@@ -84,13 +79,15 @@ automation:
   alias: Allarme Notte
   initial_state: true
   trigger:
-    - entity_id: *alarm
-      platform: state
-      to: 
-        - 'arming'
-        - 'armed_night'
-        - 'triggered'
-        - 'disarmed'
+    - platform: template
+      value_template: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {%set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{(is_state(alarm,'armed_night') or
+        is_state(alarm,'arming') or
+        is_state(alarm,'triggered') or
+        is_state(alarm,'disarmed'))
+        and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
   - choose: 
     - alias: Inserimento allarme
@@ -198,9 +195,9 @@ automation:
       event_type: state_changed
   condition:
     - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group') }}"
-    - condition: state
-      entity_id: *alarm
-      state: armed_night
+    - >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ states[alarm].state == 'armed_night' }}
   action: 
     - alias: Fai scattare allarme quando un sensore passa allo stato on
       if:
@@ -209,12 +206,15 @@ automation:
       then:
         - service: alarm_control_panel.alarm_trigger
           target:
-            entity_id: *alarm
+            entity_id: >
+              {% from 'alarm.jinja' import state_alarm %}
+              {{ (state_alarm()|from_json)['alarm']}}
         - alias: INVIA NOTIFICA
           event: customizations
           event_data:
             types: notify_alarm
             notify: allarme_notte_sensore_rilevato
+            critical: 1.0
             message: >
               {%- set last_time = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|map(attribute='last_changed')|max -%}
               {%- set last_sensor = (states.binary_sensor|selectattr('attributes.device_class', 'defined')|selectattr('last_changed', 'eq', last_time)|list)[0] -%}

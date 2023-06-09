@@ -1,7 +1,6 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
         Gruppo tutte le luci: &all_light group.tutte_le_luci
 
 ##############################################################
@@ -14,10 +13,14 @@ automation:
   variables:
     all_light: *all_light
   trigger:
-  - platform: state
-    entity_id: *alarm
-    from: 'arming'
-    to: 'armed_away'
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {%set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{ is_state(alarm,'armed_away') and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
+
+
+  - condition:  "{{ trigger.from_state.state == 'arming'}}"
   action:  
   - alias: Spegne i televisori
     service: media_player.turn_off
@@ -25,9 +28,9 @@ automation:
       entity_id: >
         {% set output = namespace(media=[]) %}
         {% set list = states.media_player|rejectattr('state','in',['unknown','unavailable','off'])|map(attribute='entity_id')|list%}
-        {% for tv in list if not is_device_attr(tv, 'manufacturer','Google Inc.') and not is_device_attr(tv, 'manufacturer','Amazon')%}
-        {%- set output.media = output.media + [tv] -%}
-        {% endfor%}
+          {% for tv in list if not is_device_attr(tv, 'manufacturer','Google Inc.') and not is_device_attr(tv, 'manufacturer','Amazon')%}
+            {%- set output.media = output.media + [tv] -%}
+          {% endfor%}
         {{output.media}}
 
   - alias: Spegni tutte le luci

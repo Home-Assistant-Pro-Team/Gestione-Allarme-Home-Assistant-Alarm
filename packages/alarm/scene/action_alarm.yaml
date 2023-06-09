@@ -1,7 +1,6 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
         Gruppo tutte le luci: &all_light group.tutte_le_luci
         
 group:
@@ -9,7 +8,7 @@ group:
     name: Gruppo automazioni da gestire se innescato allarme globale
     entities:
       - automation.occupazione_mmwave_bagno
-      - automation.accensione_automatica_bagnetto
+      #- automation.accensione_automatica_bagnetto
       - automation.accensione_automatica_corridoio
       - automation.accensione_automatica_ripostiglio
       - automation.luce_cucina
@@ -32,11 +31,13 @@ automation:
     all_light: *all_light
     exclude: "{{expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list}}"
   trigger:
-  - platform: state
-    entity_id: *alarm
-    to: 
-      - 'pending'
-      - 'disarmed'
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {%set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{(is_state(alarm,'pending') or
+      is_state(alarm,'disarmed'))
+      and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   - platform: state
     entity_id: input_boolean.alarm_triggered_state
     from: 

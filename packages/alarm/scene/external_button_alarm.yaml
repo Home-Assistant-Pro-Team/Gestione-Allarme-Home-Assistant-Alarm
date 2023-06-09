@@ -61,14 +61,6 @@ automation:
             target:
               entity_id: "{{ alarm }}"
           else:
-            - variables:
-                for_each: >
-                  {% from 'alarm.jinja' import person_alarm %}
-                  {% set output = namespace(state_home=[]) %}
-                    {%for dict in person_alarm()|from_json if states[dict.person].state == 'home'%}
-                      {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-                    {% endfor %}
-                    {{output.state_home}}
             - alias: Invia notifica push SOLO alla persone che si trovano 
               event: customizations
               event_data:
@@ -79,5 +71,11 @@ automation:
                 action2: armed_night
                 tag: state_alarm
                 notify: allarme_non_inserito_porta_aperta
-                for_each: "{{for_each}}"
+                for_each: >
+                  {% from 'alarm.jinja' import person_alarm %}
+                  {% set output = namespace(state_home=[]) %}
+                    {%for dict in person_alarm()|from_json if states[dict.person].state == 'home'%}
+                      {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
+                    {% endfor %}
+                    {{output.state_home}}
                 message: Allarme non inserito per porta aperta

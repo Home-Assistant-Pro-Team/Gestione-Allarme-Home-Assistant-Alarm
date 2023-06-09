@@ -1,8 +1,3 @@
-homeassistant:
-  customize:
-    package.node_anchors:
-        Allarme: &alarm alarm_control_panel.home_alarm
-
 alarm_control_panel:
   - platform: manual
     name: Home Alarm
@@ -61,17 +56,19 @@ automation:
   initial_state: true
   mode: single
   trigger:
-  - entity_id: *alarm
-    platform: state
-    to: 
-      - 'triggered'
-      - 'disarmed'
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {%set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{( is_state(alarm,'triggered') or
+      is_state(alarm,'disarmed'))
+      and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
   - if: "{{trigger.to_state.state == 'triggered'}}"
     then:
       - service: input_boolean.turn_on
         target:
-          entity_id: input_boolean.allarme_scattato
+          entity_id: input_boolean.alarm_triggered_state
     else:
         - service: input_boolean.turn_off
           target:
