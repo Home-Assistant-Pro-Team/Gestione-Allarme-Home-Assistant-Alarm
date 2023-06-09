@@ -2,7 +2,8 @@
 
 # **HomeAssistant Allarme**
 
-https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/6c29639a-bcc6-40ee-91ac-939ae012e780
+https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assiatant-Alarm/assets/62516592/c7a11ed0-9c74-4b61-ac54-cbe815ff5645
+
 
 Questo progetto si concentra sull'utilizzo del platform [alarm_control_panel](https://www.home-assistant.io/integrations/manual/) di HomeAssistant, con l'obiettivo di implementare funzioni che gli allarmi tradizionali non offrono. **È importante sottolineare che questo non significa che l'allarme creato sia più affidabile di un allarme commerciale**. Tuttavia, con l'uso di questo pacchetto, è possibile implementare alcune funzionalità aggiuntive non previste dagli allarmi tradizionali.
 
