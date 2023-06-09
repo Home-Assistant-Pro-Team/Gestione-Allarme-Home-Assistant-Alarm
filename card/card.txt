@@ -1,0 +1,902 @@
+type: custom:button-card
+template: image_alarm
+styles:
+  card:
+    - background-color: rgba(0,0,0,0.0)
+    - border-width: 0px
+    - height: 400px
+    - width: 355px
+    - padding: 0px
+    - border-radius: 0px
+  custom_fields:
+    n1:
+      - position: absolute
+      - left: 50px
+      - top: 140px
+    n2:
+      - position: absolute
+      - left: 125px
+      - top: 140px
+    n3:
+      - position: absolute
+      - left: 200px
+      - top: 140px
+    n4:
+      - position: absolute
+      - left: 50px
+      - top: 202px
+    n5:
+      - position: absolute
+      - left: 125px
+      - top: 202px
+    n6:
+      - position: absolute
+      - left: 200px
+      - top: 202px
+    n7:
+      - position: absolute
+      - left: 50px
+      - top: 264px
+    n8:
+      - position: absolute
+      - left: 125px
+      - top: 264px
+    n9:
+      - position: absolute
+      - left: 200px
+      - top: 264px
+    n0:
+      - position: absolute
+      - left: 125px
+      - top: 326px
+    ok:
+      - position: absolute
+      - left: 200px
+      - top: 326px
+    canc:
+      - position: absolute
+      - left: 50px
+      - top: 326px
+    fuori_casa:
+      - position: absolute
+      - left: 280px
+      - top: 29px
+    notte:
+      - position: absolute
+      - left: 280px
+      - top: 80px
+    sensor_night:
+      - position: absolute
+      - left: 275px
+      - top: 326px
+    sensor_away:
+      - position: absolute
+      - left: 275px
+      - top: 264px
+    jummer:
+      - position: absolute
+      - left: 275px
+      - top: 207px
+    setting:
+      - position: absolute
+      - left: 275px
+      - top: 140px
+    states:
+      - position: absolute
+      - left: 84px
+      - width: 187px
+      - top: 30px
+    led:
+      - position: absolute
+      - left: 45px
+      - top: 66px
+    back:
+      - position: absolute
+      - left: '-54px'
+      - top: '-206px'
+custom_fields:
+  notte:
+    card:
+      type: custom:button-card
+      entity: sensor.stato_allarme
+      icon: mdi:shield-moon-outline
+      template: action_type_alarm
+      name: NOTTE
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            content: Vuoi attivare allarme notte?
+            right_button: SI
+            left_button: 'NO'
+            right_button_action:
+              service: browser_mod.sequence
+              data:
+                sequence:
+                  - service: browser_mod.popup
+                    data:
+                      dismissable: false
+                      title: Attivazione in corso
+                      timeout: 2000
+                  - service: alarm_control_panel.alarm_arm_night
+                    data:
+                      entity_id: alarm_control_panel.home_alarm
+  fuori_casa:
+    card:
+      type: custom:button-card
+      entity: sensor.stato_allarme
+      icon: mdi:shield-check-outline
+      template: action_type_alarm
+      name: GLOBALE
+      state:
+        - value: armed_away
+          color: red
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            content: Vuoi attivare allarme globale?
+            right_button: SI
+            left_button: 'NO'
+            right_button_action:
+              service: browser_mod.sequence
+              data:
+                sequence:
+                  - service: browser_mod.popup
+                    data:
+                      dismissable: false
+                      title: Attivazione in corso
+                      timeout: 2000
+                  - service: alarm_control_panel.alarm_arm_away
+                    data:
+                      entity_id: alarm_control_panel.home_alarm
+  n1:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-1
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 1
+  n2:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-2
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 2
+  n3:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-3
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 3
+  n4:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-4
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 4
+  n5:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-5
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 5
+  n6:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-6
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 6
+  n7:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-7
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 7
+  n8:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-8
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 8
+  n9:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-9
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 9
+  n0:
+    card:
+      type: custom:button-card
+      icon: mdi:numeric-0
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': 0
+  ok:
+    card:
+      type: custom:button-card
+      icon: mdi:check
+      template: alarm_number
+      tap_action:
+        action: call-service
+        service: button.press
+        service_data:
+          entity_id: button.confirmed_code_alarm
+  canc:
+    card:
+      type: custom:button-card
+      icon: mdi:cancel
+      template:
+        - alarm_number
+        - aciton_number
+      variables:
+        'n': canc
+  states:
+    card:
+      type: custom:button-card
+      template: display 
+      entity: sensor.stato_allarme
+      label: |
+        [[[
+          if (states['sensor.stato_allarme'].state != 'Disattivato' && states['sensor.alarm_code_attempts'].state != 0) 
+            return ('Tentativi: ')+parseInt((states['sensor.alarm_code_attempts'].state)-(states['sensor.counter_code_error'].state));
+          return "";
+        ]]]
+      name: |
+        [[[
+          if (states['sensor.stato_allarme'].state != 'Disattivato') 
+          {
+            if (states['input_number.control_code_alarm'].state == 0) 
+            {
+              return 'Inserire codice';
+            }
+            let hidden = '*'.repeat(states['input_number.control_code_alarm'].state.toString().length - 2);
+            return 'Code: ' + hidden;
+          }
+          return "";
+        ]]]
+  led:
+    card:
+      type: custom:button-card
+      styles:
+        card:
+          - box-shadow: '-1px -1px 1px #373737, 1px 1px 3px black'
+          - height: 15px
+          - width: 15px
+          - background-color: |
+              [[[
+                if (states['sensor.stato_allarme'].state == 'In Attivazione') 
+                return "yellow";
+                else if (states['sensor.stato_allarme'].state === 'Allarme Notte' || states['sensor.stato_allarme'].state === 'Allarme Globale') 
+                  return 'green';
+                else if (states['sensor.stato_allarme'].state === 'Scattato' ) 
+                  return 'red' ;
+                else if (states['sensor.stato_allarme'].state === 'Disattivato' ) 
+                  return '#f8f8e7';
+              ]]]  
+      style:
+        .: |
+          ha-card {
+            background: linear-gradient(-23deg, #f8f8e7, rgba(255,0,0,0)50.71%),
+            linear-gradient(-207deg, #f8f8e7, rgba(0,0,255,0) 50.71%);
+          }
+  jummer:
+    card:
+      type: custom:button-card
+      name: DETECT JUMMER
+      template: impostazione_allarme
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            autoclose: false
+            style: |
+              --popup-min-width: 300px;
+            title: Detect Jummer
+            timeout: 60000
+            dismissable: true
+            content:
+              type: custom:button-card
+              template: no_background
+              styles:
+                card:
+                  - min-height: 350px
+                  - width: 330px
+                grid:
+                  - grid-template-columns: 1fr
+                  - grid-template-areas: |
+                      " list "
+                      " setting_offline "
+                      " text_offline  "
+                      " setting_db  "
+                      " text_db "
+              custom_fields:
+                list:
+                  card:
+                    type: entities
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                        }
+                    entities:
+                      - entity: select.jammer_detect_entities
+                text_offline:
+                  card:
+                    type: markdown
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                          text-align: left;
+                          font-size: 15px;
+                        }
+                    content: >-
+                      DISPOSITIVI SELEZIONATI:
+                      {{state_attr('sensor.lista_sensori_jummer','print_list_group')|count}}
+
+                      DISPOSITIVI OFFLINE:
+                      {{expand(state_attr('sensor.lista_sensori_jummer','print_list_group'))|selectattr('state',
+                      'in', ['unknown','unavailable'])|list|count}}
+
+
+                      {%set trigger =
+                      expand(state_attr('sensor.lista_sensori_jummer','print_list_group'))|map(attribute='entity_id')|list%}
+                      {% for entity in trigger %} {{states[entity].name}}: {{ states[entity].state}}
+                      db
+
+                      {%endfor%}
+                setting_offline:
+                  card:
+                    type: custom:button-card
+                    entity: automation.jammer_detect_notifica
+                    name: Controllo offline
+                    template: no_background
+                    state:
+                      - value: 'off'
+                        styles:
+                          card:
+                            - border-color: var(--paper-slider-container-color)
+                          name:
+                            - color: var(--paper-slider-active-color)
+                    styles:
+                      card:
+                        - height: 55px
+                        - width: 330px
+                        - border-radius: 25px
+                        - box-shadow: >-
+                            -5px -5px 5px var(--paper-slider-active-color), 5px
+                            5px 5px var(--paper-slider-container-color)
+                      custom_fields:
+                        voti:
+                          - position: absolute
+                          - left: 80%
+                          - top: 15px
+                        icon:
+                          - position: absolute
+                    custom_fields:
+                      voti:
+                        card:
+                          type: custom:button-card
+                          template: no_background
+                          entity: input_number.jammer_detect_high_availability_vote
+                          show_state: true
+                          show_icon: false
+                          show_name: false
+                          tap_action:
+                            action: fire-dom-event
+                            browser_mod:
+                              service: browser_mod.popup
+                              style: |
+                                --popup-min-width: 400px;
+                              data:
+                                content:
+                                  title: Numero dispositivi offline
+                                  type: entities
+                                  entities:
+                                    - entity: >-
+                                        input_number.jammer_detect_high_availability_vote
+                                      name: Voti
+                      icon:
+                        card:
+                          type: custom:button-card
+                          template: no_background
+                          entity: automation.jammer_detect_notifica
+                          icon: mdi:wifi-strength-1-alert
+                          show_name: false
+                          size: 56%
+                          styles:
+                            card:
+                              - height: 60px
+                              - width: 55px
+                              - background-color: GhostWhite
+                            icon:
+                              - value: 'on'
+                                styles:
+                                  icon:
+                                    - color: var(--state-icon-active-color)
+                          state:
+                            - value: 'off'
+                              styles:
+                                card:
+                                  - background-color: var(--paper-slider-active-color)
+  setting:
+    card:
+      type: custom:button-card
+      name: SETTING
+      template: impostazione_allarme
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            autoclose: false
+            style: |
+              --popup-min-width: 600px;
+            title: Impostazioni
+            timeout: 60000
+            dismissable: true
+            content:
+              type: custom:layout-card
+              layout_type: grid-layout
+              layout:
+                grid-template-columns: repeat(2, 1fr)
+                grid-template-rows: 1fr
+                grid-column-gap: 1em
+                grid-row-gap: 1em
+                mediaquery:
+                  '(max-width: 800px)':
+                    grid-template-columns: repeat(2, 1fr)
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: automation.inserimento_allarme_notte_automatico
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.inserimento_allarme_notte_automatico
+                    name: Notte ON
+                    template: popup_setting
+                    variables:
+                      icon: mdi:nfc
+                - type: conditional
+                  conditions:
+                    - entity: automation.disattiva_allarme_notte_automaticamente
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.disattiva_allarme_notte_automaticamente
+                    name: Notte OFF
+                    template: popup_setting
+                    variables:
+                      icon: mdi:power-plug-off
+                - type: conditional
+                  conditions:
+                    - entity: automation.tag_nfc_alarm
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.tag_nfc_alarm
+                    name: Tag NFC
+                    template: popup_setting
+                    variables:
+                      icon: mdi:nfc
+                - type: conditional
+                  conditions:
+                    - entity: automation.avviso_ups_batteria
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.avviso_ups_batteria
+                    name: Avviso UPS
+                    template: popup_setting
+                    variables:
+                      icon: mdi:power-plug-off
+                - type: conditional
+                  conditions:
+                    - entity: automation.notifica_e_trigger_alarme_alla_pressione_tasti
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.notifica_e_trigger_alarme_alla_pressione_tasti
+                    name: Notifica Pulsanti
+                    template: popup_setting
+                    variables:
+                      icon: mdi:message-alert-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.detached_alarm
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.detached_alarm
+                    name: Blocco Pulsanti
+                    template: popup_setting
+                    variables:
+                      icon: mdi:gesture-double-tap
+                - type: conditional
+                  conditions:
+                    - entity: automation.cctv_allarme
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.cctv_allarme
+                    name: Image CCTV
+                    template: popup_setting
+                    variables:
+                      icon: mdi:cctv
+                - type: conditional
+                  conditions:
+                    - entity: automation.stato_internet
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.stato_internet
+                    template: popup_setting
+                    variables:
+                      icon: mdi:lan-pending
+                - type: conditional
+                  conditions:
+                    - entity: automation.led_stato_allarme
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.led_stato_allarme
+                    name: Avviso Led
+                    template: popup_setting
+                    variables:
+                      icon: mdi:led-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.campanello_come_allarme
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.campanello_come_allarme
+                    name: Campanello
+                    template: popup_setting
+                    variables:
+                      icon: mdi:bell
+                - type: conditional
+                  conditions:
+                    - entity: input_boolean.presence_person_active_alarm
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: input_boolean.presence_person_active_alarm
+                    name: Stato Famiglia
+                    template: popup_setting
+                    variables:
+                      icon: mdi:exit-run
+                - type: conditional
+                  conditions:
+                    - entity: input_boolean.alarm_battery_mobile
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    template: popup_setting
+                    entity: input_boolean.alarm_battery_mobile
+                    name: Battery low person
+                    variables:
+                      icon: mdi:battery-charging-wireless-20
+                - type: conditional
+                  conditions:
+                    - entity: automation.allarme_globale_inserito_spegni_casa
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.allarme_globale_inserito_spegni_casa
+                    name: Azioni inserito Away
+                    template: popup_setting
+                    variables:
+                      icon: mdi:home-off-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.azioni_personalizzate_per_allarme_globale
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.azioni_personalizzate_per_allarme_globale
+                    name: Azioni scattato
+                    template: popup_setting
+                    variables:
+                      icon: mdi:home-alert-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.disattivazione_automatica_rietro_familiare
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.disattivazione_automatica_rietro_familiare
+                    name: Rientro notturno
+                    template: popup_setting
+                    variables:
+                      icon: mdi:home-off-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
+                    name: Pulsante Porta
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: automation.gestione_serratura_con_impronta_digitale
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.gestione_serratura_con_impronta_digitale
+                    name: Fingerprint SmartLock
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: automation.gestione_serratura_con_tastiera_esterna
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.gestione_serratura_con_tastiera_esterna
+                    name: Keypad SmartLock
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: automation.gestione_serratura_con_nfc
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.gestione_serratura_con_nfc
+                    name: NFC SmartLock
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: automation.batteria_scarica_dispositivi_allarme
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.batteria_scarica_dispositivi_allarme
+                    name: Batteria Sensori
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: input_boolean.modo_ospite
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: input_boolean.modo_ospite
+                    name: Modalità ospite
+                    template: popup_setting
+                    variables:
+                      icon: mdi:door
+                - type: conditional
+                  conditions:
+                    - entity: automation.sirena_allarme
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.sirena_allarme
+                    name: Sirena
+                    template: popup_setting
+                    variables:
+                      icon: mdi:alarm-light-outline
+                - type: conditional
+                  conditions:
+                    - entity: input_boolean.code_service
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: input_boolean.code_service
+                    name: Codice di servizio
+                    template: popup_setting
+                    variables:
+                      icon: mdi:gesture-swipe
+                - type: conditional
+                  conditions: 
+                    - entity: automation.notify_alarm_voip
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.notify_alarm_voip
+                    name: Chiamate voip
+                    template: popup_setting
+                    variables:
+                      icon: mdi:phone-voip
+                - type: conditional
+                  conditions: 
+                    - entity: automation.notify_alarm_media_player
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.notify_alarm_media_player
+                    name: Notifiche MediaPlayer
+                    template: popup_setting
+                    variables:
+                      icon: mdi:speaker-wireless
+                - type: conditional
+                  conditions: 
+                    - entity: automation.notify_alarm_push
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.notify_alarm_push
+                    name: Notifiche Push
+                    template: popup_setting
+                    variables:
+                      icon: mdi:cellphone-sound
+  sensor_away:
+    card:
+      type: custom:button-card
+      name: SENSOR GLOAL
+      template: impostazione_allarme
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            autoclose: false
+            style: |
+              --popup-min-width: 385px;
+            title: Sensori Fuori Casa
+            timeout: 60000
+            dismissable: true
+            content:
+              type: custom:button-card
+              template: no_background
+              styles:
+                card:
+                  - min-height: 550px
+                custom_fields:
+                  n1:
+                    - position: absolute
+                    - left: '-3%'
+                    - width: 370px
+                    - top: 0px
+                  n2:
+                    - position: absolute
+                    - top: 80px
+              custom_fields:
+                n1:
+                  card:
+                    type: entities
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                        }
+                    entities:
+                      - entity: select.aggiungi_o_rimuovi_sensore_allarme_globale
+                n2:
+                  card:
+                    type: markdown
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                          text-align: left;
+                        }
+                    content: >
+                      {% set active = 
+                      (expand(state_attr('sensor.lista_sensori_allarme_globale_attiv' , 'print_list_group'))|map(attribute='entity_id')|list)%} 
+                      {% set trigger = 
+                      (expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
+                      {%for triggers in trigger %} 
+
+                      **{{states[triggers].name}}**  DISATTIVATO {%endfor%} 
+                      {%-set trigger =
+                      expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|map(attribute='entity_id')|list%} 
+                      {% for entity in trigger if entity in active%} 
+
+                      **{{states[entity].name}}:**  {{states[entity].state}}  
+                      {%endfor%}
+  sensor_night:
+    card:
+      type: custom:button-card
+      name: SENSOR NIGHT
+      template: impostazione_allarme
+      tap_action:
+        action: fire-dom-event
+        browser_mod:
+          service: browser_mod.popup
+          data:
+            autoclose: false
+            style: |
+              --popup-min-width: 385px;
+            title: Sensori allarme notte
+            timeout: 60000
+            dismissable: true
+            content:
+              type: custom:button-card
+              template: no_background
+              styles:
+                card:
+                  - min-height: 550px
+                custom_fields:
+                  n1:
+                    - position: absolute
+                    - left: '-3%'
+                    - width: 370px
+                    - top: 0px
+                  n2:
+                    - position: absolute
+                    - top: 80px
+              custom_fields:
+                n1:
+                  card:
+                    type: entities
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                        }
+                    entities:
+                      - entity: select.aggiungi_o_rimuovi_sensore_allarme_notte
+                n2:
+                  card:
+                    type: markdown
+                    card_mod:
+                      style: |
+                        :host {
+                          --ha-card-border-width: 0;
+                          --ha-card-background: none;
+                          text-align: left;
+                        }
+                    content: >
+                      {% set active = 
+                      (expand(state_attr('sensor.lista_sensori_allarme_notte_attiv' , 'print_list_group'))|map(attribute='entity_id')|list)%} 
+                      {% set trigger = 
+                      (expand(state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
+                      {%for triggers in trigger %} 
+
+                      **{{states[triggers].name}}**  DISATTIVATO {%endfor%} 
+                      {%-set trigger =
+                      expand(state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group'))|map(attribute='entity_id')|list%} 
+                      {% for entity in trigger if entity in active%} 
+
+                      **{{states[entity].name}}:**  {{states[entity].state}}  
+                      {%endfor%}
