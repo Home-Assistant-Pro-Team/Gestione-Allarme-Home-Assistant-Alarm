@@ -1,0 +1,47 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Tag:      &tag_esterno e356297b-xxxx-xxxxxxxxxxxxxxxxxxx
+        Telefono Marco: &marco 3d0fa8xxxxxxxxxxxxxxxx
+        Telefono Serena: &serena caf98xxxxxxxxxxxxxxxxxxxxx
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+
+automation:        
+- alias: Tag NFC alarm
+  id: tag_nfc_alarm
+  trigger:
+  - platform: event
+    event_type: tag_scanned
+    event_data:
+      device_id:  *serena
+      tag_id: *tag_esterno
+  - platform: event
+    event_type: tag_scanned
+    event_data:
+      device_id:  *marco
+      tag_id:  *tag_esterno
+  action:
+  - variables: 
+      alarm: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['alarm']}}
+      code: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['code']}}
+  - if:
+    - >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ states[alarm].state == 'disarmed' }}
+    then:
+      - service: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: "{{alarm}}"
+    else:
+      - service: alarm_control_panel.alarm_disarm
+        data:
+          code: "{{code}}"
+        target:
+          entity_id: "{{alarm}}"

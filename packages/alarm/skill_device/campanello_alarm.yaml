@@ -1,0 +1,65 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+        Campanello: &doorbell switch.campanello
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+automation:
+- alias: Campanello come allarme
+  id: bell_for_alarm
+  mode: restart
+  variables:
+    alarm: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ (state_alarm()|from_json)['alarm']}}
+  trigger:
+  - entity_id: *alarm
+    platform: state
+    to: 
+      - triggered
+      - disarmed
+      - pending
+  action:
+  - choose:
+
+      - alias: Primo avviso sensore scattato
+        conditions:
+          - "{{trigger.to_state.state == 'pending'}}"
+        sequence:
+        - service: switch.turn_on
+          target:
+            entity_id: *doorbell
+        - delay:
+            milliseconds: 100
+        - service: switch.turn_off
+          target:
+            entity_id: *doorbell
+
+      - alias: Allarme scattato
+        conditions:
+          - "{{trigger.to_state.state == 'triggered'}}"
+        sequence:
+          - repeat:
+              until:
+                - condition: template
+                  value_template: "{{is_state(alarm , 'triggered')}}"
+              sequence:
+                - service: switch.toggle
+                  target:
+                    entity_id: *doorbell
+                - delay:
+                    seconds: 1
+          - service: switch.turn_off
+            target:
+              entity_id: *doorbell
+              
+      - alias: Allarme disattivato
+        conditions:
+          - "{{trigger.to_state.state == 'disarmed'}}"
+        sequence:
+        - service: switch.turn_off
+          target:
+            entity_id: *doorbell

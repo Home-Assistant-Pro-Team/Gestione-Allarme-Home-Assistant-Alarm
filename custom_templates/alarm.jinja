@@ -1,0 +1,84 @@
+{% macro state_alarm() %}
+	{
+
+{# Inserire la propria entità alarm_control_panel #}
+		"alarm": "alarm_control_panel.home_alarm",
+
+{# Inserire il codice dell'allarme #}
+		"code": "1234",
+
+{# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
+{# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
+		"code_service" : "9877",
+
+{# Inserire il codice per accedere alle impostazioni della card con allarme inserito #}
+		"setting_code": "1234",
+
+{# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
+		"emergency_code": "5555",
+
+{# Numero di tentativi per digitare codice allarme #}
+		"alarm_code_attempts": "3",
+
+{# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
+		"code_porta": "6666"
+
+	}
+{% endmacro %}
+
+##############################################################
+
+{% macro person_alarm() %}
+ [
+ 	{
+ 		"person": "person.marco",
+ 		"battery": "sensor.cellulare_marco_battery_level",
+        "notify": "mobile_app_cellulare_marco",
+		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
+		"cellulare": "331000000"
+  	},
+  	{
+  		"person": "person.serena",
+  		"battery": "sensor.cellulare_serena_livello_della_batteria",
+        "notify": "mobile_app_samsung_s21",
+		"sveglia": "none",
+		"cellulare": "335000000"
+  	}
+ ]
+{% endmacro%}
+
+##############################################################
+
+{% macro media_player_alarm(type) %}
+	{% set list_media = 
+		[
+			'media_player.camera',
+			'media_player.studio',
+			'media_player.googlehome_cameretta',
+			'media_player.googlehome_bagno',
+			'media_player.googlehome_cucina',
+			'media_player.googlehome_salone'
+		]
+	%}
+	{% for integrations in integration_entities(type) if integrations in list_media %}
+		{{integrations}}
+	{% endfor %}
+{% endmacro %}
+
+##################################################################
+# Da qui in poi NON MODIFICARE
+##################################################################
+
+# Lista sensori per allarme applicato al select
+{% macro select_alarm() %}
+	{% set output = namespace(numbers=[]) %}
+	{% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
+	{% set include = states.binary_sensor|selectattr('entity_id','in',expand('group.include_alarm_entities')|map(attribute='entity_id'))|list%}
+	{% set list_sensor = include + states.binary_sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','in',['window','vibration','opening','occupancy','moving','motion','lock','garage_door','door'])|list%}
+	{% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
+	{%- set output.numbers = output.numbers + [states.name ] -%}
+		{%- if loop.last -%}
+		{%- endif -%}
+	{%- endfor %}
+	{{['RESET'] + output.numbers}}
+{% endmacro %}

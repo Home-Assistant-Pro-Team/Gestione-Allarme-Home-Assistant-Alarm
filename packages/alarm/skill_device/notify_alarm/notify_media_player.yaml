@@ -1,0 +1,92 @@
+
+automation:
+- alias: notify_alarm_media_player
+  id: notify_alarm_media_player
+  mode: queued
+  variables:
+      volume: 0.5
+      alexa: >
+            {% from 'alarm.jinja' import media_player_alarm %}
+            {% set media = media_player_alarm('alexa_media').split() %}
+            {{ media}}
+      google: >
+            {% from 'alarm.jinja' import media_player_alarm %}
+            {% set media = media_player_alarm('cast').split() %}
+            {{ media}}
+  trigger:
+    - platform: event
+      event_type: customizations
+      event_data:
+        types: notify_alarm
+  action:
+      - or:
+
+###################################################################################
+#  E' possibili selezionare le singole notifiche da abilitare
+###################################################################################
+
+  # FILE: ARMED_AWAY
+        - "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
+        - "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
+        - "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
+        - "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
+        #- "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
+        - "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
+
+  # FILE: ARMED_NIGHT  
+        - "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
+        - "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
+        - "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
+        - "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
+        #- "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
+        - "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
+        #- "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
+
+  # FILE: CONTROL CODE
+        #- "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
+
+  # FILE: JAMMER DETECT
+        #- "{{trigger.event.data.notify == 'detect_jummer'}}"
+
+  # FILE: PERSON
+        #- "{{trigger.event.data.notify == 'persona_in_casa_tel_scarico'}}"
+        #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
+        
+  # FILE: BATTERY STATE
+        #- "{{trigger.event.data.notify == 'stato_batterie'}}"
+
+  # FILE: INSERT ARMED NIGHT
+        - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+        
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+
+      - alias: Imposta volume Notifica
+        service: media_player.volume_set
+        data:
+          entity_id: "{{expand(google + alexa)|map(attribute='entity_id')|list}}"
+          volume_level: "{{ trigger.event.data.volume|default(volume) }}"
+
+      - alias: INVIA NOTIFICA
+        parallel:
+
+        - alias: Invia notifica ad Google
+          if: >
+            {{google|count > 0}}
+          then:
+            - service: tts.google_translate_say
+              data:
+                entity_id: "{{google}}"
+                message: "{{ trigger.event.data.message |default('Messaggio non impostato')}}"
+
+        - alias: Invia notifica ad Alexa
+          if: >
+            {{alexa|count > 0}}
+          then:
+            service: notify.alexa_media
+            data:
+              target: "{{alexa}}" 
+              data:
+                method: spoken
+              message: "{{ trigger.event.data.message |default('Messaggio non impostato')}}"

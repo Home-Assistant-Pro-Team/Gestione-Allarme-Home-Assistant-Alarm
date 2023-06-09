@@ -1,0 +1,78 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+
+alarm_control_panel:
+  - platform: manual
+    name: Home Alarm
+    arming_time: 50
+    delay_time: 50
+    trigger_time: 120
+    code_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ (state_alarm()|from_json)['code']}}
+    code_arm_required: false
+
+group:  
+  exclude_alarm_entities:
+    name: Entità da escludere per pkg allarme
+    entities:
+      - binary_sensor.frigorifero_door_open
+      - binary_sensor.bedprecence_mattia
+      - sensor.miflora_signal_strength
+      - light.luce_ingresso
+      - cover.tenda_tavolo
+      - cover.tenda_divano
+  include_alarm_entities: 
+    name: Entità da includere per pkg allarme 
+    entities:
+      #- lock.danalock
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+input_boolean:
+  alarm_triggered_state:
+  modo_ospite:
+    name: Modalità ospite
+
+template:
+  - sensor:
+      - name: Stato allarme
+        state: >
+            {% from 'alarm.jinja' import state_alarm %}
+            {% set alarm = (state_alarm()|from_json)['alarm'] %}    
+            {{ 
+              {
+                'armed_away' : 'Allarme Globale',
+                'armed_night' : 'Allarme Notte',
+                'disarmed' : 'Disattivato',
+                'triggered': 'Scattato',
+                'pending': 'Scattato',
+                'arming': 'In Attivazione'
+              } 
+                [states(alarm)] 
+            }}
+
+automation:
+- alias: Stato Trigger Allarme
+  id: state_trigger_alarm
+  initial_state: true
+  mode: single
+  trigger:
+  - entity_id: *alarm
+    platform: state
+    to: 
+      - 'triggered'
+      - 'disarmed'
+  action:
+  - if: "{{trigger.to_state.state == 'triggered'}}"
+    then:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.allarme_scattato
+    else:
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.alarm_triggered_state

@@ -1,0 +1,96 @@
+substitutions:
+  name: bagno-specchio
+  name_sensor: Bagno Specchio
+  
+esphome:
+  name: $name
+  platform: ESP8266
+  board: esp01_1m
+
+ota:
+  password: !secret password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: "${name_sensor} Fallback Hotspot"
+    password: !secret password
+
+captive_portal:
+
+button:
+  - platform: restart
+    name: "${name_sensor} Restart"
+logger:
+
+api:
+  reboot_timeout: 15min
+
+web_server:
+  port: 80
+
+sensor:
+  - platform: wifi_signal
+    name: "Wifi ${name_sensor}"
+    update_interval: 60s
+  - platform: uptime
+    name: "${name_sensor} Uptime"
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: true
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO00
+    id: reset
+    internal: true
+    filters:
+      - invert:
+      - delayed_off: 10ms
+    on_press:
+      - light.toggle: 
+          id: relay_1
+
+  - platform: gpio
+    name: "${name_sensor}"
+    pin: GPIO04
+    device_class: power
+    id: switch_1
+    on_press:
+      then:
+        - if:
+            condition:
+              switch.is_off: detached
+            then:
+              - light.toggle: 
+                  id: relay_1
+    on_release:
+      then:
+        - if:
+            condition:
+              switch.is_off: detached
+            then:
+              - light.toggle: 
+                  id: relay_1
+
+switch:    
+  - platform: template
+    name: "Detached ${name_sensor}"
+    id: detached
+    optimistic: true
+    restore_state: true
+
+output:
+  - platform: gpio
+    pin: GPIO12
+    id: gpio_12_output
+
+light:
+  - platform: binary
+    name: "${name_sensor}"
+    output: gpio_12_output
+    id: relay_1

@@ -1,0 +1,62 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+        Led o luce stato allarme: &led switch.led_allarme
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+automation:
+- alias: Led Stato Allarme
+  id: led_state_alarm
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: *alarm
+    to: 
+      - arming
+      - disarmed
+      - triggered
+  action:
+    - choose:
+
+      - alias: Accendi led se allarme inserito
+        conditions:
+        - "{{trigger.to_state.state == 'arming'}}"
+        sequence:
+        - service: switch.turn_on
+          target:
+            entity_id: *led
+
+      - alias: Spegni led per allarme disattivato
+        conditions:
+        - "{{trigger.to_state.state == 'disarmed'}}"
+        sequence:
+        - service: switch.turn_off
+          target:
+            entity_id: *led
+
+      - alias: Fai lampeggiare led per allarme scattato fino a quando lo stato non passa a disarmato per 10 minuti
+        conditions:
+        - "{{trigger.to_state.state == 'triggered'}}"
+        sequence:
+        - repeat:
+            until:
+            - or:
+              - condition: state
+                entity_id: *alarm
+                state: disarmed
+                for: '00:10:00'
+              - "{{ trigger.to_state.state == 'disarmed' and trigger.from_state.state == 'triggered'}}"
+            sequence:
+            - service: switch.turn_on
+              target:
+                entity_id: *led
+            - delay:
+                seconds: 2
+            - service: switch.turn_off
+              target:
+                entity_id: *led
+            - delay:
+                seconds: 2

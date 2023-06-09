@@ -1,8 +1,6 @@
-# Gestione Allarme Home Assiatant Alarm control panel 
-
-Package completo e modulare per la gestione di un allarme in home assistat
-
 `- Version: 1.1 -`
+
+# **HomeAssistant Allarme**
 
 https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/6c29639a-bcc6-40ee-91ac-939ae012e780
 

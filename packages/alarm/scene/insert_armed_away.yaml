@@ -1,0 +1,52 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+        Gruppo tutte le luci: &all_light group.tutte_le_luci
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+
+automation: 
+- alias: Allarme globale inserito spegni casa
+  id: alarm_global_insert_turn_off
+  variables:
+    all_light: *all_light
+  trigger:
+  - platform: state
+    entity_id: *alarm
+    from: 'arming'
+    to: 'armed_away'
+  action:  
+  - alias: Spegne i televisori
+    service: media_player.turn_off
+    target:
+      entity_id: >
+        {% set output = namespace(media=[]) %}
+        {% set list = states.media_player|rejectattr('state','in',['unknown','unavailable','off'])|map(attribute='entity_id')|list%}
+        {% for tv in list if not is_device_attr(tv, 'manufacturer','Google Inc.') and not is_device_attr(tv, 'manufacturer','Amazon')%}
+        {%- set output.media = output.media + [tv] -%}
+        {% endfor%}
+        {{output.media}}
+
+  - alias: Spegni tutte le luci
+    service: homeassistant.turn_off
+    target:
+      entity_id: "{{expand(all_light)|map(attribute='entity_id')|list}}"
+
+  - alias: Spegni android tv
+    service: remote.turn_off
+    data: {}
+    target:
+      entity_id: "{{ states.remote|selectattr('entity_id','in', integration_entities('androidtv_remote'))|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')| list}}"
+
+  - alias: Spegni i climate (escluso frigorifero)
+    service: climate.turn_off
+    target:
+      entity_id: "{{states.climate|rejectattr('entity_id', 'in', integration_entities('smartthinq_sensors'))|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')|list }}"
+      
+  - alias: Spegni i fan
+    service: fan.turn_off
+    target: 
+      entity_id: "{{ states.fan|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')|list }}"

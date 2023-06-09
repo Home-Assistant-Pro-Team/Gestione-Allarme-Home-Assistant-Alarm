@@ -1,0 +1,61 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+        Campanello: &siren 
+                        - switch.sirena_esterna
+                        - switch.sirena_interna
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+automation:
+- alias: Sirena allarme
+  id: siren_alarm
+  mode: restart
+  variables:
+    alarm: *alarm
+  trigger:
+  - entity_id: *alarm
+    platform: state
+    to: 
+      - triggered
+      - disarmed
+      - pending
+  action:
+  - choose:
+      - alias: Primo avviso sensore scattato
+        conditions:
+          - "{{trigger.to_state.state == 'pending'}}"
+        sequence:
+        - service: switch.turn_on
+          target:
+            entity_id: *siren
+        - delay:
+            milliseconds: 100
+        - service: switch.turn_off
+          target:
+            entity_id: *siren
+      - alias: Allarme scattato
+        conditions:
+          - "{{trigger.to_state.state == 'triggered'}}"
+        sequence:
+          - repeat:
+              until:
+                - condition: template
+                  value_template: "{{is_state(alarm , 'triggered')}}"
+              sequence:
+                - service: switch.turn_on
+                  target:
+                    entity_id: *siren
+          - service: switch.turn_off
+            target:
+              entity_id: *siren
+      - alias: Allarme disattivato
+        conditions:
+          - "{{trigger.to_state.state == 'disarmed'}}"
+        sequence:
+        - alias: Spegni sirena
+          service: switch.turn_off
+          target:
+            entity_id: *siren

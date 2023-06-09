@@ -1,0 +1,330 @@
+substitutions:
+  esp_devicename: Pad Allarme
+  deviceidname: pad-allarme
+
+################################################################################
+esphome:
+  name: pad_allarme
+  platform: ESP8266
+  board: nodemcuv2
+
+<<: !include .comuni.yaml
+
+wifi:
+  ssid: "LAN SOLO"
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: 192.168.178.144
+    gateway: 192.168.178.1
+    subnet: 255.255.255.0
+
+  ap:
+    ssid: "${esp_devicename} Fallback AP"
+    password: !secret wifi_password
+
+################################################################################
+##                  Switch
+################################################
+switch:
+  - platform: restart
+    name: "Restart Pad"
+    id: restart_switch
+
+  - platform: gpio
+    pin: D7
+    name: "VERDE"
+    icon: "mdi:led-on"
+    inverted: true
+    id: VERDE
+
+  - platform: gpio
+    pin: D8
+    name: "GIALLO"
+    icon: "mdi:led-on"
+    inverted: true
+    id: GIALLO
+
+  - platform: gpio
+    pin: RX
+    name: "ROSSO"
+    icon: "mdi:led-on"
+    inverted: true
+    id: ROSSO
+
+  - platform: gpio
+    pin: TX
+    name: "BLU"
+    icon: "mdi:led-on"
+    inverted: true
+    id: BLU
+
+################################################
+##                  PAD
+################################################
+matrix_keypad:
+  id: mykeypad
+  rows:
+    - pin: D0
+    - pin: D1
+    - pin: D2
+    - pin: D3
+  columns:
+    - pin: D4
+    - pin: D5
+    - pin: D6
+  keys: "123456789*0#"
+  has_diodes: false
+
+################################################
+##                  Key Collector
+################################################
+key_collector:
+  - id: pincode_reader
+    source_id: mykeypad
+    min_length: 0
+    max_length: 4
+    end_keys: "*"
+    end_key_required: true
+    clear_keys: "#"
+    allowed_keys: "0123456789"
+    timeout: 5s
+    on_progress:
+      - logger.log:
+          format: "input progress: '%s', started by '%c'"
+          args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
+
+      - switch.turn_on: BLU
+      - delay: 100ms 
+      - switch.turn_off: BLU
+
+    on_timeout:
+      - logger.log:
+          format: "input timeout: '%s', started by '%c'"
+          args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
+
+    on_result:
+      then:
+        - logger.log:
+            format: "input result: '%s', started by '%c', ended by '%c''x.c_str()'"
+            args: [ 'x.c_str()', "(start == 0 ? '~' : start)", "(end == 0 ? '~' : end)" ]
+
+        - text_sensor.template.publish:
+            id: keypad
+            state: !lambda "return x.c_str();"  
+        - if:
+            condition:
+              lambda: 'return id(keypad).state == "";'
+            then:
+              - if:
+                  condition:
+                    lambda: |-
+                      if (id(allarme).state == "armed_away") {return true;}
+                      return false;
+                  then:
+                    - repeat:
+                        count: 4
+                        then:
+                        - switch.turn_on: ROSSO
+                        - delay: 400ms 
+                        - switch.turn_off: ROSSO
+                        - delay: 150ms
+              - if:
+                  condition:
+                    lambda: |-
+                      if (id(allarme).state == "disarmed") {return true;}
+                      return false;
+                  then:
+                    - repeat:
+                        count: 4
+                        then:
+                        - switch.turn_on: VERDE
+                        - delay: 400ms 
+                        - switch.turn_off: VERDE
+                        - delay: 150ms
+
+        - delay: 2s
+        
+        - text_sensor.template.publish:
+            id: keypad
+            state: ""
+
+  - id: pincode_reader2
+    source_id: mykeypad
+    min_length: 0
+    max_length: 1
+    allowed_keys: "*"
+    timeout: 1s
+    on_progress:
+      - logger.log:
+          format: "input progress: '%s', started by '%c'"
+          args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
+
+      - text_sensor.template.publish:
+          id: keypaok
+          state: !lambda "return x.c_str();" 
+      - delay: 2s
+
+      - text_sensor.template.publish:
+          id: keypaok
+          state: ""
+
+    on_timeout:
+      - logger.log:
+          format: "input timeout: '%s', started by '%c'"
+          args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
+
+################################################
+##                  Binary Sensor
+################################################
+binary_sensor:
+  - platform: status
+    name: Pad Allarme Stato
+    
+  - platform: template # Allarme Pedding
+    name: "Allarme Pedding"
+    internal: true
+    lambda: |-
+      if (id(allarme).state == "arming") {
+        return true;
+      } else {
+        return false;
+      }
+    on_press:
+      - while:
+          condition:
+            lambda: |-
+              if (id(allarme).state == "arming") {
+                return true;
+              } else {
+                return false;
+              }
+          then:
+            - switch.turn_on: GIALLO
+            - delay: 500ms 
+            - switch.turn_off: GIALLO
+            - delay: 500ms
+
+  - platform: template # Allarme Scattato
+    name: "Allarme Scattato"
+    internal: true
+    lambda: |-
+      if (id(alarm).state == "on") {
+        return true;
+      } else {
+        return false;
+      }
+    on_press:
+      - while:
+          condition:
+            lambda: |-
+              if (id(alarm).state == "on") {
+                return true;
+              } else {
+                return false;
+              }
+          then:
+            - switch.turn_on: BLU
+            - delay: 300ms 
+            - switch.turn_off: BLU
+            - switch.turn_on: ROSSO
+            - delay: 300ms
+            - switch.turn_off: ROSSO
+
+  - platform: template
+    name: "wrong away"
+    internal: true
+    lambda: |-
+      if (id(input).state == "*")  { return true; } 
+         else { return false; }
+    filters:
+      - invert:
+      - delayed_on: 50ms
+    on_press:
+          then:
+            - if:
+                condition:
+                  lambda: |-
+                    if (id(allarme).state == "armed_away" && id(error).state > "0")  { return true; } 
+                    return false;
+                then:
+                  - repeat:
+                      count: 4
+                      then:
+                      - switch.turn_on: ROSSO
+                      - delay: 100ms 
+                      - switch.turn_off: ROSSO
+                      - delay: 100ms
+            - if:
+                condition:
+                  lambda: |-
+                    if (id(allarme).state == "armed_night" && id(error).state > "0")  { return true; } 
+                    return false;
+                then:
+                  - repeat:
+                      count: 4
+                      then:
+                      - switch.turn_on: ROSSO
+                      - delay: 100ms 
+                      - switch.turn_off: ROSSO
+                      - delay: 100ms
+
+            - if:
+                condition:
+                  lambda: |-
+                    if (id(allarme).state == "disarmed" && id(error).state == "0")  { return true; } 
+                    return false;
+                then:
+                  - repeat:
+                      count: 4
+                      then:
+                      - switch.turn_on: VERDE
+                      - delay: 100ms 
+                      - switch.turn_off: VERDE
+                      - delay: 100ms
+
+################################################
+##                  Sensor
+################################################
+sensor:
+  - platform: wifi_signal
+    name: "${esp_devicename} WiFi Signal"
+
+################################################
+##                  Text Sensor
+################################################
+text_sensor:
+  - platform: homeassistant
+    name: "Stato allarme"
+    id: allarme
+    entity_id: alarm_control_panel.home_alarm
+    internal: true
+
+  - platform: homeassistant
+    name: "input"
+    id: input
+    entity_id: sensor.keypad_ok
+    internal: true
+              
+  - platform: homeassistant
+    name: "error"
+    id: error
+    entity_id: sensor.counter_code_error
+    internal: true
+
+  - platform: homeassistant
+    name: "alarm"
+    id: alarm
+    entity_id: input_boolean.allarme_scattato
+    internal: true
+
+  - platform: wifi_info
+    ip_address:
+      name: "${esp_devicename} IP"
+
+  - platform: template
+    name: "Keypad code"
+    id: keypad 
+    
+  - platform: template
+    name: "Keypad ok"
+    id: keypaok

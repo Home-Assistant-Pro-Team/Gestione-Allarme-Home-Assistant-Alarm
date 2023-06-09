@@ -1,0 +1,162 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+      Allarme: &alarm alarm_control_panel.home_alarm
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+input_boolean:
+  allarme_scattato:
+
+template:
+
+  - trigger:
+      - platform: state
+        entity_id: *alarm
+        not_to:
+          - "triggered"
+          - "pending"
+          - "arming"
+      - platform: state
+        entity_id: button.confirmed_code_alarm_keypad
+    sensor:
+      - name: counter_code_error_keypad
+        state: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set code = (state_alarm()|from_json)['code'] %}
+          {% set code_porta = (state_alarm()|from_json)['code_porta'] %}
+            {% if trigger.entity_id == 'button.confirmed_code_alarm_keypad' and states('sensor.keypad_code')|int(0) == code|int(0) or states('sensor.keypad_code')|int(0) == code_porta|int(0) %}
+              0
+            {% elif trigger.entity_id == 'button.confirmed_code_alarm_keypad' and not is_state('sensor.keypad_code','') and not is_state('sensor.keypad_code','unknown') and not is_state('sensor.keypad_code','unavailable') %}
+              {{ 1 if this.state| int(0) == 0 else this.state| int(0) + 1 }}
+            {% elif trigger.entity_id == 'button.confirmed_code_alarm_keypad' and is_state('sensor.keypad_code','') or is_state('sensor.keypad_code','unknown') %}
+              {{ this.state| int(0)  }}
+            {% else  %}
+              0
+            {% endif %}
+
+  - button:
+      - name: confirmed_code_alarm_keypad
+        press:
+          - variables:
+              code: >
+                {% from 'alarm.jinja' import state_alarm %}
+                {{ (state_alarm()|from_json)['code']}}
+              alarm: *alarm
+          - choose:
+
+              - alias: Disattiva allarme
+                conditions:
+                  - "{{states(alarm) != 'disarmed' }}"
+                  - or:
+                    - "{{states('sensor.keypad_code')|int(0) == code|int(0) }}"
+                    - >
+                      {% from 'alarm.jinja' import state_alarm %}
+                      {% set code_service = (state_alarm()|from_json)['code_service'] %}
+                      {{ states('sensor.keypad_code')|int(0) == code_service|int(0) and is_state('input_boolean.code_service','on')}} 
+                sequence:
+                  - service: alarm_control_panel.alarm_disarm
+                    target:
+                      entity_id: *alarm
+                    data:
+                      code: "{{ code }}"
+
+              - alias: Attiva allarme
+                conditions:
+                  - "{{states('sensor.keypad_code')|int(0) == code|int(0) }}"
+                  - "{{states(alarm) == 'disarmed' }}"
+                sequence:
+                  - service: alarm_control_panel.alarm_arm_away
+                    target:
+                      entity_id: *alarm
+                    data:
+                      code: "{{ code }}"
+
+              - alias: Codice di emergenza per disattivare allarme ed inviare notifica di pericolo
+                conditions:
+                  - "{{states('sensor.keypad_code')|int(0) == states('sensor.emergency_code')|int(0) }}"
+                sequence:
+                  - alias: Evento creato per essere usato come trigger in altre automazioni
+                    event: customizations
+                    event_data:
+                      types: emergency_code
+                  - alias: Disattiva allarme
+                    service: alarm_control_panel.alarm_disarm
+                    target:
+                      entity_id: *alarm
+                    data:
+                      code: "{{ code }}"
+                  - variables:
+                      message: >
+                        {{ "Attenzione è stato disattivato l'allarme con codice di emergenza alle " + (now().strftime("%H:%M"))|string}}
+                      for_each: >
+                        {% from 'alarm.jinja' import person_alarm %}
+                        {% set output = namespace(state_home=[]) %}
+                          {%for dict in person_alarm()|from_json if states[dict.person].state != 'home' and dict.cellulare != 'none' %}
+                            {# lista persone non in casa con numero cellulare associato #}
+                            {%- set output.state_home = output.state_home + [dict['cellulare'] ] -%}
+                          {% endfor %}
+                          {{output.state_home}}
+                  - alias: Invia chiamata voip alle persone che NON si trovano in casa
+                    event: customizations
+                    event_data:
+                      types: notify_alarm
+                      notify: disattivato_con_codice_emergenza_solovoip
+                      message: "{{message}}"
+                      for_each: "{{for_each}}"
+                  - variables:
+                      for_each: >
+                        {% from 'alarm.jinja' import person_alarm %}
+                        {% set output = namespace(state_home=[]) %}
+                          {%for dict in person_alarm()|from_json if states[dict.person].state != 'home'%}
+                            {# lista persone non in casa #}
+                            {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
+                          {% endfor %}
+                          {{output.state_home}}
+                  - alias: Invia notifica PUSH alle persone che NON si trovano in casa
+                    event: customizations
+                    event_data:
+                      types: notify_alarm
+                      notify: disattivato_con_codice_emergenza_solopush
+                      critical: 1.0
+                      tag: control_code
+                      message:  "{{message}}"
+                      for_each: "{{for_each}}"
+                      action2: None
+                      
+              - alias: Controlla tentativi codice errato
+                conditions:
+                  - "{{ (states('sensor.counter_code_error_keypad')|int(0) > states('sensor.alarm_code_attempts')|int(0))}} "
+                sequence:
+                  - alias: INVIA NOTIFICA
+                    event: customizations
+                    event_data:
+                      types: notify_alarm
+                      critical: 1.0
+                      tag: control_code
+                      notify: tentativi_codici_superati
+                      message: "{{-'Allarme!!! Troppi tentativi di inserimento codice rilevati alle ore '+ (now().strftime('%H:%M'))|string -}}"
+                      
+automation:
+  - alias: "set code allarm button"
+    id: 9ecc864d0389dce1cd6528e40a40ec81
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: *alarm
+        state: triggered
+      - platform: state
+        entity_id: sensor.keypad_code
+    action:
+      - if: "{{trigger.entity_id == 'sensor.keypad_code'}}"
+        then:
+          - service: button.press
+            target:
+              entity_id: button.confirmed_code_alarm_keypad
+        else:
+          - service: input_boolean.turn_on
+            target:
+              entity_id: 
+                - input_boolean.allarme_scattato

@@ -1,0 +1,185 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Gruppo tutte le luci: &all_light group.tutte_le_luci
+# In entrambi le automazioni è necessario personalizzare le proprie aree che non si vogliono spegnere 
+
+input_boolean:
+  winter_summer: 
+    name: Inverno estate
+
+automation:
+
+- id: armed_night_auto_disarmed
+  alias: Disattiva allarme notte automaticamente
+  variables:
+
+    # PERSONSONALIZZARE AREA
+    area: "{{area_entities('camera') + area_entities('cameretta')}}"
+
+    alarm: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ (state_alarm()|from_json)['alarm']}}
+    exclude: "{{expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list}}"
+  trigger:
+  - alias: Sveglia cellulare della persona il casa
+    platform: template
+    id: alarm_phone
+    value_template: >
+      {% from 'alarm.jinja' import person_alarm %}
+      {%for d in person_alarm()|from_json if states[d.person].state == 'home' and d['sveglia'] != 'none' 
+      and (states[d['sveglia']].state|as_datetime).strftime("%y%m%d%H%M") == utcnow().strftime("%y%m%d%H%M")%}
+        true
+      {% else %}
+        false
+      {% endfor %}
+  - alias: Letti liberi per 5 minuti
+    platform: template
+    value_template: "{{(states.binary_sensor|selectattr('entity_id','search','.bedprecence_')|selectattr('state','eq','on')|list)|count == 0}}"
+    for: "00:05:00"
+  condition:
+  - "{{is_state('input_boolean.modo_ospite','off')}}"
+  - condition: time
+    after: "05:00:00"
+    before: "11:00:00"
+  action:
+  - alias: Se suona la sveglia apri le tapparelle zona giorno, se letti liberi togli allarme notte
+    if: 
+      - "{{trigger.id == 'alarm_phone'}}"
+    then:
+      - alias: Apri tapparelle tranne le camere e quelle del gruppo exclude
+        service: cover.open_cover
+        target:
+          entity_id: "{{states.cover|rejectattr('entity_id','in',(exclude + area))|rejectattr('state','in',['unknown','unavailable'])| map(attribute='entity_id')| list}}"
+    else: 
+      - if: "{{states(alarm) == 'armed_night'}}"
+        then:
+          - service: alarm_control_panel.alarm_disarm
+            data:
+              code: >
+                {% from 'alarm.jinja' import state_alarm %}
+                {{ (state_alarm()|from_json)['code']}}
+            target:
+              entity_id: "{{ alarm}}"
+          - alias: Apri tutte le tapparelle tranne porta camera
+            service: cover.open_cover
+            target:
+              entity_id: "{{states.cover|rejectattr('entity_id','in',(exclude+['cover.camera_porta_finestra']))|rejectattr('state','in',['unknown','unavailable'])| map(attribute='entity_id')| list}}"
+          - service: cover.set_cover_position
+            data:
+              position: 55
+            target:
+              entity_id: cover.camera_porta_finestra
+
+- id: armed_night_auto_insert
+  alias: Inserimento allarme notte automatico
+  variables:
+  
+    # PERSONSONALIZZARE AREA
+    area: "{{area_entities('camera') + area_entities('cameretta')}}"
+
+    all_light: *all_light
+    alarm: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {{ (state_alarm()|from_json)['alarm']}}
+    exclude: "{{expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list}}"
+  trigger:
+    - alias: BedPresence occupati ed ultima stanza che rileva movimento (camera o cameretta)
+      platform: template
+      value_template: >
+        {% set bed_presence = (states.binary_sensor|selectattr('entity_id','search','.bedprecence_')|selectattr('state','eq','off')|list)|count%}
+        {%- set all_sensors = states.binary_sensor | rejectattr('state','equalto','unavailable') | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'motion') | list %}
+          {% if( all_sensors | selectattr('state','equalto','on') | list | length) != 0 %}
+            {% set last_sensors = all_sensors | selectattr('state','equalto','on') |list %}
+          {%else%}
+            {% set last_sensors = all_sensors | selectattr('state','equalto','off') |list %}
+          {%endif%}
+        {% set last_time = last_sensors | map(attribute='last_changed') | max %}
+          {% set last_sensor = (states.binary_sensor | selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0] %}
+        {{bed_presence == 0  and (area_name(last_sensor.entity_id) == 'Cameretta' or area_name(last_sensor.entity_id) == 'Camera')}}
+      for: "00:05:00"
+  condition:
+  #- "{{is_state('input_boolean.modo_ospite','off')}}"
+  - "{{is_state(alarm , 'disarmed')}}"
+  - condition: time
+    after: "21:00:00"
+    before: "03:00:00"
+  action:
+  - if: "{{is_state('input_boolean.modo_ospite','on')}}"
+    then: 
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          tag: state_alarm
+          notify: modalita_ospiti_no_armed_night
+          critical: 0.5
+          message: La modalità ospite ha impedito l'inserimento dell'allarme notte.
+          title1: Inserisci Notte
+          action1: armed_night
+          title2: Modalità ospite OFF
+          action2: ospite_off
+    else:
+      - alias: Inserisci allarme notte
+        service: alarm_control_panel.alarm_arm_night
+        data: {}
+        target:
+          entity_id: "{{ alarm}}"
+      - alias: Spegni tutte le luci tranne le camere
+        service: homeassistant.turn_off
+        target:
+          entity_id: "{{expand(all_light)|rejectattr('entity_id','in',exclude)|map(attribute='entity_id')|list}}"
+      - alias: Spegni tutte le tv escluse le camere ed alexa,google
+        service: media_player.turn_off
+        target:
+          entity_id: >
+            {% set output = namespace(media=[]) %}
+            {% set list = states.media_player|rejectattr('entity_id','in',area)|rejectattr('state','in',['unknown','unavailable','off'])|map(attribute='entity_id')|list%}
+            {% for tv in list if not is_device_attr(tv, 'manufacturer','Google Inc.') and not is_device_attr(tv, 'manufacturer','Amazon')%}
+            {%- set output.media = output.media + [tv] -%}
+            {% endfor%}
+            {{output.media}}
+      - alias: Spegni android tv escluse le camere
+        service: remote.turn_off
+        data: {}
+        target:
+          entity_id: "{{states.remote|selectattr('entity_id','in', integration_entities('androidtv_remote'))|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')| list}}"
+      - alias: Spegni i climate (escluso frigorifero)
+        service: climate.turn_off
+        target:
+          entity_id: "{{states.climate|rejectattr('entity_id', 'in', integration_entities('smartthinq_sensors'))|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')|list }}"
+      - alias: Spegni i fan
+        service: fan.turn_off
+        target: 
+          entity_id: "{{ states.fan|rejectattr('state','in',['unknown','unavailable','off'])| map(attribute='entity_id')|list }}"
+      - alias: Chiudi tapparelle
+        if: "{{is_state('input_boolean.winter_summer','on')}}"
+        then:
+          - alias: ESTATE
+            service: cover.close_cover
+            target:
+              entity_id:
+              - cover.salone_divano
+              - cover.salone_porta_finestra
+          - service: cover.set_cover_position
+            data:
+              position: 40
+            target:
+              entity_id:
+              - cover.camera_finestra
+              - cover.camera_porta_finestra
+              - cover.cover_cucina
+              - cover.cameretta
+          - service: cover.set_cover_position
+            data:
+              position: 55
+            target:
+              entity_id:
+              - cover.studio
+              - cover.bagno
+              - cover.salone_tavolo
+        else:
+          - alias: INVERNO
+            service: cover.close_cover
+            target:
+              entity_id: "{{states.cover|rejectattr('entity_id','in',exclude)|rejectattr('state','in',['unknown','unavailable'])| map(attribute='entity_id')| list}}"

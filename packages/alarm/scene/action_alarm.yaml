@@ -1,0 +1,107 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+        Allarme: &alarm alarm_control_panel.home_alarm
+        Gruppo tutte le luci: &all_light group.tutte_le_luci
+        
+group:
+  automation_action_armed:
+    name: Gruppo automazioni da gestire se innescato allarme globale
+    entities:
+      - automation.occupazione_mmwave_bagno
+      - automation.accensione_automatica_bagnetto
+      - automation.accensione_automatica_corridoio
+      - automation.accensione_automatica_ripostiglio
+      - automation.luce_cucina
+      - automation.accensione_automatica_studio
+      - automation.accendi_libreria_con_porta_aperta
+      - automation.notifica_campanello
+      - automation.balcone_cameretta_con_telecomando
+      - automation.telecomando_tenda_tavolo
+      - automation.telecomando_tenda_divano
+
+##############################################################
+#         DA QUESTO PUNTO NON MODIFICARE
+##############################################################
+
+automation:
+- alias: Azioni personalizzate per allarme globale
+  id: action_pending_triggered
+  mode: parallel
+  variables:
+    all_light: *all_light
+    exclude: "{{expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list}}"
+  trigger:
+  - platform: state
+    entity_id: *alarm
+    to: 
+      - 'pending'
+      - 'disarmed'
+  - platform: state
+    entity_id: input_boolean.alarm_triggered_state
+    from: 
+      - 'on'
+      - 'off'
+    to: 
+      - 'on'
+      - 'off'
+  action:
+  - alias: Infrazione rilevata, primo avviso (notifica nel file armed_away/night) 
+    if: "{{trigger.to_state.state == 'pending' and is_state('input_boolean.alarm_triggered_state','off')}}"
+    then:
+      - alias: Accendere tutte le luci
+        service: homeassistant.turn_on
+        target:
+          entity_id: "{{expand(all_light)|map(attribute='entity_id')|list}}"
+
+  - alias: Allarme scattato (notifica nel file armed_away/night) 
+    if: "{{ trigger.to_state.state == 'on'}}"
+    then:
+      - alias: Spegni tutte le luci
+        service: homeassistant.turn_off
+        target:
+          entity_id: "{{expand(all_light)|map(attribute='entity_id')|list}}"
+      - alias: Chiudi tutte le tapparelle
+        service: cover.close_cover
+        data: {}
+        target:
+          entity_id: "{{states.cover|rejectattr('entity_id','in',exclude)|rejectattr('state','in',['unknown','unavailable'])| map(attribute='entity_id')| list}}"
+      - alias: Salva stato automazioni da disattivare
+        service: scene.create
+        data:
+          scene_id: automation_action_armed
+          snapshot_entities: "{{expand('group.automation_action_armed')|map(attribute='entity_id')|list}}"
+      - delay:
+          seconds: 1
+      - alias: Disattiva automazioni scelte
+        service: automation.turn_off
+        target:
+          entity_id: "{{expand('group.automation_action_armed')|map(attribute='entity_id')|list}}"
+
+  - alias: Allarme disattivato durante il pending (primo avviso)
+    if: "{{trigger.to_state.state == 'disarmed' and trigger.from_state.state == 'pending' }}"
+    then:
+      - alias: Se dopo il tramonto lascia accese solo le entità inserite nel group.exclude_alarm_entities altrimenti tutto spento
+        if:
+          - condition: state
+            entity_id: sun.sun
+            state: below_horizon
+        then:
+          - service: homeassistant.turn_off
+            target:
+              entity_id: >
+                  {{expand(all_light)|rejectattr('entity_id','in',exclude)|map(attribute='entity_id')|list}}
+        else:
+          - service: homeassistant.turn_off
+            target:
+              entity_id: >
+                  {{ expand(all_light)|map(attribute='entity_id')|list }}
+
+  - alias: Allarme disattivato dopo essere scattato
+    if: "{{trigger.to_state.state == 'off'}}"
+    then: 
+      - alias: Reimposta stato automazioni nello stato corretto
+        service: scene.turn_on
+        data: {}
+        target:
+          entity_id: scene.automation_action_armed
