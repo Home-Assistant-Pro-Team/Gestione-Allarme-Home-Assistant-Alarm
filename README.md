@@ -379,8 +379,31 @@ Nel video, viene mostrato che è stato creato un pannello con una tastiera virtu
 - File "whit_card.yaml": Questo file contiene la configurazione della card della tastiera virtuale. 
 - File "jammer_detect.yaml": Assicurati di includere correttamente questo file nella tua configurazione di Home Assistant per garantire un corretto funzionamento della card
 
-È importante anche avere una dashboard in modalità YAML come ben descritta da [MaxAlbani](https://www.maxalbani.it/2023/04/home-assistant-dashboards-lo-strumento-per-creare-interfacce-grafiche/#modalita) nel suo articolo.
+È consigliato anche avere una dashboard in modalità YAML come ben descritta da [MaxAlbani](https://www.maxalbani.it/2023/04/home-assistant-dashboards-lo-strumento-per-creare-interfacce-grafiche/#modalita) nel suo articolo.
 
 Quando utilizzi la card della tastiera virtuale, il popup delle impostazioni mostrerà solo le entità dei file che hai deciso di utilizzare.
+
+Puoi utilizzare la card in modalità storage senza attivare la cartella "button_card_templates" (anche se sconsigliato). Per farlo, seleziona la plancia desiderata, apri il menu delle opzioni e scegli "Modifica". Successivamente, accedi all'editor di configurazione testuale e aggiungi "button_card_templates:" all'inizio della plancia, assicurandoti di rispettare l'indentazione corretta. Infine, copia il file del template nella posizione appropriata. Ricorda di fare attenzione alla formattazione e all'indentazione durante il processo di copia. Tieni presente che questa modalità potrebbe non essere raccomandata, ma è possibile utilizzarla se necessario.
+
+```
+button_card_templates:
+  no_background:
+  styles:
+  	  card:
+	    - background-color: rgba(0,0,0,0.0)
+	    - border-width: 0px
+	  display:
+	  tap_action:
+		action: none
+...........
+title: xxxxx
+views:
+  - theme: Backend-selected
+    title: test_alarm
+    path: a
+    badges: []
+    cards:
+...........
+```
 ### **Contributi**
 Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un bug o richiedere una nuova funzionalità, ti invitiamo a creare una issue sul repository.

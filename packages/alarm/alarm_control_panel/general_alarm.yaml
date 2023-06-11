@@ -56,13 +56,16 @@ automation:
   initial_state: true
   mode: single
   trigger:
-  - platform: template
-    value_template: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {%set alarm = (state_alarm()|from_json)['alarm'] %}
-      {{( is_state(alarm,'triggered') or
-      is_state(alarm,'disarmed'))
-      and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
+    - platform: template
+      value_template: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {%set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{ is_state(alarm,'triggered')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
+    - platform: template
+      value_template: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {%set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{ is_state(alarm,'disarmed')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
   action:
   - if: "{{trigger.to_state.state == 'triggered'}}"
     then:
