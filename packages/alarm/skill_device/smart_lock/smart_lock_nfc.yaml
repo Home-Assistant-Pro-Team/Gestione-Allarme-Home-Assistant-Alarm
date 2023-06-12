@@ -29,6 +29,7 @@ automation:
   - if:
       - >
         {% from 'alarm.jinja' import state_alarm %}
+        {% set alarm = (state_alarm()|from_json)['alarm'] %}
         {{ states[alarm].state == 'disarmed' }}
     then:
       - service: lock.lock

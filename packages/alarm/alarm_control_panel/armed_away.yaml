@@ -201,6 +201,7 @@ automation:
     - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }} "
     - >
       {% from 'alarm.jinja' import state_alarm %}
+      {% set alarm = (state_alarm()|from_json)['alarm'] %}
       {{ states[alarm].state == 'armed_away' }}
   action: 
       - service: alarm_control_panel.alarm_trigger

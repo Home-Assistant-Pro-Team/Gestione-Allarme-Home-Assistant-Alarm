@@ -208,6 +208,7 @@ automation:
     - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group') }}"
     - >
       {% from 'alarm.jinja' import state_alarm %}
+      {% set alarm = (state_alarm()|from_json)['alarm'] %}
       {{ states[alarm].state == 'armed_night' }}
   action: 
     - alias: Fai scattare allarme quando un sensore passa allo stato on
