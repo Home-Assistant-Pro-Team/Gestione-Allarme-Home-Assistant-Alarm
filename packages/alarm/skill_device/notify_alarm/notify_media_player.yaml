@@ -6,12 +6,12 @@ automation:
   variables:
       volume: 0.5
       alexa: >
-            {% from 'alarm.jinja' import media_player_alarm %}
-            {% set media = media_player_alarm('alexa_media').split() %}
+            {% from 'personal.jinja' import media_players %}
+            {% set media = media_players('alexa_media').split() %}
             {{ media}}
       google: >
-            {% from 'alarm.jinja' import media_player_alarm %}
-            {% set media = media_player_alarm('cast').split() %}
+            {% from 'personal.jinja' import media_players %}
+            {% set media = media_players('cast').split() %}
             {{ media}}
   trigger:
     - platform: event

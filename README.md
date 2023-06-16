@@ -69,84 +69,85 @@ homeassistant:
     package.node_anchors:
         Allarme: &alarm alarm_control_panel.home_alarm
 ```
-La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
+La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". 
 
+Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
+- **alarm.jinja**
+	In questo file occore inserire codici e l'entità allarme utilizzati
 
-```
-{% macro state_alarm() %}
-	{
+	```
+	{% macro state_alarm() %}
+		{
 
-{# Inserire la propria entità alarm_control_panel #}
-		"alarm": "alarm_control_panel.home_alarm",
+	{# Inserire la propria entità alarm_control_panel creata con file general_alarm #}
+			"alarm": "alarm_control_panel.home_alarm",
 
-{# Inserire il codice dell'allarme #}
-		"code": "1234",
+	{# Inserire il codice dell'allarme #}
+			"code": "1234",
 
-{# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
-{# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
-		"code_service" : "9877",
+	{# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
+	{# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
+			"code_service" : "9877",
 
-{# Inserire il codice per accedere alle impostazioni della card con allarme inserito #}
-		"setting_code": "1234",
+	{# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
+			"emergency_code": "5555",
 
-{# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
-		"emergency_code": "5555",
+	{# Numero di tentativi per digitare codice allarme #}
+			"alarm_code_attempts": "3",
 
-{# Numero di tentativi per digitare codice allarme #}
-		"alarm_code_attempts": "3",
+	{# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
+			"code_porta": "6666"
 
-{# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
-		"code_porta": "6666"
+		}
+	{% endmacro %}
 
-	}
-{% endmacro %}
-```
-Se non si desidera associare un numero di cellulare o un sensore di sveglia a una determinata persona, è sufficiente assegnare il valore "none" nella sezione corrispondente del file. Per aumentare o ridurre il numero di persone presenti nella lista di dictionary, è necessario fare attenzione alla sintassi Json.
-```
-{% macro person_alarm() %}
- [
- 	{
- 		"person": "person.marco",
- 		"battery": "sensor.cellulare_marco_battery_level",
-        "notify": "mobile_app_cellulare_marco",
-		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-		"cellulare": "331000000"
-  	},
-  	{
-  		"person": "person.serena",
-  		"battery": "sensor.cellulare_serena_livello_della_batteria",
-        "notify": "mobile_app_samsung_s21",
-		"sveglia": "none",
-		"cellulare": "335000000"
-  	},
-  	{
-  		"person": "person.example",
-  		"battery": "sensor.example_battery",
-        "notify": "mobile_app_example",
-		"sveglia": "none",
-		"cellulare": "none"
-  	}
- ]
-{% endmacro%}
-```
-Assicurati di elencare correttamente i media player alexa e tts (es.google) selezionati per le notifiche, seguendo attentamente la sintassi corretta.
-```
-{% macro media_player_alarm(type) %}
-	{% set list_media = 
-		[
-			'media_player.camera',
-			'media_player.studio',
-			'media_player.googlehome_cameretta',
-			'media_player.googlehome_bagno',
-			'media_player.googlehome_cucina',
-			'media_player.googlehome_salone'
-		]
-	%}
-	{% for integrations in integration_entities(type) if integrations in list_media %}
-		{{integrations}}
-	{% endfor %}
-{% endmacro %}
-```
+- **personal.jinja**
+
+	Questo file sarà utilizzato per altri progetti all'interno di questo repository GitHub. Nel file, impostiamo dati personali che verranno utilizzati in tutti i progetti. È sufficiente inserire le proprie entità rispettando l'indentazione JSON.
+
+	Vediamo come personalizzarlo. Anche se non tutte le informazioni sono necessarie per questo pacchetto, è consigliabile compilare tutti i campi per poter sfruttarlo appieno in altri progetti.
+
+	In questa sezione, definiamo le entità e i sensori per ogni persona. Se non si desidera associare un numero di cellulare o un sensore di sveglia a una persona specifica, è sufficiente assegnare il valore "none" nella sezione corrispondente del file. Per aggiungere o rimuovere persone dalla lista di dizionari, è necessario prestare attenzione alla sintassi JSON.
+
+	```
+	{% macro persons() %}
+	[
+		{
+			"person": "person.marco",
+			"battery": "sensor.cellulare_marco_battery_level",
+			"notify": "mobile_app_cellulare_marco",
+			"sveglia": "sensor.cellulare_marco_prossimo_allarme",
+			"cellulare": "331000000"
+		},
+		{
+			"person": "person.serena",
+			"battery": "sensor.cellulare_serena_livello_della_batteria",
+			"notify": "mobile_app_samsung_s21",
+			"sveglia": "none",
+			"cellulare": "335000000"
+		}
+	]
+	{% endmacro%}
+	```
+	In questa sezione, elencheremo i nostri media player utilizzati per le notifiche. Assicurati di inserire correttamente i media player selezionati per le notifiche Alexa e TTS (ad esempio, Google), seguendo attentamente la sintassi corretta.
+
+	```
+	{% macro media_players(type) %}
+		{% set list_media = 
+			[
+				'media_player.camera',
+				'media_player.studio',
+				'media_player.googlehome_cameretta',
+				'media_player.googlehome_bagno',
+				'media_player.googlehome_cucina',
+				'media_player.googlehome_salone'
+			]
+		%}
+		{% for integrations in integration_entities(type) if integrations in list_media %}
+			{{ integrations }}
+		{% endfor %}
+	{% endmacro %}
+	```
 ## **Alarm control panel**:
 I file principali si trovano nella cartella *alarm_control_panel*
 #### **General alarm**:
@@ -230,7 +231,7 @@ Nella cartella sono presenti diversi file:
  - #### **General code**:
   	Questo file deve essere sempre caricato indipendentemente dal tipo di tastierino utilizzato. Fornisce funzionalità di base per la gestione del codice di accesso.
  - #### **With card**: 
- 	Questo file può essere utilizzato solo con la card fornita nel pacchetto. Durante l'utilizzo di questo file, è importante tenere a mente alcune considerazioni importanti. Per esempio, i codici dell'allarme, del codice di emergenza e setting_code non possono iniziare con lo zero. Il file with_card esegue un controllo per i tentativi di inserimento del codice disarmo. Nel caso in cui il numero massimo di tentativi di codice errati venga superato, l'allarme passa allo stato di scattato ed iniviata una notifica. È anche possibile impostare un codice di emergenza che consente di disattivare l'allarme e inviare una notifica di allerta (voip e push) alle persone che NON si trovano in casa. Durante la sequenza, viene creato un evento per essere utilizzato come trigger in altre automazioni per esempio invio snapshoot telecamere. E' importante notare che utilizzando il codice setting_code, impostato nel file alarm.jinja, rende possibile modificare le impostazioni dalla card anche quando l'allarme è attivo e rimuovere il lock. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
+ 	Questo file può essere utilizzato solo con la card fornita nel pacchetto. Durante l'utilizzo di questo file, è importante tenere a mente alcune considerazioni importanti. Per esempio, il codice dell'allarme ed il codice di emergenza possono iniziare con lo zero. Il file with_card esegue un controllo per i tentativi di inserimento del codice disarmo. Nel caso in cui il numero massimo di tentativi di codice errati venga superato, l'allarme passa allo stato di scattato ed iniviata una notifica. È anche possibile impostare un codice di emergenza che consente di disattivare l'allarme e inviare una notifica di allerta (voip e push) alle persone che NON si trovano in casa. Durante la sequenza, viene creato un evento per essere utilizzato come trigger in altre automazioni per esempio invio snapshoot telecamere. E' importante notare che utilizzando il codice dell'allarme, rende possibile modificare le impostazioni dalla card anche quando l'allarme è attivo e rimuovere il lock. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
 
  - #### **Keypad / tastierino esterno**: 
  	Il pacchetto include un file readme e un esempio di utilizzo con 3x4 12 Key Matrixe ed EspHome. Il file keypad.yaml è essenziale per il corretto funzionamento dell'allarme. Digitando il codice di sblocco, è possibile attivare l'allarme globale e disattivare sia l'allarme globale che quello notturno. Il sistema effettua un controllo sui tentativi di inserimento del codice errato e invia una notifica se si supera il limite consentito. E' possibile definire un Codice di emergenza, che consente di disattivare l'allarme e inviare una notifica di pericolo (voip e push) solo alle persone che NON si trovano in casa.  Durante la sequenza, viene creato un evento che può essere utilizzato come trigger in altre automazioni, ad esempio per l'invio di snapshot delle telecamere in caso di emergenza. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .

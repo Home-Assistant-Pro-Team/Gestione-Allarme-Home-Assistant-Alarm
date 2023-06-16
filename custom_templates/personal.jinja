@@ -1,0 +1,34 @@
+{% macro persons() %}
+ [
+ 	{
+ 		"person": "person.marco",
+ 		"battery": "sensor.cellulare_marco_battery_level",
+        "notify": "mobile_app_cellulare_marco",
+		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
+		"cellulare": "333333333333"
+  	},
+  	{
+  		"person": "person.serena",
+  		"battery": "sensor.cellulare_serena_livello_della_batteria",
+        "notify": "mobile_app_samsung_s21",
+		"sveglia": "none",
+		"cellulare": "3333333333"
+  	}
+ ]
+{% endmacro %}
+##############################################################
+{% macro media_players(type) %}
+	{% set list_media = 
+		[
+			'media_player.camera',
+			'media_player.studio',
+			'media_player.googlehome_cameretta',
+			'media_player.googlehome_bagno',
+			'media_player.googlehome_cucina',
+			'media_player.googlehome_salone'
+		]
+	%}
+	{% for integrations in integration_entities(type) if integrations in list_media %}
+		{{ integrations }}
+	{% endfor %}
+{% endmacro %}

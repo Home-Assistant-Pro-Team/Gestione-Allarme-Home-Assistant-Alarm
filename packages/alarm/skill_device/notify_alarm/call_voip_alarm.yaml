@@ -81,9 +81,9 @@ automation:
               {% if trigger.event.data.for_each is defined %}
                 {{trigger.event.data.for_each}}
               {% else %}
-                {% from 'alarm.jinja' import person_alarm %}
+                {% from 'personal.jinja' import persons %}
                 {% set output = namespace(numbers=[]) %}
-                {%for d in person_alarm()|from_json if d['cellulare'] != 'none'%}
+                {%for d in persons()|from_json if d['cellulare'] != 'none'%}
                 {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
                 {% endfor %}
                 {{output.numbers}}
@@ -164,9 +164,9 @@ script:
           {% from 'alarm.jinja' import state_alarm %}
           {{ (state_alarm()|from_json)['code']}}
         for_each: >
-            {% from 'alarm.jinja' import person_alarm %}
+            {% from 'personal.jinja' import persons %}
             {% set output = namespace(numbers=[]) %}
-            {%for d in person_alarm()|from_json if d['cellulare'] != 'none'%}
+            {%for d in persons()|from_json if d['cellulare'] != 'none'%}
             {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
             {% endfor %}
             {{output.numbers}}

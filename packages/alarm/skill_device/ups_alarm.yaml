@@ -8,14 +8,14 @@ automation:
     entity_id: sensor.tecnoware_status
   condition:
     - or:
-      - >
-        {% from 'alarm.jinja' import person_alarm %}
+      - >-
+        {% from 'personal.jinja' import persons %}
         {% set output = namespace(state_home=[]) %}
-          {%for d in person_alarm()|from_json if states[d.person].state == 'home'%}
-            {%- set output.state_home = output.state_home + [d['person'] ] -%}
+          {% for d in persons()|from_json if states[d.person].state == 'home' %}
+            {% set output.state_home = output.state_home + [d['person'] ] %}
           {% endfor %}
-        {{output.state_home|count == 0}}
-      - >
+        {{ output.state_home|count == 0 }}
+      - >-
         {% from 'alarm.jinja' import state_alarm %}
         {{ states[(state_alarm()|from_json)['alarm']].state != 'disarmed' }}
   action:
@@ -28,9 +28,9 @@ automation:
         critical: 1.0
         title: --UPS--
         continue_voip: '. Premi asterisco per bloccare le prossime chiamate'
-        message: >
+        message: >-
           {% if trigger.to_state.state == 'On Battery' and trigger.from_state.state == 'Online' %} 
-            {{'ATTENZIONE: Assenza di tensione elettrica in casa dalle '+ as_local(states[trigger.entity_id].last_changed).strftime('%H:%M')}} 
-          {%else%} 
-            {{'Fornitura elettrica ristabilita alle '+ as_local(states[trigger.entity_id].last_changed).strftime('%H:%M')}}
-          {%endif%}
+            {{ 'ATTENZIONE: Assenza di tensione elettrica in casa dalle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }} 
+          {% else %} 
+            {{ 'Fornitura elettrica ristabilita alle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }}
+          {% endif %}

@@ -2,7 +2,7 @@ homeassistant:
   customize:
     package.node_anchors:
         Porda d'ingresso: &porta        binary_sensor.porta_ingresso
-        Serratura: &lock lock.danalock
+        Serratura:        &lock         lock.danalock
 # Nel pkg viene utilizzata una serratura danalock
 
 ##############################################################
@@ -30,20 +30,20 @@ automation:
             - >
               {% from 'alarm.jinja' import state_alarm %}
               {% set code_porta = (state_alarm()|from_json)['code_porta'] %}
-              {{states(trigger.entity_id)|int(0) == code_porta|int(0)}}
-            - "{{states(alarm) == 'disarmed' }}"
+              {{ states(trigger.entity_id)|int(0) == code_porta|int(0) }}
+            - "{{ states(alarm) == 'disarmed' }}"
           sequence:
             - service: lock.unlock
               target:
                 entity_id: *lock
         - alias: Serratura con stato allarme
           conditions:
-            - "{{states(trigger.entity_id)|int(0) == code|int(0) }}"
+            - "{{ states(trigger.entity_id)|int(0) == code|int(0) }}"
           sequence:
             - delay:
                 milliseconds: 500
             - if:
-                - "{{states(alarm) == 'disarmed' }}"
+                - "{{ states(alarm) == 'disarmed' }}"
               then:
                 - wait_template: "{{ is_state(porta, 'off') and is_states(alarm,'armed_away') }}"
                 - service: lock.lock

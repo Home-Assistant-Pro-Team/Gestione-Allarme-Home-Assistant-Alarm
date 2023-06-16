@@ -12,20 +12,20 @@ automation:
   mode: single
   trigger:
     - platform: template
-      value_template: >
+      value_template: >-
         {% from 'alarm.jinja' import state_alarm %}
         {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'arming') and now() < states[alarm].last_changed+ timedelta(seconds=1) }}
+        {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     - platform: template
-      value_template: >
+      value_template: >-
         {% from 'alarm.jinja' import state_alarm %}
         {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed+ timedelta(seconds=1) }}
+        {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     - platform: template
-      value_template: >
+      value_template: >-
         {% from 'alarm.jinja' import state_alarm %}
         {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed+ timedelta(seconds=1) }}
+        {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
   action:
     - choose:
 
@@ -56,7 +56,7 @@ automation:
                 value_template: > 
                   {% from 'alarm.jinja' import state_alarm %}                  
                   {% set alarm = (state_alarm()|from_json)['alarm'] %}
-                  {{ states[alarm].state == 'disarmed' and now() > states[alarm].last_changed+ timedelta(minutes=10) }}
+                  {{ states[alarm].state == 'disarmed' and now() > states[alarm].last_changed + timedelta(minutes=10) }}
               - "{{ trigger.to_state.state == 'disarmed' and trigger.from_state.state == 'triggered' }}"
             sequence:
             - service: switch.turn_on

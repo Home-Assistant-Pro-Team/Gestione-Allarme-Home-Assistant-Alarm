@@ -27,21 +27,20 @@ automation:
   - variables: 
       alarm: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm']}}
+        {{ (state_alarm()|from_json)['alarm'] }}
       code: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['code']}}
+        {{ (state_alarm()|from_json)['code'] }}
   - if:
     - >
-      {% from 'alarm.jinja' import state_alarm %}
       {{ states[alarm].state == 'disarmed' }}
     then:
       - service: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: "{{alarm}}"
+          entity_id: "{{ alarm }}"
     else:
       - service: alarm_control_panel.alarm_disarm
         data:
-          code: "{{code}}"
+          code: "{{ code }}"
         target:
-          entity_id: "{{alarm}}"
+          entity_id: "{{ alarm }}"

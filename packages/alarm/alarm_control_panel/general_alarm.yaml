@@ -6,7 +6,7 @@ alarm_control_panel:
     trigger_time: 120
     code_template: >
       {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['code']}}
+      {{ (state_alarm()|from_json)['code'] }}
     code_arm_required: false
 
 group:  
@@ -15,6 +15,8 @@ group:
     entities:
       - binary_sensor.frigorifero_door_open
       - binary_sensor.bedprecence_mattia
+      - binary_sensor.bedprecence_marco
+      - binary_sensor.bedprecence_serena
       - sensor.miflora_signal_strength
       - light.luce_ingresso
       - cover.tenda_tavolo
@@ -35,7 +37,7 @@ input_boolean:
 template:
   - sensor:
       - name: Stato allarme
-        state: >
+        state: >-
             {% from 'alarm.jinja' import state_alarm %}
             {% set alarm = (state_alarm()|from_json)['alarm'] %}    
             {{ 
@@ -57,17 +59,17 @@ automation:
   mode: single
   trigger:
     - platform: template
-      value_template: >
+      value_template: >-
         {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'triggered')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
+        {% set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     - platform: template
-      value_template: >
+      value_template: >-
         {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'disarmed')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
+        {% set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
   action:
-  - if: "{{trigger.to_state.state == 'triggered'}}"
+  - if: "{{ trigger.to_state.state == 'triggered' }}"
     then:
       - service: input_boolean.turn_on
         target:

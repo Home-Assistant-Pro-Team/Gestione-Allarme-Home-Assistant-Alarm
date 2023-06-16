@@ -1,11 +1,11 @@
 template:
   - sensor:
     - name: emergency_code
-      state: >
+      state: >-
         {% from 'alarm.jinja' import state_alarm %}
         {{ (state_alarm()|from_json)['emergency_code'] }}
     - name: alarm_code_attempts
-      state: >
+      state: >-
         {% from 'alarm.jinja' import state_alarm %}
         {{ (state_alarm()|from_json)['alarm_code_attempts'] }}
 

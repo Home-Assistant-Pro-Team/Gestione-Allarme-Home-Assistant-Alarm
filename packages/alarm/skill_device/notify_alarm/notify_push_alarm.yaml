@@ -75,9 +75,9 @@ automation:
             {% if trigger.event.data.for_each is defined %}
               {{trigger.event.data.for_each}}
             {% else %}
-              {% from 'alarm.jinja' import person_alarm %}
+              {% from 'personal.jinja' import persons %}
               {% set output = namespace(state_home=[]) %}
-                {%for dict in person_alarm()|from_json %}
+                {%for dict in persons()|from_json %}
                   {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
                 {% endfor %}
               {{output.state_home}}

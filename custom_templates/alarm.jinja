@@ -1,7 +1,7 @@
 {% macro state_alarm() %}
 	{
 
-{# Inserire la propria entità alarm_control_panel #}
+{# Inserire la propria entità alarm_control_panel creata con file general_alarm #}
 		"alarm": "alarm_control_panel.home_alarm",
 
 {# Inserire il codice dell'allarme #}
@@ -10,9 +10,6 @@
 {# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
 {# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
 		"code_service" : "9877",
-
-{# Inserire il codice per accedere alle impostazioni della card con allarme inserito #}
-		"setting_code": "1234",
 
 {# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
 		"emergency_code": "5555",
@@ -24,45 +21,6 @@
 		"code_porta": "6666"
 
 	}
-{% endmacro %}
-
-##############################################################
-
-{% macro person_alarm() %}
- [
- 	{
- 		"person": "person.marco",
- 		"battery": "sensor.cellulare_marco_battery_level",
-        "notify": "mobile_app_cellulare_marco",
-		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-		"cellulare": "331000000"
-  	},
-  	{
-  		"person": "person.serena",
-  		"battery": "sensor.cellulare_serena_livello_della_batteria",
-        "notify": "mobile_app_samsung_s21",
-		"sveglia": "none",
-		"cellulare": "335000000"
-  	}
- ]
-{% endmacro%}
-
-##############################################################
-
-{% macro media_player_alarm(type) %}
-	{% set list_media = 
-		[
-			'media_player.camera',
-			'media_player.studio',
-			'media_player.googlehome_cameretta',
-			'media_player.googlehome_bagno',
-			'media_player.googlehome_cucina',
-			'media_player.googlehome_salone'
-		]
-	%}
-	{% for integrations in integration_entities(type) if integrations in list_media %}
-		{{integrations}}
-	{% endfor %}
 {% endmacro %}
 
 ##################################################################
