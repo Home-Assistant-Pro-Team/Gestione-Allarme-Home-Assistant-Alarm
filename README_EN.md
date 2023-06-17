@@ -330,7 +330,7 @@ The "Insert armed night" file contains automations to manage the activation and 
 
 	The alarm is activated under certain conditions: 
 	
-	- If all beds are occupied using the [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) occupancy sensors connected to the Aqara flood sensors. 
+	- If all beds are occupied using the [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) occupancy sensors connected to the Aqara flood sensors. 
 	- The alarm is triggered only if the last room detected is the bedroom or nursery.
 	- Both of these conditions must be met for at least 5 consecutive minutes.
 	- The night alarm is activated only during the time interval between 21:00 and 03:00, unless the guest mode is active.
@@ -357,7 +357,7 @@ However, notifications playing on Alexa or other Google devices are not interrup
 
 In the following scenario, we wish to leverage a button (e.g., an Aqara button) to manage the alarm. The goal is to allow the night alarm to be quickly deactivated when we are at home and reactivated once we leave. This can be useful for those who work at night or early in the morning, but still want to ensure the safety of the family while they sleep.
 
-The automation associated with the button and with the active night alarm works as follows: when the button is pressed, the alarm is turned off immediately. Thereafter, the automation waits for the door to be closed and then reactivates the alarm. If more than one person was in the house at the time the alarm was deactivated and the [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) sensors still detect someone in bed, the night alarm is reactivated; otherwise, the global alarm is reactivated. In case a minute passes without the door being closed, the night alarm is reactivated, while a notification is sent to warn that the door remained open.
+The automation associated with the button and with the active night alarm works as follows: when the button is pressed, the alarm is turned off immediately. Thereafter, the automation waits for the door to be closed and then reactivates the alarm. If more than one person was in the house at the time the alarm was deactivated and the [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) sensors still detect someone in bed, the night alarm is reactivated; otherwise, the global alarm is reactivated. In case a minute passes without the door being closed, the night alarm is reactivated, while a notification is sent to warn that the door remained open.
 
 Automation is executed if the guest mode is not active.
 

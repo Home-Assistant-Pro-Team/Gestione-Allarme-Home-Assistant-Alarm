@@ -340,7 +340,7 @@ Il file "Insert armed night" contiene le automazioni per gestire l'attivazione e
 
 	L'allarme viene attivato in determinate condizioni: 
 	
-	- se tutti i letti risultano occupati utilizzando i sensori di presenza [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) collegati ai sensori di allagamento Aqara. 
+	- se tutti i letti risultano occupati utilizzando i sensori di presenza [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) collegati ai sensori di allagamento Aqara. 
 	- L'allarme viene attivato solo se l'ultima stanza rilevata è la camera da letto o la cameretta.
 	- Entrambe queste condizioni devono essere soddisfatte per almeno 5 minuti consecutivi.
 	- L'attivazione dell'allarme notte avviene solo durante l'intervallo di tempo compreso tra le 21:00 e le 03:00, a meno che la modalità ospite non sia attiva.
@@ -366,7 +366,7 @@ Tuttavia, non vengono interrotte le notifiche in riproduzione su Alexa o su altr
 #### **External button alarm**:
 Nel seguente scenario, desideriamo sfruttare un pulsante (ad esempio, un pulsante Aqara) per gestire l'allarme. L'obiettivo è consentire di disattivare rapidamente l'allarme notturno quando siamo a casa e di riattivarlo una volta usciti. Questo può essere utile per coloro che lavorano di notte o presto al mattino, ma vogliono comunque garantire la sicurezza della famiglia durante il sonno.
 
-L'automazione associata al pulsante e con l'allarme notturno attivo funziona nel seguente modo: al momento della pressione del pulsante, l'allarme viene disattivato immediatamente. Successivamente, l'automazione aspetta che la porta venga chiusa e quindi riattiva l'allarme. Se nel momento della disattivazione dell'allarme erano presenti più persone in casa e i sensori [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) rilevano ancora qualcuno a letto, l'allarme notturno viene riattivato; in caso contrario, l'allarme globale viene riattivato. Nel caso in cui trascorra un minuto senza che la porta venga chiusa, l'allarme notturno viene riattivato, mentre viene inviata una notifica per avvertire che la porta è rimasta aperta.
+L'automazione associata al pulsante e con l'allarme notturno attivo funziona nel seguente modo: al momento della pressione del pulsante, l'allarme viene disattivato immediatamente. Successivamente, l'automazione aspetta che la porta venga chiusa e quindi riattiva l'allarme. Se nel momento della disattivazione dell'allarme erano presenti più persone in casa e i sensori [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) rilevano ancora qualcuno a letto, l'allarme notturno viene riattivato; in caso contrario, l'allarme globale viene riattivato. Nel caso in cui trascorra un minuto senza che la porta venga chiusa, l'allarme notturno viene riattivato, mentre viene inviata una notifica per avvertire che la porta è rimasta aperta.
 
 L'automazione viene eseguita se la modalità ospiti non è attiva.
 
