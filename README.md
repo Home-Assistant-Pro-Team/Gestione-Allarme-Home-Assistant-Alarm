@@ -1,4 +1,4 @@
-`- Version: 1.1 -`
+`- Version: 1.2 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -55,6 +55,7 @@ Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_
 	- [Insert armed night](#insert-armed-night)
 	- [External button alarm](#external-button-alarm)
 - [Card](#card)
+- [ChangeLog](#change-log)
 ### **Requisiti**
 - [HomeAssitant release 2023.4 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
 - [Cartella Package abilitata](https://www.home-assistant.io/docs/configuration/packages/)
@@ -179,7 +180,8 @@ I file principali si trovano nella cartella *alarm_control_panel*
 - Viene creato un template select che permette di avere la lista di tutti i sensori utilizzati per il funzionamento dell'allarme, filtrati per dominio e device_class.
 - Quando si seleziona un sensore dal select, viene automaticamente aggiunto alla lista dei sensori abilitati per allarme, se già presente, viene rimosso.
 - Quando lo stato dell'allarme passa a ARMED_NIGHT o ARMED_AWAY, i sensori con device_class: window (finestre) che si trovano nello stato "on" (aperte) vengono esclusi dal trigger (non vengono rimossi dalla lista).
-- Quando una finestra che era stata precedentemente esclusa dal funzionamento viene chiusa e trascorrono 10 minuti, viene automaticamente reinserita tra i sensori per il controllo dell'allarme, ma solo durante lo stato ARMED_NIGHT.
+- Quando una finestra che era stata precedentemente esclusa dal funzionamento viene chiusa e trascorrono 10 minuti, viene automaticamente reinserita tra i sensori per il controllo dell'allarme, ma SOLO durante lo stato ARMED_NIGHT.
+- È possibile escludere dai sensori selezionati solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
 - L'automazione si occupa di tutto: quando un sensore passa allo stato "on", viene automaticamente attivato il trigger corrispondente.
 - È possibile escludere o includere singoli sensori anche con allarme in corso dall'interfaccia utente (UI).
 - Nelle notifiche, viene sempre identificato l'ultimo sensore che ha effettivamente cambiato stato, indicando l'orario in cui ciò è avvenuto.
@@ -408,3 +410,11 @@ views:
 ```
 ### **Contributi**
 Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un bug o richiedere una nuova funzionalità, ti invitiamo a creare una issue sul repository.
+
+## Change Log
+
+### Versione: 1.2
+- FILE PERSONAL: I dati personali sono stati separati in un nuovo file nella cartella 'custom_templates' per le notifiche, consentendo un utilizzo unico in tutti i progetti del GitHub.
+- È stato aggiunto il trigger 'pending' per l'invio di notifiche CCTV.
+- I singoli template sono stati sostituiti con macro per ridurre la quantità di codice.
+- È possibile escludere determinati sensori solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.

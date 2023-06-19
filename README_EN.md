@@ -54,6 +54,7 @@ It is important to note that the only mandatory folders to use are "alarm contro
 	- [Insert armed night](#insert-armed-night)
 	- [External button alarm](#external-button-alarm)
 - [Card](#card)
+- [ChangeLog](#change-log)
 ### **Requisiti**The package is organized into several folders.
 
 In YAML files where "node_anchors" are present, you need to customize the document by adding your own entities. For example:
@@ -172,8 +173,8 @@ The main files are located in the *alarm_control_panel* folder.
 - A select template is created to have the list of all sensors used for alarm operation, filtered by domain and device_class.
 - When a sensor is selected from the select, it is automatically added to the list of alarm-enabled sensors; if already present, it is removed.
 - When the alarm status changes to ARMED_NIGHT or ARMED_AWAY, sensors with device_class: windows that are in the "on" (open) state are excluded from the trigger (they are not removed from the list).
-- When a window that was previously excluded from triggering is closed and 10 minutes elapse, it is automatically re-entered among the sensors for alarm control, but only during the ARMED_NIGHT state.
-- Automation takes care of everything: when a sensor goes to the "on" state, the corresponding trigger is automatically activated.
+- When a window that had previously been excluded from operation is closed and 10 minutes elapses, it is automatically re-entered among the sensors for alarm control, but ONLY during the ARMED_NIGHT state.
+- It is possible to exclude from the selected sensors only for ARMED_AWAY mode during a single alarm input, either before activating it or after. This exclusion remains in effect until the alarm is deactivated.
 - Individual sensors can be excluded or included even with an alarm in progress from the user interface (UI).
 - In notifications, the last sensor that actually changed state is always identified, indicating the time when this happened.
 - You can decide which sensors to include or exclude from the list used in the "select" function in the "general_alarm" file by entering the entities in the exclude_alarm_entities and include_alarm_entities groups.
@@ -398,3 +399,10 @@ views:
 ```
 ### **Contributi**
 This project is open for contributions. If you would like to provide feedback, report a bug, or request a new feature, please create an issue on the repository.
+## Change Log
+
+### Versione: 1.2
+- PERSONAL FILE: Personal data has been separated into a new file in the 'custom_templates' folder for notifications, allowing unique use across all GitHub projects.
+- The 'pending' trigger for sending CCTV notifications has been added.
+- Individual templates have been replaced with macros to reduce the amount of code.
+- It is possible to exclude certain sensors only for ARMED_AWAY mode during a single alarm input, either before triggering or after. This exclusion remains in effect until the alarm is deactivated.

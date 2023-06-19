@@ -625,17 +625,6 @@ custom_fields:
                       icon: mdi:home-off-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.azioni_personalizzate_per_allarme_globale
-                      state_not: unavailable
-                  card:
-                    type: custom:button-card
-                    entity: automation.azioni_personalizzate_per_allarme_globale
-                    name: Azioni scattato
-                    template: popup_setting
-                    variables:
-                      icon: mdi:home-alert-outline
-                - type: conditional
-                  conditions:
                     - entity: automation.disattivazione_automatica_rietro_familiare
                       state_not: unavailable
                   card:
@@ -645,6 +634,17 @@ custom_fields:
                     template: popup_setting
                     variables:
                       icon: mdi:home-off-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.azioni_personalizzate_per_allarme_globale
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.azioni_personalizzate_per_allarme_globale
+                    name: Azioni scattato
+                    template: popup_setting
+                    variables:
+                      icon: mdi:home-alert-outline
                 - type: conditional
                   conditions:
                     - entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
@@ -783,56 +783,67 @@ custom_fields:
             timeout: 60000
             dismissable: true
             content:
-              type: custom:button-card
-              template: no_background
-              styles:
-                card:
-                  - min-height: 550px
-                custom_fields:
-                  n1:
-                    - position: absolute
-                    - left: '-3%'
-                    - width: 370px
-                    - top: 0px
-                  n2:
-                    - position: absolute
-                    - top: 80px
-              custom_fields:
-                n1:
-                  card:
-                    type: entities
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                        }
-                    entities:
-                      - entity: select.aggiungi_o_rimuovi_sensore_allarme_globale
-                n2:
-                  card:
-                    type: markdown
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                          text-align: left;
-                        }
-                    content: >
-                      {% set active = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_globale_attiv' , 'print_list_group'))|map(attribute='entity_id')|list)%} 
-                      {% set trigger = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
-                      {%for triggers in trigger %} 
+              type: vertical-stack
+              cards:
+                - type: entities
+                  card_mod:
+                    style: |
+                      :host {
+                        --ha-card-border-width: 0;
+                        --ha-card-background: none;
+                      }
+                  entities:
+                    - entity: select.rimuovi_sensori_solo_per_prossimo_allarme_globale
+                      name: Rimuovi sensore solo per un inserimento
+                - type: markdown
+                  content: >
+                    {% set trigger =
+                    (expand(state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme',
+                    'print_list_group'))|map(attribute='entity_id')|list) %} 
 
-                      **{{states[triggers].name}}**  DISATTIVATO {%endfor%} 
-                      {%-set trigger =
-                      expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|map(attribute='entity_id')|list%} 
-                      {% for entity in trigger if entity in active%} 
+                    {% for triggers in trigger %} 
+                      {{- states[triggers].name }}
+                    {% endfor %}
+                  card_mod:
+                    style: |
+                      :host {
+                        --ha-card-border-width: 0;
+                        --ha-card-background: none;
+                        text-align: left;
+                      }
+                - type: entities
+                  card_mod:
+                    style: |
+                      :host {
+                        --ha-card-border-width: 0;
+                        --ha-card-background: none;
+                      }
+                  entities:
+                    - entity: select.aggiungi_o_rimuovi_sensore_allarme_globale
+                - type: markdown
+                  card_mod:
+                    style: |
+                      :host {
+                        --ha-card-border-width: 0;
+                        --ha-card-background: none;
+                        text-align: left;
+                        min-height: 320px;
+                      }
+                  content: >
+                    {% set active = 
+                    (expand(state_attr('sensor.lista_sensori_allarme_globale_attiv' ,
+                    'print_list_group'))|map(attribute='entity_id')|list)%}  {% set trigger = 
+                    (expand(state_attr('sensor.lista_sensori_allarme_global' ,
+                    'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
+                    {%for triggers in trigger %} 
 
-                      **{{states[entity].name}}:**  {{states[entity].state}}  
-                      {%endfor%}
+                    **{{states[triggers].name}}**  DISATTIVATO {%endfor%}  {%-set trigger =
+                    expand(state_attr('sensor.lista_sensori_allarme_global' ,
+                    'print_list_group'))|map(attribute='entity_id')|list%}  {% for entity in
+                    trigger if entity in active%} 
+
+                    **{{states[entity].name}}:**  {{states[entity].state}}   {%endfor%}
+
   sensor_night:
     card:
       type: custom:button-card

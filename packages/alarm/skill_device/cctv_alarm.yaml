@@ -8,7 +8,7 @@ homeassistant:
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
-##############################################################                              
+##############################################################
 automation:
 - alias: CCTV allarme
   id: notify_cctv_alarm
@@ -24,6 +24,11 @@ automation:
       {% from 'alarm.jinja' import state_alarm %}
       {% set alarm = (state_alarm()|from_json)['alarm'] %}
       {{  is_state(alarm, 'triggered') }}
+  - platform: template
+    value_template: >
+      {% from 'alarm.jinja' import state_alarm %}
+      {% set alarm = (state_alarm()|from_json)['alarm'] %}
+      {{  is_state(alarm, 'pending') }}
   action:
   - alias: Invia notifica push alle persone che NON si trovano in casa
     repeat:
