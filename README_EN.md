@@ -166,7 +166,8 @@ The main files are located in the *alarm_control_panel* folder.
 		- It is possible **only** to exclude sensors. 
 		- It is possible to exclude covers that you do not want to use in the package for example awnings.
 #### **Armed night e Armed away**:
-![armed_night](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/f3d16a84-9211-49a9-b6f9-b9a20527a467)
+![armed_night](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/18fb3736-3faf-41a5-ab59-3fc333fed1b2)
+
 - A select template is created to have the list of all sensors used for alarm operation, filtered by domain and device_class.
 - When a sensor is selected from the select, it is automatically added to the list of alarm-enabled sensors; if already present, it is removed.
 - When the alarm status changes to ARMED_NIGHT or ARMED_AWAY, sensors with device_class: windows that are in the "on" (open) state are excluded from the trigger (they are not removed from the list).
@@ -183,7 +184,8 @@ There are several files in the **skill_device** folder that can be used accordin
 
 #### **Notifiche**:
 
-![notify](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/1cd2b3d2-65b1-4ea3-a445-fdd4cb4e091e)
+![notify](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/fdc4ecb1-2223-4687-9ef2-16cc414194e9)
+
 
 To make it easier to choose notifications based on the devices used, we are introducing a centralized system. This system allows customizing the notifications activated on different types of devices, such as push, VoIP call, and media player. It is important to point out that the files related to this choice are not essential for general operation.
   - #### **Notifiche voip**: 
@@ -227,7 +229,8 @@ There are several files in the folder:
     The package includes a readme file and an example of use with 3x4 12 Key Matrixe and EspHome. The keypad.yaml file is essential for proper alarm operation. By entering the unlock code, both the global alarm and the night alarm can be turned on and off. The system checks on attempts to enter the wrong code and sends a notification if the allowed limit is exceeded. It is possible to define an Emergency Code, which allows you to disable the alarm and send a danger notification (voip and push) only to people who are NOT in the house.  During the sequence, an event is created that can be used as a trigger in other automations, such as sending camera snapshots in case of emergency. It is also possible to configure a service code that can be shared, for example, with cleaning staff, which can be turned on and off from the user interface .
 #### **Detect jummer**:
 
-![jummer](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/6f512908-cda2-4b41-b5a4-5c01bcd2a0d3)
+![jummer](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/a9b7f52e-618e-4e03-82c2-f6f170501aee)
+
 
 It is based on the detection of devices that switch to the offline state.
 
@@ -251,7 +254,8 @@ There are three files in the folder that describe how to use a smart lock, such 
     It is possible to manage the opening or closing of the lock using a specific code and to turn the alarm on or off using the alarm code.
 #### **Person**
 
-![person](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/5cd97800-c19e-495a-8f3f-1afbdeb00a5b)
+![person](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/d499becb-ac48-43cf-8e2d-843ee4ac43a4)
+
 
 To use this file, it is necessary to customize the anchors.
 - The system can turn the global alarm on and off based on the presence of people in the house, as long as the guest mode is not active. 
@@ -262,7 +266,8 @@ To use this file, it is necessary to customize the anchors.
 *To ensure proper operation of person tracking, we strongly recommend that you read the article written by [Henrik Sozzi](https://henriksozzi.it/2021/05/posizione-delle-persone-con-home-assistant/). This article provides a comprehensive explanation of the operation and configuration of the tracking system. By reading it, you will be able to gain a thorough understanding of how to properly set up tracking and achieve the desired results.*
 #### **Detached**
 
-![detached](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/e255a218-6273-4a33-a41e-501632a50ea2)
+![detached](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/df2bbfba-b6a2-46ff-b94b-83906e693c4a)
+
 
   - #### **Detached shelly**: 
     This file is used to activate the "detached" function on all Shelly devices that work with the official Home Assistant integration. The "detached" function allows you to disable the physical buttons on the devices, but continue to use the relays via Home Assistant. The file works like this: when we execute the "detached_on" script, it is first checked that the same script has not been executed twice in a row. Next, the current state of the buttons is saved in a sensor, after which all devices are set to "detached" mode. On the other hand, when we execute the "detached_off" script, it is checked that the same script has not been executed twice in a row. Then, all devices are reset to the settings in use before the "detached" function was activated.
@@ -272,17 +277,20 @@ To use this file, it is necessary to customize the anchors.
   	- Detached alarm: When the alarm goes off, the function allows you to disable the physical keys throughout the house. In addition, when the alarm returns to "disarmed" mode but previously the alarm was triggered, the automation restores the key settings to the previous state. The "Detached alarm" function is compatible with Shelly devices that have official integration (detached_shelly.yaml) and with Esphome devices that use the sample firmware (firmware_esphome).
 #### **UPS alarm**:
 
-![ups](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/6a458651-22df-43bb-aeb5-5fe0bcf3d1b4)
+![ups](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/f5761b20-f3a1-4adc-b604-c38fbfa5df04)
+
 
 In the system, a Tecnoware1100 was used. Through this device, I receive a notification if a power failure occurs and a notification when power is restored.
 #### **Router alarm**
 
-![router](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/3fc716b1-304d-460a-8096-a3422afad0ce)
+![router](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/41482b56-3870-40c8-94c5-42cfab2839d3)
+
 
 If you are using a Fritz!Box 6890 router with LTE fallback, you will receive a notification when the Internet connection is dropped or restored. This device can automatically switch to the LTE connection if the main connection is interrupted and will send a notification to inform you of the connection status. In this way, you will be aware of Internet interruptions and resets.
 #### **CCTV**:
 
-![cctv](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/44641639-bac9-444b-80f9-e501c44404f8)
+![cctv](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/7bd79e1f-be9e-40b3-a520-87b498c3cb15)
+
 
 Cameras should be entered in the anchor list. When the alarm is triggered, a 30-second recording is made and a notification is sent to all recipients entered in the notify list in alarm.jinja for each camera. The notification includes a screenshot of the camera and two action buttons: the first allows you to view the camera live, while the second allows you to access the folder to play the recording you just made.
 
@@ -290,7 +298,8 @@ Cameras should be entered in the anchor list. When the alarm is triggered, a 30-
 ## **Scene**
 #### **Action alarm**:
 
-![triggered](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/3d0be2ac-565b-4b09-bf8e-b260d44d0d7c)
+![triggered](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/fe8cdd43-eba7-4b26-b873-e9e0c792a0ba)
+
 
 Household actions are programmed to be performed when an infraction is detected with the alarm on. Here is how the actions work according to the different phases:
 - Infraction detected (Pending): 
@@ -310,7 +319,8 @@ Household actions are programmed to be performed when an infraction is detected 
 *Keep in mind that this file was written for personal use and may not reflect everyone's habits. However, it was included in the project in order to provide insights and possibilities for customization.*
 #### **Insert armed away**:
 
-![insert_armed_away](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/89fa1411-465e-47a4-8034-4261180cac68)
+![insert_armed_away](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/2c53bd9d-35f3-46a9-ae48-17a45c619c20)
+
 
 When the global alarm is activated in the "armed away" mode, several actions are performed to ensure the safety and energy efficiency of the home. Here is how these actions work:
 - Turning off TVs and Android TV
@@ -321,7 +331,8 @@ When the global alarm is activated in the "armed away" mode, several actions are
 *Keep in mind that this file was written for personal use and may not reflect everyone's habits. However, it was included in the project in order to provide insights and possibilities for customization.*
 #### **Insert armed night**:
 
-![auto_night](https://github.com/Home-Assistant-Pro-Team/Allarme/assets/62516592/03fa2a36-f4b0-41b3-ab29-34239b3b538a)
+![auto_night](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/b0705019-0a1e-4206-800a-0b0cd90f7ef7)
+
 
 The "Insert armed night" file contains automations to manage the activation and deactivation of the night alarm. Here is how these automations work:
 - Automatic insert armed night alarm: 
