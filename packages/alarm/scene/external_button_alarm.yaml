@@ -1,7 +1,7 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Porda d'ingresso: &porta        binary_sensor.porta_ingresso
+        Porta d'ingresso:   &porta   binary_sensor.porta_ingresso
 # Occorre personalizzare il trigger in base al button e l'integrazione usata
 
 automation:

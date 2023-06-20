@@ -1,7 +1,7 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Porda d'ingresso: &porta        binary_sensor.porta_ingresso
+        Porta d'ingresso: &porta        binary_sensor.porta_ingresso
         Serratura:        &lock         lock.danalock
 # Nel pkg viene utilizzata una serratura danalock
 
