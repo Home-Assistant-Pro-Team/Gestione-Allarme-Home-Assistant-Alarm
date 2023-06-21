@@ -216,7 +216,7 @@ automation:
       event_type: state_changed
   condition:
     - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_globale_attiv', 'print_list_group') }}"
-    - "{{ state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme', 'print_list_group') is not none and trigger.event.data.entity_id not in state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme', 'print_list_group') }}"
+    - "{{ state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme', 'print_list_group') is none or trigger.event.data.entity_id not in state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme', 'print_list_group') }}"
     - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }}"
     - >-
       {% from 'alarm.jinja' import state_alarm %}
