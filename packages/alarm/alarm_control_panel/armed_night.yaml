@@ -25,29 +25,11 @@ template:
         state: "{{ trigger.event.data.sensor_select }}"
         attributes:
           print_list_group: >-
-              {% set option = trigger.event.data.sensor_select %}
-              {% set lists = this.attributes.print_list_group %}
-              {% if option == 'RESET' %}
-              {% else %}
-                {% for device in states.binary_sensor if device.name|lower == option|lower %}
-                  {% if device.entity_id in lists %}
-                    {{ lists|list|select('ne', device.entity_id)|list }}
-                  {% else %}
-                      {% set ns = namespace(entities=lists|list|select('ne', device.entity_id)|list) %}
-                        {{ ns.entities + [device.entity_id] }}
-                    {% endif %}
-                {% endfor %}
-              {% endif %}
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group) }}
           print_list_name: >-
-              {% set option = trigger.event.data.sensor_select %}
-              {% set lists = this.attributes.print_list_name %}
-                {% if option == 'RESET' %}
-                {% elif option in lists%}
-                  {{ lists|select('ne', option)|list }}
-                {% else %}
-                  {% set ns = namespace(entities=lists|select('ne', option)|list) %}
-                  {{ ns.entities + [option] }}
-                {% endif %}
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
   - trigger:
     - platform: event
