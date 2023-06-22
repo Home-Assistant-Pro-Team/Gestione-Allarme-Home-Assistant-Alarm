@@ -418,3 +418,11 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - È stato aggiunto il trigger 'pending' per l'invio di notifiche CCTV.
 - I singoli template sono stati sostituiti con macro per ridurre la quantità di codice.
 - È possibile escludere determinati sensori solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
+
+
+### **Supportaci**
+Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
+I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
+Grazie di cuore per il tuo sostegno!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
