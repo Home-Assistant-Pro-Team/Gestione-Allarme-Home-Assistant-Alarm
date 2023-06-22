@@ -406,3 +406,11 @@ This project is open for contributions. If you would like to provide feedback, r
 - The 'pending' trigger for sending CCTV notifications has been added.
 - Individual templates have been replaced with macros to reduce the amount of code.
 - It is possible to exclude certain sensors only for ARMED_AWAY mode during a single alarm input, either before triggering or after. This exclusion remains in effect until the alarm is deactivated.
+
+
+### **Support Us**
+If you enjoyed this project, we'd love to have your support. Even a simple coffee can make a difference.
+The funds raised will be used to purchase new material and carry out new projects. You can contribute by clicking the button below.
+Heartfelt thanks for your support!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
