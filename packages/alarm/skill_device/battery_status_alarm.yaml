@@ -1,8 +1,8 @@
 automation:
-- id: battery_low
-  alias: Batteria scarica dispositivi allarme
-  variables: 
-    battery: >
+  - id: battery_low
+    alias: Batteria scarica dispositivi allarme
+    variables:
+      battery: >
         {# lista di tutti i device_id scelti per allarme e sensori presenti nel group.include_alarm_entities (esempio utile per serratura) #}
         {% set id_power = (
             expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) +
@@ -22,18 +22,18 @@ automation:
             {{- d.name -}} {{ '(' + d.battery_level + '%)' }}
           {% -if not loop.last%},{%endif %}
         {% endfor %}
-  trigger:
-  - platform: time
-    at: "13:00:00"
-  condition: "{{ battery != 'Nessuna' }}"
-  action:
-    - alias: INVIA NOTIFICA
-      event: customizations
-      event_data:
-        types: notify_alarm
-        tag: state_battery_alarm
-        notify: stato_batterie
-        title: "Stato batterie allarme"
-        message: "{{ battery }}"
-        action1: None
-        action2: None
+    trigger:
+      - platform: time
+        at: "13:00:00"
+    condition: "{{ battery != 'Nessuna' }}"
+    action:
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          tag: state_battery_alarm
+          notify: stato_batterie
+          title: "Stato batterie allarme"
+          message: "{{ battery }}"
+          action1: None
+          action2: None

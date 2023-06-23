@@ -1,13 +1,13 @@
 template:
   - sensor:
-    - name: emergency_code
-      state: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['emergency_code'] }}
-    - name: alarm_code_attempts
-      state: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm_code_attempts'] }}
+      - name: emergency_code
+        state: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {{ (state_alarm()|from_json)['emergency_code'] }}
+      - name: alarm_code_attempts
+        state: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {{ (state_alarm()|from_json)['alarm_code_attempts'] }}
 
 input_boolean:
   code_service:

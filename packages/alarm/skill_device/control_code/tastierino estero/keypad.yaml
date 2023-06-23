@@ -2,25 +2,24 @@ input_boolean:
   allarme_scattato:
 
 template:
-
   - trigger:
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: state
-      entity_id: button.confirmed_code_alarm_keypad
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: state
+        entity_id: button.confirmed_code_alarm_keypad
     sensor:
       - name: counter_code_error_keypad
         state: >-
@@ -48,16 +47,15 @@ template:
                 {% from 'alarm.jinja' import state_alarm %}
                 {{ (state_alarm()|from_json)['alarm'] }}
           - choose:
-
               - alias: Disattiva allarme
                 conditions:
                   - "{{ states(alarm) != 'disarmed' }}"
                   - or:
-                    - "{{ states('sensor.keypad_code')|int(0) == code|int(0) }}"
-                    - >-
-                      {% from 'alarm.jinja' import state_alarm %}
-                      {% set code_service = (state_alarm()|from_json)['code_service'] %}
-                      {{ states('sensor.keypad_code')|int(0) == code_service|int(0) and is_state('input_boolean.code_service', 'on')}} 
+                      - "{{ states('sensor.keypad_code')|int(0) == code|int(0) }}"
+                      - >-
+                        {% from 'alarm.jinja' import state_alarm %}
+                        {% set code_service = (state_alarm()|from_json)['code_service'] %}
+                        {{ states('sensor.keypad_code')|int(0) == code_service|int(0) and is_state('input_boolean.code_service', 'on')}}
                 sequence:
                   - service: alarm_control_panel.alarm_disarm
                     target:
@@ -114,7 +112,7 @@ template:
                       notify: disattivato_con_codice_emergenza_solopush
                       critical: 1.0
                       tag: control_code
-                      message:  "{{ message }}"
+                      message: "{{ message }}"
                       for_each: >-
                         {% from 'personal.jinja' import persons %}
                         {% set output = namespace(state_home=[]) %}
@@ -124,7 +122,7 @@ template:
                           {% endfor %}
                           {{ output.state_home }}
                       action2: None
-                      
+
               - alias: Controlla tentativi codice errato
                 conditions:
                   - "{{ (states('sensor.counter_code_error_keypad')|int(0) > states('sensor.alarm_code_attempts')|int(0)) }}"
@@ -137,20 +135,20 @@ template:
                       tag: control_code
                       notify: tentativi_codici_superati
                       message: "{{ 'Allarme!!! Troppi tentativi di inserimento codice rilevati alle ore ' + (now().strftime('%H:%M'))|string }}"
-                      
+
 automation:
   - alias: "set code allarm button"
     id: 9ecc864d0389dce1cd6528e40a40ec81
     initial_state: true
     mode: single
     trigger:
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: state
-      entity_id: sensor.keypad_code
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: state
+        entity_id: sensor.keypad_code
     action:
       - if: "{{ trigger.entity_id == 'sensor.keypad_code' }}"
         then:
@@ -160,5 +158,5 @@ automation:
         else:
           - service: input_boolean.turn_on
             target:
-              entity_id: 
+              entity_id:
                 - input_boolean.allarme_scattato

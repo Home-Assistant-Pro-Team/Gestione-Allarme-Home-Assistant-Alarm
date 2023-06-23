@@ -13,29 +13,29 @@ input_number:
 
 template:
   - sensor:
-    - name: setting_code
-      state: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['code'] }}
+      - name: setting_code
+        state: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {{ (state_alarm()|from_json)['code'] }}
 
   - trigger:
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: state
-      entity_id: button.confirmed_code_alarm
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: state
+        entity_id: button.confirmed_code_alarm
     sensor:
       - name: counter_code_error
         state: >-
@@ -57,16 +57,16 @@ template:
               code: >-
                 {% from 'alarm.jinja' import state_alarm %}
                 {{ (state_alarm()|from_json)['code'] }}
-          - choose: 
+          - choose:
               - alias: Disattiva allarme
                 conditions:
                   - or:
-                    - "{{ states('input_number.control_code_alarm')|int(0) == code|int(0) }}"
-                    - >-
-                      {% from 'alarm.jinja' import state_alarm %}
-                      {% set code_service = (state_alarm()|from_json)['code_service'] %}
-                      {{ states('input_number.control_code_alarm')|int(0) == code_service|int(0) and is_state('input_boolean.code_service', 'on') }} 
-                sequence: 
+                      - "{{ states('input_number.control_code_alarm')|int(0) == code|int(0) }}"
+                      - >-
+                        {% from 'alarm.jinja' import state_alarm %}
+                        {% set code_service = (state_alarm()|from_json)['code_service'] %}
+                        {{ states('input_number.control_code_alarm')|int(0) == code_service|int(0) and is_state('input_boolean.code_service', 'on') }}
+                sequence:
                   - service: alarm_control_panel.alarm_disarm
                     target:
                       entity_id: "{{ alarm }}"
@@ -76,7 +76,7 @@ template:
               - alias: Codice di emergenza per disattivare allarme ed inviare notifica di pericolo
                 conditions:
                   - "{{ states('input_number.control_code_alarm')|int(0) == states('sensor.emergency_code')|int(0) }}"
-                sequence: 
+                sequence:
                   - alias: Evento creato per essere usato come trigger in altre automazioni
                     event: customizations
                     event_data:
@@ -94,7 +94,7 @@ template:
                     event_data:
                       types: notify_alarm
                       notify: disattivato_con_codice_emergenza_solovoip
-                      message:  "{{ message }}"
+                      message: "{{ message }}"
                       for_each: >-
                         {% from 'personal.jinja' import persons %}
                         {% set output = namespace(state_home=[]) %}
@@ -110,7 +110,7 @@ template:
                       notify: disattivato_con_codice_emergenza_solopush
                       critical: 1.0
                       tag: control_code
-                      message:  "{{ message }}"
+                      message: "{{ message }}"
                       for_each: >-
                         {% from 'personal.jinja' import persons %}
                         {% set output = namespace(state_home=[]) %}
@@ -121,7 +121,7 @@ template:
                           {{ output.state_home }}
                       action2: None
 
-              - alias: Controlla tentativi codice errato 
+              - alias: Controlla tentativi codice errato
                 conditions:
                   - "{{ (states('sensor.counter_code_error')|int(0) >= states('sensor.alarm_code_attempts')|int(0)) }}"
                 sequence:
@@ -136,7 +136,7 @@ template:
                       tag: control_code
                       notify: tentativi_codici_superati
                       message: "{{ 'Allarme!!! Troppi tentativi di inserimento codice rilevati alle ore ' + (now().strftime('%H:%M'))|string }}"
-          
+
           - service: script.control_code_alarm
 
 script:
@@ -144,7 +144,7 @@ script:
     alias: Inserisci codice allarme
     mode: restart
     variables:
-      n: 'canc'
+      n: "canc"
     sequence:
       - service: input_number.set_value
         data:

@@ -1,73 +1,71 @@
 automation:
-- alias: notify_alarm_push
-  id: notify_alarm_push
-  mode: queued
-  trigger:
-    - platform: event
-      event_type: customizations
-      event_data:
-        types: notify_alarm
-  action:
+  - alias: notify_alarm_push
+    id: notify_alarm_push
+    mode: queued
+    trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: notify_alarm
+    action:
       - or:
+          ###################################################################################
+          #  E' possibili selezionare le singole notifiche da abilitare
+          ###################################################################################
 
-###################################################################################
-#  E' possibili selezionare le singole notifiche da abilitare
-###################################################################################
+          # FILE: ARMED_AWAY
+          #- "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
+          - "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
+          - "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
+          - "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
+          - "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
 
-  # FILE: ARMED_AWAY
-        #- "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
-        - "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
-        - "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
-        - "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
-        - "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
+          # FILE: ARMED_NIGHT
+          #- "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
 
-  # FILE: ARMED_NIGHT  
-        #- "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
+          # FILE: CONTROL CODE
+          - "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
+          - "{{trigger.event.data.notify == 'disattivato_con_codice_emergenza_solopush'}}"
 
-  # FILE: CONTROL CODE
-        - "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
-        - "{{trigger.event.data.notify == 'disattivato_con_codice_emergenza_solopush'}}"
+          # FILE: GENERAL DETACHED
+          - "{{trigger.event.data.notify == 'detached_allarme_premuto_tasto'}}"
 
-  # FILE: GENERAL DETACHED
-        - "{{trigger.event.data.notify == 'detached_allarme_premuto_tasto'}}"
+          # FILE: CCTV ALARM
+          - "{{trigger.event.data.notify == 'cctv'}}"
 
-  # FILE: CCTV ALARM
-        - "{{trigger.event.data.notify == 'cctv'}}"
+          # FILE: JAMMER DETECT
+          - "{{trigger.event.data.notify == 'detect_jummer'}}"
 
-  # FILE: JAMMER DETECT
-        - "{{trigger.event.data.notify == 'detect_jummer'}}"
+          # FILE: PERSON
+          - "{{trigger.event.data.notify == 'persona_in_casa_tel_scarico'}}"
+          - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
+          - "{{trigger.event.data.notify == 'rientro_in_casa_con_allarme_notte'}}"
 
-  # FILE: PERSON
-        - "{{trigger.event.data.notify == 'persona_in_casa_tel_scarico'}}"
-        - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
-        - "{{trigger.event.data.notify == 'rientro_in_casa_con_allarme_notte'}}"
+          # FILE: ROUTER
+          - "{{trigger.event.data.notify == 'stato_router'}}"
 
-  # FILE: ROUTER        
-        - "{{trigger.event.data.notify == 'stato_router'}}"
-        
-  # FILE: UPS
-        - "{{trigger.event.data.notify == 'stato_ups'}}"
-  
-  # FILE: EXTERNAL BUTTON ALLARM
-        - "{{trigger.event.data.notify == 'allarme_non_inserito_porta_aperta'}}"
+          # FILE: UPS
+          - "{{trigger.event.data.notify == 'stato_ups'}}"
 
-  # FILE: BATTERY STATE
-        - "{{trigger.event.data.notify == 'stato_batterie'}}"
-  
-  # FILE: INSERT ARMED NIGHT
-        - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
-    
+          # FILE: EXTERNAL BUTTON ALLARM
+          - "{{trigger.event.data.notify == 'allarme_non_inserito_porta_aperta'}}"
 
-##############################################################
-#         DA QUESTO PUNTO NON MODIFICARE
-##############################################################
+          # FILE: BATTERY STATE
+          - "{{trigger.event.data.notify == 'stato_batterie'}}"
+
+          # FILE: INSERT ARMED NIGHT
+          - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+
+      ##############################################################
+      #         DA QUESTO PUNTO NON MODIFICARE
+      ##############################################################
 
       - alias: Invia notifica notifica push
         repeat:
@@ -83,135 +81,134 @@ automation:
               {{output.state_home}}
             {% endif %}
           sequence:
-              - service: "{{ repeat.item }}"
+            - service: "{{ repeat.item }}"
+              data:
+                message: "{{ trigger.event.data.message|default('Messaggio non impostato')}}"
+                title: "{{trigger.event.data.title |default('--ALLARME--')}}"
                 data:
-                  message: "{{ trigger.event.data.message|default('Messaggio non impostato')}}"
-                  title: "{{trigger.event.data.title |default('--ALLARME--')}}"
-                  data:
-                    image: "{{ trigger.event.data.image | default(None)}}"
-                    tag: "{{ trigger.event.data.tag | default(None)}}"
+                  image: "{{ trigger.event.data.image | default(None)}}"
+                  tag: "{{ trigger.event.data.tag | default(None)}}"
 
-                    # ios
-                    push:
-                      sound:
-                        name: "default"
-                        critical: "{{ 1 if trigger.event.data.critical is defined else 0 }}"
-                        volume: "{{ trigger.event.data.critical if trigger.event.data.critical is defined else 1.0}}"
-                    # android
-                    ttl: "{{ 0 if trigger.event.data.critical is defined else None}}"
-                    priority: "{{ 'high' if trigger.event.data.critical is defined else None}}"
-                    channel: "{{ 'alarm_stream' if trigger.event.data.critical is defined else None}}"
-                    notification_icon: "{{ trigger.event.data.notification_icon |default('mdi:alarm-light')}}"
-                    color: "{{ trigger.event.data.color |default('red')}}"
-                    sticky: "{{ trigger.event.data.sticky |default('true')}}"
+                  # ios
+                  push:
+                    sound:
+                      name: "default"
+                      critical: "{{ 1 if trigger.event.data.critical is defined else 0 }}"
+                      volume: "{{ trigger.event.data.critical if trigger.event.data.critical is defined else 1.0}}"
+                  # android
+                  ttl: "{{ 0 if trigger.event.data.critical is defined else None}}"
+                  priority: "{{ 'high' if trigger.event.data.critical is defined else None}}"
+                  channel: "{{ 'alarm_stream' if trigger.event.data.critical is defined else None}}"
+                  notification_icon: "{{ trigger.event.data.notification_icon |default('mdi:alarm-light')}}"
+                  color: "{{ trigger.event.data.color |default('red')}}"
+                  sticky: "{{ trigger.event.data.sticky |default('true')}}"
 
-                    actions:
-                      - action: "{{ trigger.event.data.action1 |default('disable_notify_alarm')}}"
-                        title: "{{ trigger.event.data.title1 |default('Disattiva')}}"
-                        uri: "{{ trigger.event.data.uri1 | default(None) }}"
-                      - action: "{{ trigger.event.data.action2 |default('triggered_notify_alarm')}}"
-                        title: "{{ trigger.event.data.title2 |default('Fai Scattare')}}" 
-                        uri: "{{ trigger.event.data.uri2 | default(None) }}"
+                  actions:
+                    - action: "{{ trigger.event.data.action1 |default('disable_notify_alarm')}}"
+                      title: "{{ trigger.event.data.title1 |default('Disattiva')}}"
+                      uri: "{{ trigger.event.data.uri1 | default(None) }}"
+                    - action: "{{ trigger.event.data.action2 |default('triggered_notify_alarm')}}"
+                      title: "{{ trigger.event.data.title2 |default('Fai Scattare')}}"
+                      uri: "{{ trigger.event.data.uri2 | default(None) }}"
 
-- alias: Action notify alarm
-  id: action_notify_alarm
-  initial_state: true
-  variables:
-    alarm: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['alarm']}}
-    code: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['code']}}
-  trigger:
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "not_home_battery"
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "armed_away"
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "ospite_off"
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "not_home_battery_ignore"
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "disable_notify_alarm"
-    - platform: event
-      event_type: mobile_app_notification_action
-      event_data:
-        action: "triggered_notify_alarm"
-  action:
-    - choose:
+  - alias: Action notify alarm
+    id: action_notify_alarm
+    initial_state: true
+    variables:
+      alarm: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['alarm']}}
+      code: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['code']}}
+    trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "not_home_battery"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "armed_away"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "ospite_off"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "not_home_battery_ignore"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "disable_notify_alarm"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "triggered_notify_alarm"
+    action:
+      - choose:
+          - alias: Modalità ospiti off
+            conditions:
+              - "{{trigger.event.data.action == 'ospite_off'}}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.modo_ospite
 
-      - alias: Modalità ospiti off
-        conditions:
-          - "{{trigger.event.data.action == 'ospite_off'}}" 
-        sequence:
-          - service: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.modo_ospite
+          - alias: Attiva allarme globale
+            conditions:
+              - "{{trigger.event.data.action == 'armed_away'}}"
+            sequence:
+              - service: alarm_control_panel.alarm_arm_away
+                target:
+                  entity_id: "{{ alarm}}"
 
-      - alias: Attiva allarme globale
-        conditions:
-          - "{{trigger.event.data.action == 'armed_away'}}" 
-        sequence:
-          - service: alarm_control_panel.alarm_arm_away
-            target:
-              entity_id: "{{ alarm}}"
+          - alias: Attiva allarme Notte
+            conditions:
+              - "{{trigger.event.data.action == 'armed_night'}}"
+            sequence:
+              - service: alarm_control_panel.alarm_arm_night
+                target:
+                  entity_id: "{{ alarm}}"
 
-      - alias: Attiva allarme Notte
-        conditions:
-          - "{{trigger.event.data.action == 'armed_night'}}" 
-        sequence:
-          - service: alarm_control_panel.alarm_arm_night
-            target:
-              entity_id: "{{ alarm}}"
+          - alias: Disattiva allarme
+            conditions:
+              - "{{trigger.event.data.action == 'disable_notify_alarm'}}"
+            sequence:
+              - service: alarm_control_panel.alarm_disarm
+                data:
+                  code: "{{ code }}"
+                target:
+                  entity_id: "{{ alarm}}"
 
-      - alias: Disattiva allarme 
-        conditions:
-          - "{{trigger.event.data.action == 'disable_notify_alarm'}}" 
-        sequence:
-          - service: alarm_control_panel.alarm_disarm
-            data:
-              code: "{{ code }}"
-            target:
-              entity_id: "{{ alarm}}"
+          - alias: Fai scattare allarme
+            conditions:
+              - "{{trigger.event.data.action == 'triggered_notify_alarm'}}"
+            sequence:
+              - service: alarm_control_panel.alarm_trigger
+                target:
+                  entity_id: "{{ alarm}}"
 
-      - alias: Fai scattare allarme 
-        conditions:
-          - "{{trigger.event.data.action == 'triggered_notify_alarm'}}" 
-        sequence:
-          - service: alarm_control_panel.alarm_trigger
-            target:
-              entity_id: "{{ alarm}}"
+          - alias: Disattiva notifica alert not_home_battery
+            conditions:
+              - "{{trigger.event.data.action == 'not_home_battery_ignore'}}"
+            sequence:
+              - service: alert.turn_off
+                target:
+                  entity_id: alert.not_home_battery
 
-      - alias: Disattiva notifica alert not_home_battery
-        conditions:
-          - "{{trigger.event.data.action == 'not_home_battery_ignore'}}" 
-        sequence: 
-          - service: alert.turn_off
-            target:
-              entity_id: alert.not_home_battery
-
-      - alias: Disattiva allarme per batteria scarica con persona fuori casa
-        conditions:
-          - "{{trigger.event.data.action == 'not_home_battery'}}" 
-        sequence:
-          - service: alarm_control_panel.alarm_disarm
-            data:
-              code: "{{ code }}"
-            target:
-              entity_id: "{{ alarm}}"
-          - alias: >
-              Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in on 
-            service: input_boolean.turn_on
-            target:
-              entity_id: input_boolean.not_home_battery_disarmed
+          - alias: Disattiva allarme per batteria scarica con persona fuori casa
+            conditions:
+              - "{{trigger.event.data.action == 'not_home_battery'}}"
+            sequence:
+              - service: alarm_control_panel.alarm_disarm
+                data:
+                  code: "{{ code }}"
+                target:
+                  entity_id: "{{ alarm}}"
+              - alias: >
+                  Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in on
+                service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.not_home_battery_disarmed

@@ -9,7 +9,7 @@ alarm_control_panel:
       {{ (state_alarm()|from_json)['code'] }}
     code_arm_required: false
 
-group:  
+group:
   exclude_alarm_entities:
     name: Entità da escludere per pkg allarme
     entities:
@@ -21,8 +21,8 @@ group:
       - light.luce_ingresso
       - cover.tenda_tavolo
       - cover.tenda_divano
-  include_alarm_entities: 
-    name: Entità da includere per pkg allarme 
+  include_alarm_entities:
+    name: Entità da includere per pkg allarme
     entities:
       #- lock.danalock
 
@@ -38,43 +38,43 @@ template:
   - sensor:
       - name: Stato allarme
         state: >-
-            {% from 'alarm.jinja' import state_alarm %}
-            {% set alarm = (state_alarm()|from_json)['alarm'] %}    
-            {{ 
-              {
-                'armed_away' : 'Allarme Globale',
-                'armed_night' : 'Allarme Notte',
-                'disarmed' : 'Disattivato',
-                'triggered': 'Scattato',
-                'pending': 'Scattato',
-                'arming': 'In Attivazione'
-              } 
-                [states(alarm)] 
-            }}
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}    
+          {{ 
+            {
+              'armed_away' : 'Allarme Globale',
+              'armed_night' : 'Allarme Notte',
+              'disarmed' : 'Disattivato',
+              'triggered': 'Scattato',
+              'pending': 'Scattato',
+              'arming': 'In Attivazione'
+            } 
+              [states(alarm)] 
+          }}
 
 automation:
-- alias: Stato Trigger Allarme
-  id: state_trigger_alarm
-  initial_state: true
-  mode: single
-  trigger:
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-    - platform: template
-      value_template: >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-  action:
-  - if: "{{ trigger.to_state.state == 'triggered' }}"
-    then:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.alarm_triggered_state
-    else:
-        - service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.alarm_triggered_state
+  - alias: Stato Trigger Allarme
+    id: state_trigger_alarm
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+    action:
+      - if: "{{ trigger.to_state.state == 'triggered' }}"
+        then:
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.alarm_triggered_state
+        else:
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.alarm_triggered_state

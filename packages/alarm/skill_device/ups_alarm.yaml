@@ -1,36 +1,36 @@
 # Occorre personalizzare il trigger. Nell'esempio è usato Tecnoware
 
 automation:
-- id: Avviso UPS Batteria
-  alias: Avviso UPS Batteria
-  trigger:
-  - platform: state
-    entity_id: sensor.tecnoware_status
-  condition:
-    - or:
-      - >-
-        {% from 'personal.jinja' import persons %}
-        {% set output = namespace(state_home=[]) %}
-          {% for d in persons()|from_json if states[d.person].state == 'home' %}
-            {% set output.state_home = output.state_home + [d['person'] ] %}
-          {% endfor %}
-        {{ output.state_home|count == 0 }}
-      - >-
-        {% from 'alarm.jinja' import state_alarm %}
-        {{ states[(state_alarm()|from_json)['alarm']].state != 'disarmed' }}
-  action:
-    - alias: INVIA NOTIFICA
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: stato_ups
-        tag: stato_ups
-        critical: 1.0
-        title: --UPS--
-        continue_voip: '. Premi asterisco per bloccare le prossime chiamate'
-        message: >-
-          {% if trigger.to_state.state == 'On Battery' and trigger.from_state.state == 'Online' %} 
-            {{ 'ATTENZIONE: Assenza di tensione elettrica in casa dalle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }} 
-          {% else %} 
-            {{ 'Fornitura elettrica ristabilita alle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }}
-          {% endif %}
+  - id: Avviso UPS Batteria
+    alias: Avviso UPS Batteria
+    trigger:
+      - platform: state
+        entity_id: sensor.tecnoware_status
+    condition:
+      - or:
+          - >-
+            {% from 'personal.jinja' import persons %}
+            {% set output = namespace(state_home=[]) %}
+              {% for d in persons()|from_json if states[d.person].state == 'home' %}
+                {% set output.state_home = output.state_home + [d['person'] ] %}
+              {% endfor %}
+            {{ output.state_home|count == 0 }}
+          - >-
+            {% from 'alarm.jinja' import state_alarm %}
+            {{ states[(state_alarm()|from_json)['alarm']].state != 'disarmed' }}
+    action:
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          notify: stato_ups
+          tag: stato_ups
+          critical: 1.0
+          title: --UPS--
+          continue_voip: ". Premi asterisco per bloccare le prossime chiamate"
+          message: >-
+            {% if trigger.to_state.state == 'On Battery' and trigger.from_state.state == 'Online' %} 
+              {{ 'ATTENZIONE: Assenza di tensione elettrica in casa dalle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }} 
+            {% else %} 
+              {{ 'Fornitura elettrica ristabilita alle ' + as_local(states[trigger.entity_id].last_changed).strftime('%H:%M') }}
+            {% endif %}

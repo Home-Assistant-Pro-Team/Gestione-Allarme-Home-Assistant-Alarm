@@ -1,70 +1,70 @@
 automation:
-- id: press_btn_alarm_trigger
-  alias: Notifica e trigger alarme alla pressione tasti
-  variables: 
-    alarm: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['alarm']}}
-  trigger:
-  - platform: event
-    event_type: shelly.click
-  - platform: event
-    event_type: state_changed 
-  condition: 
-  - "{{is_state(alarm,'armed_away') }}" 
-  - or:
-    - "{{ trigger.event.event_type == 'shelly.click'}}"
-    - and:
-      - >
-        {% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
-        {%- set last_time = states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined')| selectattr('attributes.device_class', 'eq','power')| map(attribute='last_changed')|max -%}
-        {%- set last_sensor = ((states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0]) -%}
-          {{-trigger.event.data.entity_id == last_sensor.entity_id and trigger.event.event_type == 'state_changed'-}}
-      - or: 
-        - "{{trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off'}}"
-        - "{{trigger.event.data.new_state.state == 'off' and trigger.event.data.old_state.state == 'on'}}"
-  action:
-    - alias: INVIA NOTIFICA
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: detached_allarme_premuto_tasto
-        critical: 1.0
-        message: >
-          {%- if trigger.event.event_type == 'state_changed' -%}
-            {{- ("Allarme!!! Propabile infrazione. E' stato premuto l'interrutture: ")+trigger.event.data.new_state.attributes.friendly_name +(' alle ore ')+ as_local(trigger.event.time_fired).strftime("%H:%M")-}}
-          {%-else-%}
-            {{- ("Allarme!!! Propabile infrazione. E' stato premuto l'interrutture: ")+ device_attr(trigger.event.data.device_id , 'name')+(' alle ore ')+ as_local(trigger.event.time_fired).strftime("%H:%M")-}}
-          {%-endif-%}
-    - service: alarm_control_panel.alarm_trigger
-      target:
-        entity_id: "{{alarm}}"
-        
-- id: detached_alarm  
-  alias: Detached alarm
-  mode: queued
-  trigger:
-  - platform: state
-    entity_id: input_boolean.alarm_triggered_state
-    from: 
-      - 'on'
-      - 'off'
-    to:
-      - 'on'
-      - 'off'
-  action:
-  - if: "{{trigger.to_state.state == 'on'}}"
-    then:
-      - alias: Attiva detached shelly
-        service: script.detached_on
-      - alias: Attiva detached ESPHome
-        service: switch.turn_on
+  - id: press_btn_alarm_trigger
+    alias: Notifica e trigger alarme alla pressione tasti
+    variables:
+      alarm: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['alarm']}}
+    trigger:
+      - platform: event
+        event_type: shelly.click
+      - platform: event
+        event_type: state_changed
+    condition:
+      - "{{is_state(alarm,'armed_away') }}"
+      - or:
+          - "{{ trigger.event.event_type == 'shelly.click'}}"
+          - and:
+              - >
+                {% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
+                {%- set last_time = states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined')| selectattr('attributes.device_class', 'eq','power')| map(attribute='last_changed')|max -%}
+                {%- set last_sensor = ((states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0]) -%}
+                  {{-trigger.event.data.entity_id == last_sensor.entity_id and trigger.event.event_type == 'state_changed'-}}
+              - or:
+                  - "{{trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off'}}"
+                  - "{{trigger.event.data.new_state.state == 'off' and trigger.event.data.old_state.state == 'on'}}"
+    action:
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          notify: detached_allarme_premuto_tasto
+          critical: 1.0
+          message: >
+            {%- if trigger.event.event_type == 'state_changed' -%}
+              {{- ("Allarme!!! Propabile infrazione. E' stato premuto l'interrutture: ")+trigger.event.data.new_state.attributes.friendly_name +(' alle ore ')+ as_local(trigger.event.time_fired).strftime("%H:%M")-}}
+            {%-else-%}
+              {{- ("Allarme!!! Propabile infrazione. E' stato premuto l'interrutture: ")+ device_attr(trigger.event.data.device_id , 'name')+(' alle ore ')+ as_local(trigger.event.time_fired).strftime("%H:%M")-}}
+            {%-endif-%}
+      - service: alarm_control_panel.alarm_trigger
         target:
-          entity_id: "{{integration_entities('esphome') | select('search', '^switch.detached') | list }}"
-    else:
-      - alias: Ripristina stato shelly
-        service: script.detached_off
-      - alias: Ripristina stato ESPHome
-        service: switch.turn_off
-        target:
-          entity_id: "{{integration_entities('esphome') | select('search', '^switch.detached') | list }}"
+          entity_id: "{{alarm}}"
+
+  - id: detached_alarm
+    alias: Detached alarm
+    mode: queued
+    trigger:
+      - platform: state
+        entity_id: input_boolean.alarm_triggered_state
+        from:
+          - "on"
+          - "off"
+        to:
+          - "on"
+          - "off"
+    action:
+      - if: "{{trigger.to_state.state == 'on'}}"
+        then:
+          - alias: Attiva detached shelly
+            service: script.detached_on
+          - alias: Attiva detached ESPHome
+            service: switch.turn_on
+            target:
+              entity_id: "{{integration_entities('esphome') | select('search', '^switch.detached') | list }}"
+        else:
+          - alias: Ripristina stato shelly
+            service: script.detached_off
+          - alias: Ripristina stato ESPHome
+            service: switch.turn_off
+            target:
+              entity_id: "{{integration_entities('esphome') | select('search', '^switch.detached') | list }}"

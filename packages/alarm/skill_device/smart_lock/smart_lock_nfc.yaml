@@ -1,41 +1,41 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Tag ESTERNO: &tag_esterno a4bfdd27-d226-43b1-xxxxxxxxxxxxxxxxxxx 
-        Telefono Marco: &marco 3d0fa85xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        Telefono Serena: &serena caf982xxxxxxxxxxxxxxxxxxxxx
-        Serratura: &lock lock.danalock
+      Tag ESTERNO: &tag_esterno a4bfdd27-d226-43b1-xxxxxxxxxxxxxxxxxxx
+      Telefono Marco: &marco 3d0fa85xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      Telefono Serena: &serena caf982xxxxxxxxxxxxxxxxxxxxx
+      Serratura: &lock lock.danalock
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-- alias: Gestione serratura con nfc
-  id: smart_lock_alarm_nfc
-  trigger:
-  - platform: event
-    event_type: tag_scanned
-    event_data:
-      device_id:  *serena
-      tag_id: *tag_esterno
-  - platform: event
-    event_type: tag_scanned
-    event_data:
-      device_id:  *marco
-      tag_id:  *tag_esterno
-  action:
-  - delay:
-      milliseconds: 500
-  - if:
-      - >
-        {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ states[alarm].state == 'disarmed' }}
-    then:
-      - service: lock.lock
-        target:
-          entity_id: *lock
-    else:
-      - service: lock.unlock
-        target:
-          entity_id: *lock
+  - alias: Gestione serratura con nfc
+    id: smart_lock_alarm_nfc
+    trigger:
+      - platform: event
+        event_type: tag_scanned
+        event_data:
+          device_id: *serena
+          tag_id: *tag_esterno
+      - platform: event
+        event_type: tag_scanned
+        event_data:
+          device_id: *marco
+          tag_id: *tag_esterno
+    action:
+      - delay:
+          milliseconds: 500
+      - if:
+          - >
+            {% from 'alarm.jinja' import state_alarm %}
+            {% set alarm = (state_alarm()|from_json)['alarm'] %}
+            {{ states[alarm].state == 'disarmed' }}
+        then:
+          - service: lock.lock
+            target:
+              entity_id: *lock
+        else:
+          - service: lock.unlock
+            target:
+              entity_id: *lock
