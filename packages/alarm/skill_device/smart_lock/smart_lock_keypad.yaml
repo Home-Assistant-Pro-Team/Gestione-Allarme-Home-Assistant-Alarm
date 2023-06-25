@@ -43,7 +43,7 @@ automation:
             - delay:
                 milliseconds: 500
             - if:
-                - "{{states(alarm) == 'disarmed' }}"
+                - "{{states(alarm) != 'disarmed' }}"
               then:
                 - wait_template: "{{ is_state(porta, 'off') and is_states(alarm,'armed_away') }}"
                 - service: lock.lock
