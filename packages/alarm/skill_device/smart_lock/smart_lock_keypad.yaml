@@ -31,7 +31,7 @@ automation:
                 {% from 'alarm.jinja' import state_alarm %}
                 {% set code_porta = (state_alarm()|from_json)['code_porta'] %}
                 {{ states(trigger.entity_id)|int(0) == code_porta|int(0) }}
-              - "{{ states(alarm) == 'disarmed' }}"
+              - "{{states(alarm) == 'disarmed' }}"
             sequence:
               - service: lock.unlock
                 target:
