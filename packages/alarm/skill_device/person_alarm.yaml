@@ -5,6 +5,9 @@ homeassistant:
       Lista familiari: &family
         - person.marco
         - person.serena
+      Lista notify per alert: &alert
+        - mobile_app_cellulare_marco
+        - mobile_app_samsung_s21
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
@@ -36,13 +39,7 @@ alert:
         - action: "not_home_battery_ignore"
           title: "Ignora"
     can_acknowledge: true
-    notifiers: >
-      {% from 'personal.jinja' import persons %}
-      {% set output = namespace(state_home=[]) %}
-        {% for dict in persons()|from_json %}
-          {% set output.state_home = output.state_home + ['notify.' + dict['notify']] %}
-        {% endfor %}
-      {{ output.state_home }}
+    notifiers: *alert
 
 template:
   - sensor:
