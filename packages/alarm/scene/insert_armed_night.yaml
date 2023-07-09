@@ -24,12 +24,12 @@ automation:
         platform: template
         id: alarm_phone
         value_template: >-
-          {% from 'personal.jinja' import persons %}
-          {% for d in persons()|from_json if states[d.person].state == 'home' and d['sveglia'] != 'none' and (states[d['sveglia']].state|as_datetime).strftime("%y%m%d%H%M") == utcnow().strftime("%y%m%d%H%M") %}
-            true
-          {% else %}
-            false
-          {% endfor %}
+          {% from 'personal.jinja' import persons %} 
+            {% for d in persons()|from_json if states[d.person].state == 'home' and states[d['sveglia']].state != 'unavailable' and d['sveglia'] != 'none' and (states[d['sveglia']].state|as_datetime).strftime("%y%m%d%H%M") == utcnow().strftime("%y%m%d%H%M") %} 
+              true 
+            {% else %} 
+              false 
+            {% endfor %}'
       - alias: Letti liberi per 5 minuti
         platform: template
         value_template: "{{ (states.binary_sensor|selectattr('entity_id', 'search', '.bedprecence_')|selectattr('state', 'eq', 'on')|list)|count == 0 }}"
@@ -109,7 +109,7 @@ automation:
               types: notify_alarm
               tag: state_alarm
               notify: modalita_ospiti_no_armed_night
-              critical: 0.5
+              #critical: 0.5
               message: La modalità ospite ha impedito l'inserimento dell'allarme notte.
               title1: Inserisci Notte
               action1: armed_night

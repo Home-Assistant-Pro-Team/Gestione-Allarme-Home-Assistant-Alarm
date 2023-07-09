@@ -18,9 +18,8 @@ automation:
           {% from 'alarm.jinja' import state_alarm %}
           {% set alarm = (state_alarm()|from_json)['alarm'] %}
           {{ is_state(alarm,'armed_away') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-
-      - condition: "{{ trigger.from_state.state == 'arming' }}"
     action:
+      - condition: "{{ trigger.from_state.state == 'arming' }}"
       - alias: Spegne i televisori
         service: media_player.turn_off
         target:

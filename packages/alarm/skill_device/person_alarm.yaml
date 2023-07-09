@@ -196,7 +196,7 @@ automation:
                     event: customizations
                     event_data:
                       types: notify_alarm
-                      critical: 1.0
+                      #critical: 1.0
                       tag: state_alarm
                       notify: modalita_ospiti_no_armed
                       message: La modalità ospite ha impedito l'inserimento dell'allarme fuori casa.
@@ -242,7 +242,7 @@ automation:
               {% endfor %}
               {{ output.state_home }}
           title: "--ALLARME RIENTRO--"
-          message: "{{ trigger.to_state.name + ', disattivo l'allarme notte preventivamente per il tuo rientro.' }}"
+          message: "{{ trigger.to_state.name|string + ', disattivo allarme notte preventivamente per il tuo rientro.' }}"
       - service: alarm_control_panel.alarm_disarm
         data:
           code: >-
