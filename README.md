@@ -1,4 +1,4 @@
-`- Version: 1.2 -`
+`- Version: 2.0 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -23,6 +23,8 @@ Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_
 	- [General alarm](#general-alarm)
 	- [Armed night](#armed-night-e-armed-away)
 	- [Armed away](#armed-night-e-armed-away)
+	- [Armed night zone](#armed-night-zone-e-armed-away-zone)
+	- [Armed away zone](#armed-night-zone-e-armed-away-zone)
 - [Skill device](#skill-device)
 	- [Notifiche](#notifiche)
 		- [Voip](#notifiche-voip)
@@ -438,7 +440,10 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - È possibile escludere determinati sensori solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
 - Aggiunta funzione zona alla card
 
-
+### Versione: 2.0
+- Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
+- Separate informazioni person e media_player 
+- 
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
