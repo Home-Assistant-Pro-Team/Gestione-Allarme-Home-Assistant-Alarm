@@ -29,7 +29,7 @@ automation:
               true 
             {% else %} 
               false 
-            {% endfor %}'
+            {% endfor %}
       - alias: Letti liberi per 5 minuti
         platform: template
         value_template: "{{ (states.binary_sensor|selectattr('entity_id', 'search', '.bedprecence_')|selectattr('state', 'eq', 'on')|list)|count == 0 }}"
