@@ -1,4 +1,4 @@
-`- Version: 1.1 -`
+`- Version: 2.0 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -23,6 +23,8 @@ Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_
 	- [General alarm](#general-alarm)
 	- [Armed night](#armed-night-e-armed-away)
 	- [Armed away](#armed-night-e-armed-away)
+	- [Armed night zone](#armed-night-zone-e-armed-away-zone)
+	- [Armed away zone](#armed-night-zone-e-armed-away-zone)
 - [Skill device](#skill-device)
 	- [Notifiche](#notifiche)
 		- [Voip](#notifiche-voip)
@@ -55,6 +57,7 @@ Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_
 	- [Insert armed night](#insert-armed-night)
 	- [External button alarm](#external-button-alarm)
 - [Card](#card)
+- [ChangeLog](#change-log)
 ### **Requisiti**
 - [HomeAssitant release 2023.4 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
 - [Cartella Package abilitata](https://www.home-assistant.io/docs/configuration/packages/)
@@ -69,84 +72,85 @@ homeassistant:
     package.node_anchors:
         Allarme: &alarm alarm_control_panel.home_alarm
 ```
-La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
+La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". 
 
+Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
+- **alarm.jinja**
+	In questo file occore inserire codici e l'entità allarme utilizzati
 
-```
-{% macro state_alarm() %}
-	{
+	```
+	{% macro state_alarm() %}
+		{
 
-{# Inserire la propria entità alarm_control_panel #}
-		"alarm": "alarm_control_panel.home_alarm",
+	{# Inserire la propria entità alarm_control_panel creata con file general_alarm #}
+			"alarm": "alarm_control_panel.home_alarm",
 
-{# Inserire il codice dell'allarme #}
-		"code": "1234",
+	{# Inserire il codice dell'allarme #}
+			"code": "1234",
 
-{# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
-{# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
-		"code_service" : "9877",
+	{# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
+	{# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
+			"code_service" : "9877",
 
-{# Inserire il codice per accedere alle impostazioni della card con allarme inserito #}
-		"setting_code": "1234",
+	{# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
+			"emergency_code": "5555",
 
-{# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
-		"emergency_code": "5555",
+	{# Numero di tentativi per digitare codice allarme #}
+			"alarm_code_attempts": "3",
 
-{# Numero di tentativi per digitare codice allarme #}
-		"alarm_code_attempts": "3",
+	{# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
+			"code_porta": "6666"
 
-{# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
-		"code_porta": "6666"
+		}
+	{% endmacro %}
 
-	}
-{% endmacro %}
-```
-Se non si desidera associare un numero di cellulare o un sensore di sveglia a una determinata persona, è sufficiente assegnare il valore "none" nella sezione corrispondente del file. Per aumentare o ridurre il numero di persone presenti nella lista di dictionary, è necessario fare attenzione alla sintassi Json.
-```
-{% macro person_alarm() %}
- [
- 	{
- 		"person": "person.marco",
- 		"battery": "sensor.cellulare_marco_battery_level",
-        "notify": "mobile_app_cellulare_marco",
-		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-		"cellulare": "331000000"
-  	},
-  	{
-  		"person": "person.serena",
-  		"battery": "sensor.cellulare_serena_livello_della_batteria",
-        "notify": "mobile_app_samsung_s21",
-		"sveglia": "none",
-		"cellulare": "335000000"
-  	},
-  	{
-  		"person": "person.example",
-  		"battery": "sensor.example_battery",
-        "notify": "mobile_app_example",
-		"sveglia": "none",
-		"cellulare": "none"
-  	}
- ]
-{% endmacro%}
-```
-Assicurati di elencare correttamente i media player alexa e tts (es.google) selezionati per le notifiche, seguendo attentamente la sintassi corretta.
-```
-{% macro media_player_alarm(type) %}
-	{% set list_media = 
-		[
-			'media_player.camera',
-			'media_player.studio',
-			'media_player.googlehome_cameretta',
-			'media_player.googlehome_bagno',
-			'media_player.googlehome_cucina',
-			'media_player.googlehome_salone'
-		]
-	%}
-	{% for integrations in integration_entities(type) if integrations in list_media %}
-		{{integrations}}
-	{% endfor %}
-{% endmacro %}
-```
+- **personal.jinja**
+
+	Questo file sarà utilizzato per altri progetti all'interno di questo repository GitHub. Nel file, impostiamo dati personali che verranno utilizzati in tutti i progetti. È sufficiente inserire le proprie entità rispettando l'indentazione JSON.
+
+	Vediamo come personalizzarlo. Anche se non tutte le informazioni sono necessarie per questo pacchetto, è consigliabile compilare tutti i campi per poter sfruttarlo appieno in altri progetti.
+
+	In questa sezione, definiamo le entità e i sensori per ogni persona. Se non si desidera associare un numero di cellulare o un sensore di sveglia a una persona specifica, è sufficiente assegnare il valore "none" nella sezione corrispondente del file. Per aggiungere o rimuovere persone dalla lista di dizionari, è necessario prestare attenzione alla sintassi JSON.
+
+	```
+	{% macro persons() %}
+	[
+		{
+			"person": "person.marco",
+			"battery": "sensor.cellulare_marco_battery_level",
+			"notify": "mobile_app_cellulare_marco",
+			"sveglia": "sensor.cellulare_marco_prossimo_allarme",
+			"cellulare": "331000000"
+		},
+		{
+			"person": "person.serena",
+			"battery": "sensor.cellulare_serena_livello_della_batteria",
+			"notify": "mobile_app_samsung_s21",
+			"sveglia": "none",
+			"cellulare": "335000000"
+		}
+	]
+	{% endmacro%}
+	```
+	In questa sezione, elencheremo i nostri media player utilizzati per le notifiche. Assicurati di inserire correttamente i media player selezionati per le notifiche Alexa e TTS (ad esempio, Google), seguendo attentamente la sintassi corretta.
+
+	```
+	{% macro media_players(type) %}
+		{% set list_media = 
+			[
+				'media_player.camera',
+				'media_player.studio',
+				'media_player.googlehome_cameretta',
+				'media_player.googlehome_bagno',
+				'media_player.googlehome_cucina',
+				'media_player.googlehome_salone'
+			]
+		%}
+		{% for integrations in integration_entities(type) if integrations in list_media %}
+			{{ integrations }}
+		{% endfor %}
+	{% endmacro %}
+	```
 ## **Alarm control panel**:
 I file principali si trovano nella cartella *alarm_control_panel*
 #### **General alarm**:
@@ -154,6 +158,7 @@ I file principali si trovano nella cartella *alarm_control_panel*
 - Viene  creato l'*input_boolean.alarm_triggered_state*:	
 	-  Questo input viene utilizzato per determinare se l'allarme è scattato da quando è stato inserito. 
 	-  Lo stato di questo boolean viene utilizzato in altri file del pacchetto.
+- Viene creato il sensore delle zone con i relativi sensori associati.
 - Viene creato un boolean per gestire la modalità ospite
 - Vengono creati due gruppi: **exclude_alarm_entities ed include_alarm_entities**, che permettono di includere o escludere entità che non sono necessarie per il pacchetto o che non vengono rilevate automaticamente. Le entità sono utilizzate nei seguenti file:
 	- STATO BATTERIA DISPOSITIVI file: "battery_status_alarm": 
@@ -173,13 +178,13 @@ I file principali si trovano nella cartella *alarm_control_panel*
 		- E' possibile **solo** escludere i sensori 
 		- E' possibile escludere cover che non si vogliono utilizzare nel pacchetto per esempio tende da sole.
 #### **Armed night e Armed away**:
-![armed_night](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/0bce8abb-aa8e-4989-be44-6cb093eb11a6)
-
+![entity_alarm](examples/entity_alarm.png)
 
 - Viene creato un template select che permette di avere la lista di tutti i sensori utilizzati per il funzionamento dell'allarme, filtrati per dominio e device_class.
 - Quando si seleziona un sensore dal select, viene automaticamente aggiunto alla lista dei sensori abilitati per allarme, se già presente, viene rimosso.
 - Quando lo stato dell'allarme passa a ARMED_NIGHT o ARMED_AWAY, i sensori con device_class: window (finestre) che si trovano nello stato "on" (aperte) vengono esclusi dal trigger (non vengono rimossi dalla lista).
-- Quando una finestra che era stata precedentemente esclusa dal funzionamento viene chiusa e trascorrono 10 minuti, viene automaticamente reinserita tra i sensori per il controllo dell'allarme, ma solo durante lo stato ARMED_NIGHT.
+- Quando una finestra che era stata precedentemente esclusa dal funzionamento viene chiusa e trascorrono 10 minuti, viene automaticamente reinserita tra i sensori per il controllo dell'allarme, ma SOLO durante lo stato ARMED_NIGHT.
+- È possibile escludere dai sensori selezionati solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
 - L'automazione si occupa di tutto: quando un sensore passa allo stato "on", viene automaticamente attivato il trigger corrispondente.
 - È possibile escludere o includere singoli sensori anche con allarme in corso dall'interfaccia utente (UI).
 - Nelle notifiche, viene sempre identificato l'ultimo sensore che ha effettivamente cambiato stato, indicando l'orario in cui ciò è avvenuto.
@@ -187,13 +192,29 @@ I file principali si trovano nella cartella *alarm_control_panel*
 
 *NB Assicurati di aver impostato correttamente l'attributo **device_class: window** sui dispositivi utilizzati per le finestre. Se non è impostato correttamente, lo stato della finestra non verrà rilevato correttamente e non verrà esclusa dal funzionamento dell'allarme se viene lasciata aperta ma verrà trattata come un sensore generico dell'allarme.*
 
+#### **Armed night zone e Armed away zone**:
+
+Il comportamento dei file è identico a quello descritto in precedenza, tuttavia l'abilitazione riguarda le zone abilitate anziché i singoli sensori.
+
+Le zone possono essere create tramite l'opzione 'Imposta zone' nelle impostazioni.
+
+NB: Per eliminare le zone precedentemente create, è sufficiente inserire la parola 'RESET' come se si stesse creando una nuova zona."
+
+Le zone vengono create da setting --> imposta zone
+NB: Per cancellare le zone le creata occorre inserire la parola RESET come se fosse una nuova zona
+
+![setting_zone_alarm](examples/setting_zone_alarm.png)
+
+Le zone abilitate vengono scelte dal pulsante sensor global/sensor night
+
+![zone_alarm](examples/zone_alarm.png)
+
 ## **Skill device**
 Nella cartella **skill_device** sono presenti diversi file che possono essere utilizzati a seconda delle tue esigenze personali. Tuttavia, nessuno di questi file è indispensabile per il corretto funzionamento dell'allarme.
 
 #### **Notifiche**:
 
-![notify](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/e93bd4bd-0d83-4eb1-8240-c5d68cd07058)
-
+![notify](examples/notify.png)
 
 Per rendere più semplice la scelta delle notifiche in base ai dispositivi utilizzati, stiamo introducendo un sistema centralizzato. Questo sistema permette di personalizzare le notifiche attivate su diverse tipologie di dispositivi, come push, chiamata VoIP e media player. È importante precisare che i file relativi a questa scelta non sono indispensabili per il funzionamento generale.
   - #### **Notifiche voip**: 
@@ -232,14 +253,13 @@ Nella cartella sono presenti diversi file:
  - #### **General code**:
   	Questo file deve essere sempre caricato indipendentemente dal tipo di tastierino utilizzato. Fornisce funzionalità di base per la gestione del codice di accesso.
  - #### **With card**: 
- 	Questo file può essere utilizzato solo con la card fornita nel pacchetto. Durante l'utilizzo di questo file, è importante tenere a mente alcune considerazioni importanti. Per esempio, i codici dell'allarme, del codice di emergenza e setting_code non possono iniziare con lo zero. Il file with_card esegue un controllo per i tentativi di inserimento del codice disarmo. Nel caso in cui il numero massimo di tentativi di codice errati venga superato, l'allarme passa allo stato di scattato ed iniviata una notifica. È anche possibile impostare un codice di emergenza che consente di disattivare l'allarme e inviare una notifica di allerta (voip e push) alle persone che NON si trovano in casa. Durante la sequenza, viene creato un evento per essere utilizzato come trigger in altre automazioni per esempio invio snapshoot telecamere. E' importante notare che utilizzando il codice setting_code, impostato nel file alarm.jinja, rende possibile modificare le impostazioni dalla card anche quando l'allarme è attivo e rimuovere il lock. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
+ 	Questo file può essere utilizzato solo con la card fornita nel pacchetto. Durante l'utilizzo di questo file, è importante tenere a mente alcune considerazioni importanti. Per esempio, il codice dell'allarme ed il codice di emergenza possono iniziare con lo zero. Il file with_card esegue un controllo per i tentativi di inserimento del codice disarmo. Nel caso in cui il numero massimo di tentativi di codice errati venga superato, l'allarme passa allo stato di scattato ed iniviata una notifica. È anche possibile impostare un codice di emergenza che consente di disattivare l'allarme e inviare una notifica di allerta (voip e push) alle persone che NON si trovano in casa. Durante la sequenza, viene creato un evento per essere utilizzato come trigger in altre automazioni per esempio invio snapshoot telecamere. E' importante notare che utilizzando il codice dell'allarme, rende possibile modificare le impostazioni dalla card anche quando l'allarme è attivo e rimuovere il lock. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
 
  - #### **Keypad / tastierino esterno**: 
  	Il pacchetto include un file readme e un esempio di utilizzo con 3x4 12 Key Matrixe ed EspHome. Il file keypad.yaml è essenziale per il corretto funzionamento dell'allarme. Digitando il codice di sblocco, è possibile attivare l'allarme globale e disattivare sia l'allarme globale che quello notturno. Il sistema effettua un controllo sui tentativi di inserimento del codice errato e invia una notifica se si supera il limite consentito. E' possibile definire un Codice di emergenza, che consente di disattivare l'allarme e inviare una notifica di pericolo (voip e push) solo alle persone che NON si trovano in casa.  Durante la sequenza, viene creato un evento che può essere utilizzato come trigger in altre automazioni, ad esempio per l'invio di snapshot delle telecamere in caso di emergenza. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
 #### **Detect jummer**:
 
-![jummer](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/717e8978-b863-4b27-9c28-cc0d404d4fd1)
-
+![jummer](examples/jummer.png)
 
 Si basa sul rilevamento dei dispositivi che passano allo stato offline.
 
@@ -263,8 +283,7 @@ Nella cartella sono presenti tre file che descrivono come utilizzare una serratu
  	E' possibile gestire l'apertura o la chiusura della serratura utilizzando un codice specifico e attivare o disattivare l'allarme tramite il codice dell'allarme.
 #### **Person**
 
-![person](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/8f4b14e1-6d78-4e25-bed8-90add8c397c0)
-
+![person](examples/person.png)
 
 Per utilizzare questo file, è necessario personalizzare gli anchor.
 - Il sistema è in grado di attivare e disattivare l'allarme globale in base alla presenza di persone in casa, sempre che la modalità ospite non sia attiva. 
@@ -275,8 +294,7 @@ Per utilizzare questo file, è necessario personalizzare gli anchor.
 *Per garantire un corretto funzionamento del tracciamento delle persone, ti consigliamo vivamente di leggere l'articolo scritto da [Henrik Sozzi](https://henriksozzi.it/2021/05/posizione-delle-persone-con-home-assistant/). Questo articolo fornisce una spiegazione esaustiva sul funzionamento e la configurazione del sistema di tracciamento. Leggendolo, sarai in grado di ottenere una comprensione approfondita su come impostare correttamente il tracciamento e raggiungere i risultati desiderati.*
 #### **Detached**
 
-![detached](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/69e8fa6c-5e62-492e-8776-ecd489aac1a1)
-
+![detached](examples/detached.png)
 
   - #### **Detached shelly**: 
   	Questo file serve per attivare la funzione "detached" su tutti i dispositivi Shelly che funzionano con l'integrazione ufficiale di Home Assistant. La funzione "detached" consente di disattivare i tasti fisici dei dispositivi, ma di continuare a utilizzare i relè tramite Home Assistant. Il file funziona in questo modo: quando eseguiamo lo script "detached_on", viene prima controllato che lo stesso script non sia stato eseguito due volte consecutive. Successivamente, viene salvato lo stato attuale dei pulsanti in un sensore, dopodiché tutti i dispositivi vengono impostati in modalità "detached". Quando invece eseguiamo lo script "detached_off", viene controllato che lo stesso script non sia stato eseguito due volte consecutive. Successivamente, vengono reimpostati tutti i dispositivi con le impostazioni in uso prima dell'attivazione della funzione "detached".
@@ -287,20 +305,17 @@ Per utilizzare questo file, è necessario personalizzare gli anchor.
   	- Detached alarm: Quando l'allarme scatta, la funzione permette di disabilitare i tasti fisici di tutta la casa. Inoltre, quando l'allarme torna in modalità "disarmed" ma precedentemente l'allarme era scattato, l'automazione ripristina le impostazioni dei tasti allo stato precedente. La funzione "Detached alarm" è compatibile con i dispositivi Shelly che hanno un'integrazione ufficiale (detached_shelly.yaml) e con i dispositivi Esphome che utilizzano il firmware di esempio (firmware_esphome).
 #### **UPS alarm**:
 
-![ups](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/bd178dfb-9878-4050-96bf-c47ad7bf9167)
-
+![ups](examples/ups.png)
 
 Nel sistema, è stato utilizzato un Tecnoware1100. Attraverso questo dispositivo, ricevo una notifica nel caso in cui si verifichi un'interruzione di corrente e una notifica quando la corrente viene ripristinata.
 #### **Router alarm**
 
-![router](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/92835a26-727f-4440-b47d-51ace54fc405)
-
+![router](examples/router.png)
 
 Se stai utilizzando un router Fritz!Box 6890 con fallback LTE, riceverai una notifica quando la connessione a Internet viene interrotta o ripristinata. Questo dispositivo è in grado di commutare automaticamente sulla connessione LTE in caso di interruzione della connessione principale e invierà una notifica per informarti dello stato della connessione. In questo modo, sarai consapevole delle interruzioni di Internet e dei ripristini.
 #### **CCTV**:
 
-![cctv](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/f1c5e14e-40c3-40b3-8c5f-314848784e79)
-
+![cctv](examples/cctv.png)
 
 Le telecamere vanno inserite nella lista degli anchor. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
 
@@ -308,8 +323,7 @@ Le telecamere vanno inserite nella lista degli anchor. Quando scatta l'allarme v
 ## **Scene**
 #### **Action alarm**:
 
-![triggered](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/1b985e51-a72d-423c-8415-3daf01da399a)
-
+![triggered](examples/triggered.png)
 
 Le azioni della casa vengono programmate per essere eseguite quando viene rilevata un'infrazione con l'allarme inserito. Ecco come funzionano le azioni in base alle diverse fasi:
 - Infrazione rilevata (Pending): 
@@ -329,8 +343,7 @@ Le azioni della casa vengono programmate per essere eseguite quando viene rileva
 *Si tenga presente che questo file è stato scritto per un'utilizzo personale e potrebbe non rispecchiare le abitudini di tutti. Tuttavia, è stato incluso nel progetto al fine di fornire spunti e possibilità di personalizzazione.*
 #### **Insert armed away**:
 
-![insert_armed_away](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/42e04cb9-a631-4633-92c5-0f36e3446d2e)
-
+![insert_armed_away](examples/insert_armed_away.png)
 
 Quando l'allarme globale viene attivato nella modalità "armed away", vengono eseguite diverse azioni per garantire la sicurezza e l'efficienza energetica della casa. Ecco come funzionano queste azioni:
 - Spegnimento televisori e Android TV
@@ -342,15 +355,14 @@ Quando l'allarme globale viene attivato nella modalità "armed away", vengono es
 
 #### **Insert armed night**:
 
-![auto_night](https://github.com/Home-Assistant-Pro-Team/Gestione-Allarme-Home-Assistant-Alarm/assets/62516592/d70a9ba7-9d53-4537-8325-86c386fbf2d6)
-
+![auto_night](examples/auto_night.png)
 
 Il file "Insert armed night" contiene le automazioni per gestire l'attivazione e la disattivazione dell'allarme notturno. Ecco come funzionano queste automazioni:
 - Inserimento automatico dell'allarme notte: 
 
 	L'allarme viene attivato in determinate condizioni: 
 	
-	- se tutti i letti risultano occupati utilizzando i sensori di presenza [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) collegati ai sensori di allagamento Aqara. 
+	- se tutti i letti risultano occupati utilizzando i sensori di presenza [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) collegati ai sensori di allagamento Aqara. 
 	- L'allarme viene attivato solo se l'ultima stanza rilevata è la camera da letto o la cameretta.
 	- Entrambe queste condizioni devono essere soddisfatte per almeno 5 minuti consecutivi.
 	- L'attivazione dell'allarme notte avviene solo durante l'intervallo di tempo compreso tra le 21:00 e le 03:00, a meno che la modalità ospite non sia attiva.
@@ -376,7 +388,7 @@ Tuttavia, non vengono interrotte le notifiche in riproduzione su Alexa o su altr
 #### **External button alarm**:
 Nel seguente scenario, desideriamo sfruttare un pulsante (ad esempio, un pulsante Aqara) per gestire l'allarme. L'obiettivo è consentire di disattivare rapidamente l'allarme notturno quando siamo a casa e di riattivarlo una volta usciti. Questo può essere utile per coloro che lavorano di notte o presto al mattino, ma vogliono comunque garantire la sicurezza della famiglia durante il sonno.
 
-L'automazione associata al pulsante e con l'allarme notturno attivo funziona nel seguente modo: al momento della pressione del pulsante, l'allarme viene disattivato immediatamente. Successivamente, l'automazione aspetta che la porta venga chiusa e quindi riattiva l'allarme. Se nel momento della disattivazione dell'allarme erano presenti più persone in casa e i sensori [bedpresence](https://github.com/marco-hacs/Configurable-Zigbee-bed-presence-occupancy-sensor) rilevano ancora qualcuno a letto, l'allarme notturno viene riattivato; in caso contrario, l'allarme globale viene riattivato. Nel caso in cui trascorra un minuto senza che la porta venga chiusa, l'allarme notturno viene riattivato, mentre viene inviata una notifica per avvertire che la porta è rimasta aperta.
+L'automazione associata al pulsante e con l'allarme notturno attivo funziona nel seguente modo: al momento della pressione del pulsante, l'allarme viene disattivato immediatamente. Successivamente, l'automazione aspetta che la porta venga chiusa e quindi riattiva l'allarme. Se nel momento della disattivazione dell'allarme erano presenti più persone in casa e i sensori [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence) rilevano ancora qualcuno a letto, l'allarme notturno viene riattivato; in caso contrario, l'allarme globale viene riattivato. Nel caso in cui trascorra un minuto senza che la porta venga chiusa, l'allarme notturno viene riattivato, mentre viene inviata una notifica per avvertire che la porta è rimasta aperta.
 
 L'automazione viene eseguita se la modalità ospiti non è attiva.
 
@@ -419,7 +431,19 @@ views:
 ### **Contributi**
 Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un bug o richiedere una nuova funzionalità, ti invitiamo a creare una issue sul repository.
 
+## Change Log
 
+### Versione: 1.2
+- FILE PERSONAL: I dati personali sono stati separati in un nuovo file nella cartella 'custom_templates' per le notifiche, consentendo un utilizzo unico in tutti i progetti del GitHub.
+- È stato aggiunto il trigger 'pending' per l'invio di notifiche CCTV.
+- I singoli template sono stati sostituiti con macro per ridurre la quantità di codice.
+- È possibile escludere determinati sensori solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
+- Aggiunta funzione zona alla card
+
+### Versione: 2.0
+- Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
+- Separate informazioni person e media_player 
+- 
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
