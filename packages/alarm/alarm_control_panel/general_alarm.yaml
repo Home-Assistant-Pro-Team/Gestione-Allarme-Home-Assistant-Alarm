@@ -6,21 +6,23 @@ alarm_control_panel:
     trigger_time: 120
     code_template: >
       {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['code']}}
+      {{ (state_alarm()|from_json)['code'] }}
     code_arm_required: false
 
-group:  
+group:
   exclude_alarm_entities:
     name: Entità da escludere per pkg allarme
     entities:
       - binary_sensor.frigorifero_door_open
       - binary_sensor.bedprecence_mattia
+      - binary_sensor.bedprecence_marco
+      - binary_sensor.bedprecence_serena
       - sensor.miflora_signal_strength
       - light.luce_ingresso
       - cover.tenda_tavolo
       - cover.tenda_divano
-  include_alarm_entities: 
-    name: Entità da includere per pkg allarme 
+  include_alarm_entities:
+    name: Entità da includere per pkg allarme
     entities:
       #- lock.danalock
 
@@ -32,47 +34,178 @@ input_boolean:
   modo_ospite:
     name: Modalità ospite
 
+input_select:
+  setting_zone_entity:
+    name: Modalità allarme
+    options:
+      - Zone
+      - Dispositivi
+
 template:
   - sensor:
       - name: Stato allarme
-        state: >
-            {% from 'alarm.jinja' import state_alarm %}
-            {% set alarm = (state_alarm()|from_json)['alarm'] %}    
-            {{ 
-              {
-                'armed_away' : 'Allarme Globale',
-                'armed_night' : 'Allarme Notte',
-                'disarmed' : 'Disattivato',
-                'triggered': 'Scattato',
-                'pending': 'Scattato',
-                'arming': 'In Attivazione'
-              } 
-                [states(alarm)] 
-            }}
+        state: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}    
+          {{ 
+            { 
+              'armed_away' : 'Allarme Globale',
+              'armed_night' : 'Allarme Notte',
+              'disarmed' : 'Disattivato',
+              'triggered': 'Scattato',
+              'pending': 'Scattato',
+              'arming': 'In Attivazione'
+            } 
+              [states(alarm)] 
+          }}
+
+  - button:
+      - name: confirmed_zone_alarm
+        press:
+          - event: customizations
+            event_data:
+              types: setting_name_zone_alarm
+              zone_select: "{{ states('input_text.setting_name_zone_alarm')|title }}"
+          - if: "{{ states('input_text.setting_name_zone_alarm')|title == 'Reset'}}"
+            then:
+              - service: select.select_option
+                data:
+                  option: RESET
+                target:
+                  entity_id:
+                    - select.aggiungi_o_rimuovi_sensori_alle_zone
+                    - select.seleziona_attivazione_zona_allarme_away
+                    - select.seleziona_attivazione_zona_allarme_night
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: setting_name_zone_alarm
+    sensor:
+      - name: Lista zone alarm setting
+        state: "{{ trigger.event.data.zone_select }}"
+        attributes:
+          print_list_group: >-
+            {% set option = trigger.event.data.zone_select|string %}
+            {% set lists = this.attributes.print_list_group %}
+            {% if option == 'Reset' %}
+            {% elif option|length > 0 and not option in lists %}
+              {{ lists|list + [option] }}
+            {% else %}
+              {{ lists }}
+            {% endif %}
+
+  - select:
+      - name: "Seleziona zona allarme setting"
+        state: "{{ states('input_text.select_zone_alarm')|title }}"
+        options: "{{ state_attr('sensor.lista_zone_alarm_setting', 'print_list_group')}}"
+        select_option:
+          - service: input_text.set_value
+            data:
+              value: "{{ option }}"
+            target:
+              entity_id: input_text.select_zone_alarm
+
+  - select:
+      - name: "Aggiungi o rimuovi sensori alle zone"
+        state: "{{ states('sensor.lista_sensori_allarme_a_zone') }}"
+        options: >-
+          {% from 'alarm.jinja' import select_alarm %}
+          {{ select_alarm() }}
+        select_option:
+          - event: customizations
+            event_data:
+              types: armed_zone_sensor
+              sensor_select: "{{ option }}"
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: armed_zone_sensor
+    sensor:
+      - name: Lista sensori allarme per zone
+        state: "{{ 'test' }}"
+        attributes:
+          zona0: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[0]}}"
+          sensor_zona0: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona0, trigger.event.data.sensor_select, 0) }}
+
+          zona1: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[1]}}"
+          sensor_zona1: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona1, trigger.event.data.sensor_select, 1) }}
+
+          zona2: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[2]}}"
+          sensor_zona2: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona2, trigger.event.data.sensor_select, 2) }}
+
+          zona3: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[3]}}"
+          sensor_zona3: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona3, trigger.event.data.sensor_select, 3) }}
+
+          zona4: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[4]}}"
+          sensor_zona4: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona4, trigger.event.data.sensor_select, 4) }}
+
+          zona5: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[5]}}"
+          sensor_zona5: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona5, trigger.event.data.sensor_select, 5) }}
+
+          zona6: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[6]}}"
+          sensor_zona6: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona6, trigger.event.data.sensor_select, 6) }}
+
+          zona7: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[7]}}"
+          sensor_zona7: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona7, trigger.event.data.sensor_select, 7) }}
+
+          zona8: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[8]}}"
+          sensor_zona8: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona8, trigger.event.data.sensor_select, 8) }}
+
+          zona9: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[9]}}"
+          sensor_zona9: >-
+            {% from 'alarm.jinja' import zone_alarm %}
+            {{ zone_alarm(this.attributes.sensor_zona9, trigger.event.data.sensor_select, 9) }}
+
+input_text:
+  setting_name_zone_alarm:
+    name: Assegna nome a zona
+  select_zone_alarm:
 
 automation:
-- alias: Stato Trigger Allarme
-  id: state_trigger_alarm
-  initial_state: true
-  mode: single
-  trigger:
-    - platform: template
-      value_template: >
-        {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'triggered')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
-    - platform: template
-      value_template: >
-        {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'disarmed')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
-  action:
-  - if: "{{trigger.to_state.state == 'triggered'}}"
-    then:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.alarm_triggered_state
-    else:
-        - service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.alarm_triggered_state
+  - alias: Stato Trigger Allarme
+    id: state_trigger_alarm
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+    action:
+      - if: "{{ trigger.to_state.state == 'triggered' }}"
+        then:
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.alarm_triggered_state
+        else:
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.alarm_triggered_state

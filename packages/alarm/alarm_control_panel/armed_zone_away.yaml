@@ -1,0 +1,256 @@
+template:
+  - select:
+      - name: "Aggiungi o rimuvi zone allarme globale"
+        state: "{{ '' }}"
+        options: "{{ ['RESET'] + state_attr('sensor.lista_zone_alarm_setting', 'print_list_group')|list }}"
+        select_option:
+          - event: customizations
+            event_data:
+              types: name_zone_alarm_active_away
+              sensor_select: "{{ option }}"
+          - delay:
+              milliseconds: 250
+          - event: customizations
+            event_data:
+              types: update_armed_away_zone
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: name_zone_alarm_active_away
+    sensor:
+      - name: Lista zone alarm attive away
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% set option = trigger.event.data.sensor_select|string %}
+            {% set lists = this.attributes.print_list_group %}
+            {% if option == 'RESET' %}
+            {% elif option in lists %}
+              {{ lists|list|select('ne', option)|list }}
+            {% else %}
+              {{ lists|list + [option] }}
+            {% endif %}
+
+  - sensor:
+      - name: Lista sensori allarme zone away
+        state: "{{ 'Lista' }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import zone_sensor %}
+            {{ zone_sensor('sensor.lista_zone_alarm_attive_away') }}
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: armed_zone_sensor
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: update_armed_away_zone
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm, 'armed_away') and is_state('input_boolean.alarm_triggered_state', 'off') }}
+    sensor:
+      - name: Lista sensori allarme zone attiv away
+        state: >-
+          {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_away' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
+          {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_away' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
+            {{ (window + not_window)|count}}
+        attributes:
+          print_list_group: >
+            {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_away' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
+            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_away' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
+              {{ (window + not_window)}}
+
+  - select:
+      - name: "Rimuovi sensori solo per prossimo allarme zone away"
+        state: "{{ '' }}"
+        options: >-
+          {% set output = namespace(numbers=[]) %}
+          {% set list_sensor = expand(state_attr('sensor.lista_sensori_allarme_zone_away', 'print_list_group')) %}
+            {% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
+                {%- set output.numbers = output.numbers + [states.name ] -%} {%- if loop.last -%} {%- endif -%}
+            {%- endfor %}
+            {{['RESET'] + output.numbers}}
+        select_option:
+          - event: customizations
+            event_data:
+              types: armed_zone_remove_sensor_away
+              sensor_select: "{{ option }}"
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: armed_zone_remove_sensor_away
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+            {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+    sensor:
+      - name: Sensori rimossi solo per il prossimo allarme zone away
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group) }}
+          print_list_name: >-
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
+
+automation:
+  - id: allarme_home_a_zone
+    alias: Allarme Home a zone
+    initial_state: true
+    trigger:
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+            {{ is_state(alarm,'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'armed_away') and now() < states[alarm].last_changed+ timedelta(seconds=1) }}
+    condition:
+      - "{{ is_state('input_select.setting_zone_entity', 'Zone') }}"
+    action:
+      - choose:
+          - alias: Inserimento allarme
+            conditions:
+              - "{{ trigger.to_state.attributes.next_state == 'armed_away' }}"
+            sequence:
+              - alias: Attiva automazione Trigger Allarme Globale
+                service: automation.turn_on
+                target:
+                  entity_id: automation.trigger_allarme_zone
+              - alias: INVIA NOTIFICA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  notify: allarme_globale_inserimento
+                  tag: state_alarm
+                  action2: None
+                  message: >-
+                    {% set entities= expand(state_attr('sensor.lista_sensori_allarme_zone_away', 'print_list_group'))|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'window')|selectattr('state', 'eq', 'on')|map(attribute='name')|list %}
+                    {% if entities|length != 0 %}
+                      {% for element in entities %}
+                        {%- if loop.first %}Allarme attivo tra 40 secondi. Escluso sensore: {% else %}, {% endif -%}
+                          {{- element -}}
+                      {% endfor %}
+                    {% else %}
+                      Allarme a zone globale attivo tra 40 secondi
+                    {% endif %}
+
+          - alias: Allarme inserito
+            conditions:
+              - "{{ trigger.to_state.state == 'armed_away' and is_state('input_boolean.alarm_triggered_state', 'off') }}"
+            sequence:
+              - alias: INVIA NOTIFICA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  tag: state_alarm
+                  notify: allarme_globale_inserito
+                  message: "Allarme a zone globale inserito"
+                  action2: None
+
+          - alias: Allarme scattato
+            conditions:
+              - "{{ trigger.to_state.state == 'triggered' and trigger.to_state.attributes.previous_state == 'armed_away' }}"
+            sequence:
+              - alias: INVIA NOTIFICA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  notify: allarme_globale_scattato
+                  critical: 1.0
+                  action2: None
+                  title2: None
+                  continue_voip: ". Inserire codice per disattivarlo o premi asterisco per bloccare le prossime chiamate"
+                  message: >-
+                    {% from 'alarm.jinja' import notify_sensor %}
+                    {{ 'Allarme!!! Propabile infrazione. Ultimo sensore rilevato: ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_away') }}
+              - alias: INVIA NOTIFICA SOLO MEDIA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  notify: allarme_globale_scattato_media_player
+                  volume: 1
+                  message: Attenzione. Allarme collegato alla centrale operativa. Pattuglia in arrivo!
+
+          - alias: Allarme disattivato
+            conditions:
+              - "{{ trigger.to_state.state == 'disarmed' }}"
+              - or:
+                  - "{{ trigger.from_state.state == 'armed_away' }}"
+                  - "{{ trigger.from_state.state == 'arming' and trigger.from_state.attributes.next_state == 'armed_away' }}"
+                  - "{{ trigger.from_state.state == 'pending' and trigger.from_state.attributes.previous_state == 'armed_away' }}"
+            sequence:
+              - alias: Spegni automazione Trigger Allarme Globale per evitare continui trigger con allarme spento
+                service: automation.turn_off
+                target:
+                  entity_id: automation.trigger_allarme_zone
+              - alias: INVIA NOTIFICA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  notify: allarme_globale_disattivato
+                  tag: state_alarm
+                  volume: "{{ 0.9 if is_state('input_boolean.alarm_triggered_state', 'on') else 0.5 }}"
+                  action2: None
+                  action1: None
+                  message: >-
+                    {% if is_state('input_boolean.alarm_triggered_state', 'on') %}
+                      {{ 'Attenzione allarme scattato in vostra assenza il ' + as_local(states['input_boolean.alarm_triggered_state'].last_changed).strftime("%d/%m/%Y %H:%M") + '. Allarme disattivato.' }}
+                    {% else %}
+                      Allarme a zone globale disattivato.
+                    {% endif %}
+
+  - alias: Trigger Allarme zone
+    id: trigger_allarme_zone
+    mode: parallel
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - "{{ is_state('input_select.setting_zone_entity', 'Zone') }}"
+      - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_zone_attiv_away', 'print_list_group') }}"
+      - "{{ state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme_zone_away', 'print_list_group') is none or trigger.event.data.entity_id not in state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme_zone_away', 'print_list_group') }}"
+      - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }}"
+      - >-
+        {% from 'alarm.jinja' import state_alarm %}
+        {% set alarm = (state_alarm()|from_json)['alarm'] %}
+        {{ states[alarm].state == 'armed_away' }}
+    action:
+      - service: alarm_control_panel.alarm_trigger
+        target:
+          entity_id: >-
+            {% from 'alarm.jinja' import state_alarm %}
+            {{ (state_alarm()|from_json)['alarm'] }}
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          #critical: 1.0
+          notify: allarme_globale_sensore_rilevato
+          message: >-
+            {% from 'alarm.jinja' import notify_sensor %}
+            {{ 'Attenzione allarme in attivaziona da ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_away') }}

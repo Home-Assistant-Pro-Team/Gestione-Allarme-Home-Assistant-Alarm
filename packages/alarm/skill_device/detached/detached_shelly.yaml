@@ -5,15 +5,15 @@ rest_command:
 sensor:
   - platform: rest
     name: rest_btn_type
-    resource_template: "{{state_attr('sensor.detached_list','btn_type')[states('input_number.rest_btn_index')|int(0)|default(0)]|default(none)}}"
+    resource_template: "{{state_attr('sensor.detached_list', 'btn_type')[states('input_number.rest_btn_index')|int(0)|default(0)]|default(none)}}"
     method: GET
-    value_template: "{{state_attr('sensor.detached_list','detached_on')[states('input_number.rest_btn_index')|int(0)]|default(ok)|replace('detached','')}}"
+    value_template: "{{state_attr('sensor.detached_list', 'detached_on')[states('input_number.rest_btn_index')|int(0)]|default(ok)|replace('detached', '')}}"
     json_attributes:
-    - btn_type
-    - button_type
-    - in_mode
-    - btn1_type
-    - btn2_type
+      - btn_type
+      - button_type
+      - in_mode
+      - btn1_type
+      - btn2_type
 
 input_number:
   rest_btn_index:
@@ -29,93 +29,93 @@ template:
         state: "{{'test'}}"
         attributes:
           detached_on: >
-            {%- set ns = namespace( url_switch0= [], url_switch1= [], url_switch2= [], url_switch3 = [],btn1_type = [],btn2_type = [], url_light0  = [], url_roller = [], url_cover = [],  url_white = [],url_color = [],  url_relay0 = [],  url_relay1= [],  url_relay2= [],  url_relay3 = []) %}
-            {% set entity_covers = integration_entities('shelly') | select('search', '^cover.') | map('device_id') | unique| reject('eq',None)| list %}
-            {% set entity_relay = integration_entities('shelly') | select('search', '(^switch.|^light.)') | map('device_id') | unique| reject('eq',None)| list %}
-            {% for device in entity_covers if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2')%}
-              {%- set ns.url_cover = ns.url_cover + [ device_attr(device, 'configuration_url')+('/settings/roller/0?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2') or is_device_attr(device, 'model','Shelly 1') or is_device_attr(device, 'model','Shelly 1PM') or is_device_attr(device, 'model','Shelly 4Pro') or is_device_attr(device, 'model','Shelly UNI') or is_device_attr(device, 'model','Shelly 2.5')%}
-              {%- set ns.url_relay0 = ns.url_relay0 + [ device_attr(device, 'configuration_url')+('/settings/relay/0?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2') or is_device_attr(device, 'model','Shelly 4Pro') or is_device_attr(device, 'model','Shelly UNI')%}
-              {%- set ns.url_relay1 = ns.url_relay1 + [ device_attr(device, 'configuration_url')+('/settings/relay/1?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 4Pro')%}
-              {%- set ns.url_relay2 = ns.url_relay2 + [ device_attr(device, 'configuration_url')+('/settings/relay/2?btn_type=detached') ] %}
-              {%- set ns.url_relay3 = ns.url_relay3 + [ device_attr(device, 'configuration_url')+('/settings/relay/3?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly RGBW2')%}
-              {%- set ns.url_white = ns.url_white + [ device_attr(device, 'configuration_url')+('/settings/white/0?btn_type=detached') ] %}
-              {%- set ns.url_color = ns.url_color + [ device_attr(device, 'configuration_url')+('/settings/color/0?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Dimmer')or is_device_attr(device, 'model','Shelly Dimmer 2')%}
-              {%- set ns.url_light0 = ns.url_light0 + [ device_attr(device, 'configuration_url')+('/settings/light/0?btn_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 1L')%}
-              {%- set ns.btn2_type = ns.btn2_type + [ device_attr(device, 'configuration_url')+('/settings/relay/0?btn2_type=detached') ] %}
-              {%- set ns.btn1_type = ns.btn1_type + [ device_attr(device, 'configuration_url')+('/settings/relay/0?btn1_type=detached') ] %}
-            {%endfor%}
-            {% for device in entity_covers if is_device_attr(device, 'model','Shelly Plus 2PM')%}
-              {%- set ns.url_roller = ns.url_roller + [ device_attr(device, 'configuration_url')+('/rpc/Cover.SetConfig?id=0&config={"in_mode":"detached"}') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM')%}
-              {%- set ns.url_switch3 = ns.url_switch3 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.SetConfig?id=3&config={"in_mode":"detached"}') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3')%}
-              {%- set ns.url_switch2 = ns.url_switch2 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.SetConfig?id=2&config={"in_mode":"detached"}') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3') or is_device_attr(device, 'model','Shelly Pro 2PM')or is_device_attr(device, 'model','Shelly Pro 2') or is_device_attr(device, 'model','Shelly Plus 2PM')%}
-              {%- set ns.url_switch1 = ns.url_switch1 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.SetConfig?id=1&config={"in_mode":"detached"}') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3') or is_device_attr(device, 'model','Shelly Pro 2PM')or is_device_attr(device, 'model','Shelly Pro 2') or is_device_attr(device, 'model','Shelly Plus 2PM') or is_device_attr(device, 'model','Shelly Pro 1PM')or is_device_attr(device, 'model','Shelly Pro 1')or is_device_attr(device, 'model','Shelly Plus 1')or is_device_attr(device, 'model','Shelly Plus 1PM')%}
-              {%- set ns.url_switch0 = ns.url_switch0 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.SetConfig?id=0&config={"in_mode":"detached"}') ] %}
-            {%endfor%}
+            {% set ns = namespace(url_switch0=[], url_switch1=[], url_switch2=[], url_switch3=[], btn1_type=[], btn2_type=[], url_light0=[], url_roller=[], url_cover=[], url_white=[], url_color=[], url_relay0=[], url_relay1=[], url_relay2=[], url_relay3=[]) %}
+            {% set entity_covers = integration_entities('shelly')|select('search', '^cover.')|map('device_id')|unique|reject('eq', None)|list %}
+            {% set entity_relay = integration_entities('shelly')|select('search', '(^switch.|^light.)')|map('device_id')|unique|reject('eq', None)|list %}
+            {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') %}
+              {% set ns.url_cover = ns.url_cover + [device_attr(device, 'configuration_url') + '/settings/roller/0?btn_type=detached'] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') or is_device_attr(device, 'model', 'Shelly 1') or is_device_attr(device, 'model', 'Shelly 1PM') or is_device_attr(device, 'model', 'Shelly 4Pro') or is_device_attr(device, 'model', 'Shelly UNI') or is_device_attr(device, 'model', 'Shelly 2.5') %}
+              {% set ns.url_relay0 = ns.url_relay0 + [device_attr(device, 'configuration_url') + '/settings/relay/0?btn_type=detached'] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') or is_device_attr(device, 'model', 'Shelly 4Pro') or is_device_attr(device, 'model', 'Shelly UNI') %}
+              {% set ns.url_relay1 = ns.url_relay1 + [device_attr(device, 'configuration_url') + '/settings/relay/1?btn_type=detached'] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 4Pro') %}
+              {% set ns.url_relay2 = ns.url_relay2 + [device_attr(device, 'configuration_url') + '/settings/relay/2?btn_type=detached'] %}
+              {% set ns.url_relay3 = ns.url_relay3 + [device_attr(device, 'configuration_url') + '/settings/relay/3?btn_type=detached'] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly RGBW2') %}
+              {% set ns.url_white = ns.url_white + [device_attr(device, 'configuration_url') + '/settings/white/0?btn_type=detached'] %}
+              {% set ns.url_color = ns.url_color + [device_attr(device, 'configuration_url') + '/settings/color/0?btn_type=detached'] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Dimmer')or is_device_attr(device, 'model', 'Shelly Dimmer 2') %}
+              {% set ns.url_light0 = ns.url_light0 + [device_attr(device, 'configuration_url') + ('/settings/light/0?btn_type=detached') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 1L') %}
+              {% set ns.btn2_type = ns.btn2_type + [device_attr(device, 'configuration_url') + ('/settings/relay/0?btn2_type=detached') ] %}
+              {% set ns.btn1_type = ns.btn1_type + [device_attr(device, 'configuration_url') + ('/settings/relay/0?btn1_type=detached') ] %}
+            {% endfor %}
+            {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly Plus 2PM') %}
+              {% set ns.url_roller = ns.url_roller + [device_attr(device, 'configuration_url') + ('/rpc/Cover.SetConfig?id=0&config={"in_mode":"detached"}') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') %}
+              {% set ns.url_switch3 = ns.url_switch3 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.SetConfig?id=3&config={"in_mode":"detached"}') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') %}
+              {% set ns.url_switch2 = ns.url_switch2 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.SetConfig?id=2&config={"in_mode":"detached"}') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') or is_device_attr(device, 'model', 'Shelly Pro 2PM')or is_device_attr(device, 'model', 'Shelly Pro 2') or is_device_attr(device, 'model', 'Shelly Plus 2PM') %}
+              {% set ns.url_switch1 = ns.url_switch1 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.SetConfig?id=1&config={"in_mode":"detached"}') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') or is_device_attr(device, 'model', 'Shelly Pro 2PM')or is_device_attr(device, 'model', 'Shelly Pro 2') or is_device_attr(device, 'model', 'Shelly Plus 2PM') or is_device_attr(device, 'model', 'Shelly Pro 1PM')or is_device_attr(device, 'model', 'Shelly Pro 1')or is_device_attr(device, 'model', 'Shelly Plus 1')or is_device_attr(device, 'model', 'Shelly Plus 1PM') %}
+              {% set ns.url_switch0 = ns.url_switch0 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.SetConfig?id=0&config={"in_mode":"detached"}') ] %}
+            {% endfor %}
             {{ ns.url_switch0 + ns.url_switch1 + ns.url_switch2 + ns.url_switch3 + ns.url_cover + ns.url_roller + ns.btn1_type + ns.btn2_type + ns.url_light0 + ns.url_color + ns.url_white + ns.url_relay0 + ns.url_relay1 + ns.url_relay2 + ns.url_relay3}}
 
           btn_type: >
-            {%- set ns = namespace( url_switch0= [], url_switch1= [], url_switch2= [], url_switch3 = [],btn1_type = [],btn2_type = [], url_light0  = [], url_roller = [], url_cover = [],  url_white = [],url_color = [],  url_relay0 = [],  url_relay1= [],  url_relay2= [],  url_relay3 = []) %}
+            {% set ns = namespace( url_switch0=[], url_switch1=[], url_switch2=[], url_switch3=[],btn1_type=[],btn2_type=[], url_light0 =[], url_roller=[], url_cover=[],  url_white=[],url_color=[],  url_relay0=[],  url_relay1=[],  url_relay2=[],  url_relay3=[]) %}
             {% set entity_covers = integration_entities('shelly') | select('search', '^cover.') | map('device_id') | unique| reject('eq',None)| list %}
             {% set entity_relay = integration_entities('shelly') | select('search', '(^switch.|^light.)') | map('device_id') | unique| reject('eq',None)| list %}
-            {% for device in entity_covers if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2')%}
-              {%- set ns.url_cover = ns.url_cover + [ device_attr(device, 'configuration_url')+('/settings/roller/0') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2') or is_device_attr(device, 'model','Shelly 1') or is_device_attr(device, 'model','Shelly 1PM') or is_device_attr(device, 'model','Shelly 4Pro') or is_device_attr(device, 'model','Shelly UNI') or is_device_attr(device, 'model','Shelly 2.5')%}
-              {%- set ns.url_relay0 = ns.url_relay0 + [ device_attr(device, 'configuration_url')+('/settings/relay/0') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 2.5') or is_device_attr(device, 'model','Shelly 2') or is_device_attr(device, 'model','Shelly 4Pro') or is_device_attr(device, 'model','Shelly UNI')%}
-              {%- set ns.url_relay1 = ns.url_relay1 + [ device_attr(device, 'configuration_url')+('/settings/relay/1') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 4Pro')%}
-              {%- set ns.url_relay2 = ns.url_relay2 + [ device_attr(device, 'configuration_url')+('/settings/relay/2') ] %}
-              {%- set ns.url_relay3 = ns.url_relay3 + [ device_attr(device, 'configuration_url')+('/settings/relay/3') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly RGBW2')%}
-              {%- set ns.url_white = ns.url_white + [ device_attr(device, 'configuration_url')+('/settings/white/0') ] %}
-              {%- set ns.url_color = ns.url_color + [ device_attr(device, 'configuration_url')+('/settings/color/0') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Dimmer')or is_device_attr(device, 'model','Shelly Dimmer 2')%}
-              {%- set ns.url_light0 = ns.url_light0 + [ device_attr(device, 'configuration_url')+('/settings/light/0') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly 1L')%}
-              {%- set ns.btn2_type = ns.btn2_type + [ device_attr(device, 'configuration_url')+('/settings/relay/0') ] %}
-              {%- set ns.btn1_type = ns.btn1_type + [ device_attr(device, 'configuration_url')+('/settings/relay/0') ] %}
-            {%endfor%}
-            {% for device in entity_covers if is_device_attr(device, 'model','Shelly Plus 2PM')%}
-              {%- set ns.url_roller = ns.url_roller + [ device_attr(device, 'configuration_url')+('/rpc/Cover.GetConfig?id=0') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM')%}
-              {%- set ns.url_switch3 = ns.url_switch3 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.GetConfig?id=3') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3')%}
-              {%- set ns.url_switch2 = ns.url_switch2 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.GetConfig?id=2') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3') or is_device_attr(device, 'model','Shelly Pro 2PM')or is_device_attr(device, 'model','Shelly Pro 2') or is_device_attr(device, 'model','Shelly Plus 2PM')%}
-              {%- set ns.url_switch1 = ns.url_switch1 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.GetConfig?id=1') ] %}
-            {%endfor%}
-            {% for device in entity_relay if is_device_attr(device, 'model','Shelly Pro 4PM') or is_device_attr(device, 'model','Shelly Pro 3') or is_device_attr(device, 'model','Shelly Pro 2PM')or is_device_attr(device, 'model','Shelly Pro 2') or is_device_attr(device, 'model','Shelly Plus 2PM') or is_device_attr(device, 'model','Shelly Pro 1PM')or is_device_attr(device, 'model','Shelly Pro 1')or is_device_attr(device, 'model','Shelly Plus 1')or is_device_attr(device, 'model','Shelly Plus 1PM')%}
-              {%- set ns.url_switch0 = ns.url_switch0 + [ device_attr(device, 'configuration_url')+('/rpc/Switch.GetConfig?id=0') ] %}
-            {%endfor%}
+            {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') %}
+              {% set ns.url_cover = ns.url_cover + [device_attr(device, 'configuration_url') + ('/settings/roller/0') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') or is_device_attr(device, 'model', 'Shelly 1') or is_device_attr(device, 'model', 'Shelly 1PM') or is_device_attr(device, 'model', 'Shelly 4Pro') or is_device_attr(device, 'model', 'Shelly UNI') or is_device_attr(device, 'model', 'Shelly 2.5') %}
+              {% set ns.url_relay0 = ns.url_relay0 + [device_attr(device, 'configuration_url') + ('/settings/relay/0') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') or is_device_attr(device, 'model', 'Shelly 4Pro') or is_device_attr(device, 'model', 'Shelly UNI') %}
+              {% set ns.url_relay1 = ns.url_relay1 + [device_attr(device, 'configuration_url') + ('/settings/relay/1') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 4Pro') %}
+              {% set ns.url_relay2 = ns.url_relay2 + [device_attr(device, 'configuration_url') + ('/settings/relay/2') ] %}
+              {% set ns.url_relay3 = ns.url_relay3 + [device_attr(device, 'configuration_url') + ('/settings/relay/3') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly RGBW2') %}
+              {% set ns.url_white = ns.url_white + [device_attr(device, 'configuration_url') + ('/settings/white/0') ] %}
+              {% set ns.url_color = ns.url_color + [device_attr(device, 'configuration_url') + ('/settings/color/0') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Dimmer')or is_device_attr(device, 'model', 'Shelly Dimmer 2') %}
+              {% set ns.url_light0 = ns.url_light0 + [device_attr(device, 'configuration_url') + ('/settings/light/0') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly 1L') %}
+              {% set ns.btn2_type = ns.btn2_type + [device_attr(device, 'configuration_url') + ('/settings/relay/0') ] %}
+              {% set ns.btn1_type = ns.btn1_type + [device_attr(device, 'configuration_url') + ('/settings/relay/0') ] %}
+            {% endfor %}
+            {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly Plus 2PM') %}
+              {% set ns.url_roller = ns.url_roller + [device_attr(device, 'configuration_url') + ('/rpc/Cover.GetConfig?id=0') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') %}
+              {% set ns.url_switch3 = ns.url_switch3 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.GetConfig?id=3') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') %}
+              {% set ns.url_switch2 = ns.url_switch2 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.GetConfig?id=2') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') or is_device_attr(device, 'model', 'Shelly Pro 2PM')or is_device_attr(device, 'model', 'Shelly Pro 2') or is_device_attr(device, 'model', 'Shelly Plus 2PM') %}
+              {% set ns.url_switch1 = ns.url_switch1 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.GetConfig?id=1') ] %}
+            {% endfor %}
+            {% for device in entity_relay if is_device_attr(device, 'model', 'Shelly Pro 4PM') or is_device_attr(device, 'model', 'Shelly Pro 3') or is_device_attr(device, 'model', 'Shelly Pro 2PM')or is_device_attr(device, 'model', 'Shelly Pro 2') or is_device_attr(device, 'model', 'Shelly Plus 2PM') or is_device_attr(device, 'model', 'Shelly Pro 1PM')or is_device_attr(device, 'model', 'Shelly Pro 1')or is_device_attr(device, 'model', 'Shelly Plus 1')or is_device_attr(device, 'model', 'Shelly Plus 1PM') %}
+              {% set ns.url_switch0 = ns.url_switch0 + [device_attr(device, 'configuration_url') + ('/rpc/Switch.GetConfig?id=0') ] %}
+            {% endfor %}
             {{ ns.url_switch0 + ns.url_switch1 + ns.url_switch2 + ns.url_switch3 + ns.url_cover + ns.url_roller + ns.btn1_type + ns.btn2_type + ns.url_light0 + ns.url_color + ns.url_white + ns.url_relay0 + ns.url_relay1 + ns.url_relay2 + ns.url_relay3}}
 
   - trigger:
@@ -145,99 +145,98 @@ template:
               {% set type = 'unknown' %}
             {% endif %}
               {% if trigger.to_state.state == '0.0' %}
-            {{states('sensor.rest_btn_type')|string + type }}
+            {{ states('sensor.rest_btn_type')|string + type }}
             {% else %}
-            {{this.attributes.state_btn_type|string +(', ')+ states('sensor.rest_btn_type')|string + type}}
+            {{ this.attributes.state_btn_type|string + ', ' + states('sensor.rest_btn_type')|string + type }}
             {%endif%}
-            
+
 script:
   detached_on:
     alias: Abilita detached
     sequence:
       - choose:
-        - conditions:
-            - "{{state_attr('script.detached_off','last_triggered') < this.attributes.last_triggered}}"
-          sequence:
-            - service: notify.persistent_notification
-              data:
-                message: Attenzione eseguire prima disabilita detached
-                title: Detached Shelly
-        - alias:  serve solo per la prima volta caricato il file perchè script detached_off ancora non eseguito
-          conditions:
-          - "{{state_attr('script.detached_off','last_triggered') == none }}"
-          sequence:
-            - repeat:
-                count: 2
-                sequence:
+          - conditions:
+              - "{{ state_attr('script.detached_off', 'last_triggered') < this.attributes.last_triggered }}"
+            sequence:
+              - service: notify.persistent_notification
+                data:
+                  message: Attenzione eseguire prima disabilita detached
+                  title: Detached Shelly
+          - alias: serve solo per la prima volta caricato il file perchè script detached_off ancora non eseguito
+            conditions:
+              - "{{ state_attr('script.detached_off', 'last_triggered') == none }}"
+            sequence:
+              - repeat:
+                  count: 2
+                  sequence:
+                    - alias: salva stato pulsante impostato sui device
+                      repeat:
+                        count: "{{ state_attr('sensor.detached_list', 'btn_type')|count }}"
+                        sequence:
+                          - service: input_number.set_value
+                            data:
+                              value: "{{ repeat.index-1 }}"
+                            target:
+                              entity_id: input_number.rest_btn_index
+                          - service: homeassistant.update_entity
+                            entity_id: sensor.rest_btn_type
+              - alias: abilita detached a tutti i device shelly
+                repeat:
+                  count: "{{ state_attr('sensor.detached_list', 'detached_on')|count }}"
+                  sequence:
+                    - service: rest_command.detached_shelly
+                      data:
+                        urls: "{{ state_attr('sensor.detached_list', 'detached_on')[repeat.index-1] }}"
+        default:
+          - repeat:
+              count: 2
+              sequence:
                 - alias: salva stato pulsante impostato sui device
                   repeat:
-                    count: "{{state_attr('sensor.detached_list','btn_type')|count}}"
+                    count: "{{ state_attr('sensor.detached_list', 'btn_type')|count }}"
                     sequence:
                       - service: input_number.set_value
                         data:
-                          value: "{{repeat.index-1}}"
+                          value: "{{ repeat.index-1 }}"
                         target:
                           entity_id: input_number.rest_btn_index
                       - service: homeassistant.update_entity
                         entity_id: sensor.rest_btn_type
-            - alias: abilita detached a tutti i device shelly
-              repeat:
-                count: "{{state_attr('sensor.detached_list','detached_on')|count}}"
-                sequence:
-                  - service: rest_command.detached_shelly
-                    data:
-                      urls: "{{state_attr('sensor.detached_list','detached_on')[repeat.index-1]}}"
-        default:
-
-          - repeat:
-              count: 2
-              sequence:
-              - alias: salva stato pulsante impostato sui device
-                repeat:
-                  count: "{{state_attr('sensor.detached_list','btn_type')|count}}"
-                  sequence:
-                    - service: input_number.set_value
-                      data:
-                        value: "{{repeat.index-1}}"
-                      target:
-                        entity_id: input_number.rest_btn_index
-                    - service: homeassistant.update_entity
-                      entity_id: sensor.rest_btn_type
           - alias: abilita detached a tutti i device shelly
             repeat:
-              count: "{{state_attr('sensor.detached_list','detached_on')|count}}"
+              count: "{{ state_attr('sensor.detached_list', 'detached_on')|count }}"
               sequence:
                 - service: rest_command.detached_shelly
                   data:
-                    urls: "{{state_attr('sensor.detached_list','detached_on')[repeat.index-1]}}"
+                    urls: "{{ state_attr('sensor.detached_list', 'detached_on')[repeat.index-1] }}"
 
   detached_off:
     alias: Disabilita detached
     sequence:
       - choose:
-        - conditions:
-          - "{{is_state('script.detached_on','on')}}"
-          sequence:
-            - wait_template: "{{is_state('script.detached_on','off')}}"
-            - delay: 
-                seconds: 2 
-            - repeat:
-                count: "{{state_attr('sensor.btn_type_list','state_btn_type').split(',')|count}}"
-                sequence:
-                  - service: rest_command.detached_shelly
-                    data:
-                      urls: "{{state_attr('sensor.btn_type_list','state_btn_type').split(',')[repeat.index-1]}}"
-        - conditions:
-          - "{{this.attributes.last_triggered > state_attr('script.detached_on','last_triggered')}}"
-          sequence:
-            - service: notify.persistent_notification
-              data:
-                message: Attenzione eseguire prima abilitazione detached
-                title: Detached Shelly
-        default: 
-            - repeat:
-                count: "{{state_attr('sensor.btn_type_list','state_btn_type').split(',')|count}}"
-                sequence:
-                  - service: rest_command.detached_shelly
-                    data:
-                      urls: "{{state_attr('sensor.btn_type_list','state_btn_type').split(',')[repeat.index-1]}}"
+          - conditions:
+              - "{{ is_state('script.detached_on', 'on') }}"
+            sequence:
+              - wait_template: "{{ is_state('script.detached_on', 'off') }}"
+              - delay:
+                  seconds: 2
+              - repeat:
+                  count: "{{ state_attr('sensor.btn_type_list', 'state_btn_type').split(', ')|count }}"
+                  sequence:
+                    - service: rest_command.detached_shelly
+                      data:
+                        urls: "{{ state_attr('sensor.btn_type_list', 'state_btn_type').split(', ')[repeat.index-1] }}"
+          - conditions:
+              - "{{ this.attributes.last_triggered > state_attr('script.detached_on', 'last_triggered') }}"
+            sequence:
+              - service: notify.persistent_notification
+                data:
+                  message: Attenzione eseguire prima abilitazione detached
+                  title: Detached Shelly
+        default:
+          - repeat:
+              count: "{{ state_attr('sensor.btn_type_list', 'state_btn_type').split(', ')|count }}"
+              sequence:
+                - service: rest_command.detached_shelly
+                  data:
+                    urls: "{{ state_attr('sensor.btn_type_list', 'state_btn_type').split(', ')[repeat.index-1] }}"

@@ -5,14 +5,14 @@
 		"alarm": "alarm_control_panel.home_alarm",
 
 {# Inserire il codice dell'allarme #}
-		"code": "1234",
+		"code": "2708",
 
 {# Inserire il codice di servizio che può essere attivato e disattivato da UI. #}
 {# ATTENZIONE: Se il codice viene cambiato occorre riavviare HA #}
 		"code_service" : "9877",
-
+		
 {# Inserire il codice per accedere alle impostazioni della card con allarme inserito #}
-		"setting_code": "1234",
+		"setting_code": "2708",
 
 {# Inserire il codice di emergenza per disattivare l'allarme ma inviare comunque notifica #}
 		"emergency_code": "5555",
@@ -21,64 +21,93 @@
 		"alarm_code_attempts": "3",
 
 {# Inserire il codice di sblocco della serratura solo se necessario; altrimenti, inserire il codice dell'allarme. #}		
-		"code_porta": "6666"
+		"code_porta": "2708"
 
 	}
-{% endmacro %}
-
-##############################################################
-
-{% macro person_alarm() %}
- [
- 	{
- 		"person": "person.marco",
- 		"battery": "sensor.cellulare_marco_battery_level",
-        "notify": "mobile_app_cellulare_marco",
-		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-		"cellulare": "331000000"
-  	},
-  	{
-  		"person": "person.serena",
-  		"battery": "sensor.cellulare_serena_livello_della_batteria",
-        "notify": "mobile_app_samsung_s21",
-		"sveglia": "none",
-		"cellulare": "335000000"
-  	}
- ]
-{% endmacro%}
-
-##############################################################
-
-{% macro media_player_alarm(type) %}
-	{% set list_media = 
-		[
-			'media_player.camera',
-			'media_player.studio',
-			'media_player.googlehome_cameretta',
-			'media_player.googlehome_bagno',
-			'media_player.googlehome_cucina',
-			'media_player.googlehome_salone'
-		]
-	%}
-	{% for integrations in integration_entities(type) if integrations in list_media %}
-		{{integrations}}
-	{% endfor %}
 {% endmacro %}
 
 ##################################################################
 # Da qui in poi NON MODIFICARE
 ##################################################################
 
+# Lista sensori allarme zone night/away
+{% macro zone_sensor(sensor) %}
+	{% set zone_attive = state_attr(sensor,'print_list_group') %}
+	{% set output = namespace(numbers=[]) %}
+	{% set sensori_allarme = states['sensor.lista_sensori_allarme_per_zone'].attributes %}
+		{% for zona in range(10) %}
+			{% set zona_nome = sensori_allarme['zona' ~ zona] %}
+			{% set sensori = sensori_allarme['sensor_zona' ~ zona] %}
+				{% if zona_nome|string in zone_attive %}
+					{% set output.numbers = output.numbers + sensori|list %}
+				{% endif %}
+		{% endfor %}
+			{{ output.numbers }}
+{% endmacro %}
+
+{% macro zone_alarm(lista, option, index) %}
+	{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[0]|length > 0 or option != 'RESET' %}
+		{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[index] == states('input_text.select_zone_alarm')|title %}
+			{% for device in states.binary_sensor if device.name|lower == option|lower %}
+				{% if device.entity_id in lista %}
+					{{ lista|list|select('ne', device.entity_id)|list }}
+				{% else %}
+					{% set ns = namespace(entities=lista|list|select('ne', device.entity_id)|list) %}
+					{{ ns.entities + [device.entity_id] }}
+				{% endif %}
+			{% endfor %}
+		{% else %}
+			{{ lista }}
+		{% endif %}
+	{% else %}
+	{% endif %}		
+{% endmacro %}
+
 # Lista sensori per allarme applicato al select
 {% macro select_alarm() %}
 	{% set output = namespace(numbers=[]) %}
 	{% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
-	{% set include = states.binary_sensor|selectattr('entity_id','in',expand('group.include_alarm_entities')|map(attribute='entity_id'))|list%}
-	{% set list_sensor = include + states.binary_sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','in',['window','vibration','opening','occupancy','moving','motion','lock','garage_door','door'])|list%}
-	{% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
-	{%- set output.numbers = output.numbers + [states.name ] -%}
-		{%- if loop.last -%}
-		{%- endif -%}
-	{%- endfor %}
-	{{['RESET'] + output.numbers}}
+	{% set include = states.binary_sensor|selectattr('entity_id','in',expand('group.include_alarm_entities')|map(attribute='entity_id'))|list %}
+	{% set list_sensor = include + states.binary_sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class', 'defined')
+		|selectattr('attributes.device_class','in',['window', 'vibration', 'opening', 'occupancy', 'moving', 'motion', 'lock', 'garage_door', 'door'])|list %}
+		{% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
+		{%- set output.numbers = output.numbers + [states.name ] -%}
+			{%- if loop.last -%}
+			{%- endif -%}
+		{%- endfor %}
+	{{ ['RESET'] + output.numbers }}
+{% endmacro %}
+
+{% macro list_sensor_entity(sensor_select, print_list_group) %}
+	{% set option = sensor_select %}
+	{% set lists = print_list_group %}
+	{% if option == 'RESET' %}
+	{% else %}
+		{% for device in states.binary_sensor if device.name|lower == option|lower %}
+			{% if device.entity_id in lists %}
+				{{ lists|list|select('ne', device.entity_id)|list }}
+			{%else%}
+				{% set ns = namespace(entities=lists|list|select('ne', device.entity_id)|list)%}
+				{{ ns.entities + [device.entity_id] }}
+			{%- endif -%}
+		{%- endfor -%}
+	{% endif %}
+{% endmacro %}
+
+{% macro list_sensor_name(sensor_select, print_list_group) %}
+	{% set option = sensor_select %}
+	{% set lists = print_list_group %}
+	{% if option == 'RESET' %}
+	{% elif option in lists%}
+		{{ lists|select('ne', option)|list }}
+	{% else %}
+		{% set ns = namespace(entities=lists|select('ne',option)|list) %}
+		{{ ns.entities + [option] }}
+	{% endif %}
+{% endmacro %}
+
+{% macro notify_sensor(sensor) %}
+  {%- set last_time = expand(state_attr(sensor, 'print_list_group'))|map(attribute='last_changed')|max %}
+  {%- set last_sensor = (states.binary_sensor|selectattr('attributes.device_class', 'defined')|selectattr('last_changed', 'eq', last_time)|list)[0] %}
+  	{{-  last_sensor.name + ' alle ore ' + as_local(last_time).strftime("%H:%M") }}
 {% endmacro %}

@@ -1,64 +1,68 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Lista videocamere: &camera 
-                              - camera.camcorridoio
-                              - camera.camsala
-                              - camera.timcam_ezviz
+      Lista videocamere: &camera
+        - camera.camcorridoio
+        - camera.camsala
+        - camera.timcam_ezviz
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
-##############################################################                              
+##############################################################
 automation:
-- alias: CCTV allarme
-  id: notify_cctv_alarm
-  variables:
-    camera: *camera
-  trigger:
-  - platform: event
-    event_type: customizations
-    event_data:
-      types: emergency_code
-  - platform: template
-    value_template: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {% set alarm = (state_alarm()|from_json)['alarm'] %}
-      {{  is_state(alarm,'triggered') }}
-  action:
-  - alias: Invia notifica push alle persone che NON si trovano in casa
-    repeat:
-      count: "{{camera|count}}"
-      sequence:
-        - variables:
-            var_index: "{{repeat.index-1}}"
-        - parallel:
-
-          - alias: Avvia registrazione camera
-            service: camera.record
-            data:
-              filename: "/config/www/immagini_allarme/{{states[camera[var_index]].object_id}}/{{now().strftime('%d-%m-%Y--%H:%M')}}.mp4"
-              duration: 30
-            target:
-              entity_id: "{{camera[var_index]}}"
-          - alias: INVIA NOTIFICA
-            event: customizations
-            event_data:
-              types: notify_alarm
-              notify: cctv
-              for_each: >
-                {% from 'alarm.jinja' import person_alarm %}
-                {% set output = namespace(state_home=[]) %}
-                  {%for dict in person_alarm()|from_json if states[dict.person].state != 'home'%}
-                    {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-                  {% endfor %}
-                  {{output.state_home}}
-              message: "{{ states[camera[var_index]].name }}"
-              title: '---CCTV---'
-              notification_icon: "mdi:cctv"
-              image: "/api/camera_proxy/{{camera[var_index]}}"
-              action1: "URI"
-              title1: "Apri live"
-              uri1: "entityId:{{camera[var_index]}}"
-              action2: "URI"
-              title2: "Apri Registrazione"
-              uri2: "/media-browser/browser/%2Cmedia-source%3A%2F%2Fmedia_source%2Flocale%2Fimmagini_allarme"
+  - alias: CCTV allarme
+    id: notify_cctv_alarm
+    variables:
+      camera: *camera
+    trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: emergency_code
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{  is_state(alarm, 'triggered') }}
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{  is_state(alarm, 'pending') }}
+    action:
+      - alias: Invia notifica push alle persone che NON si trovano in casa
+        repeat:
+          count: "{{ camera|count }}"
+          sequence:
+            - variables:
+                var_index: "{{ repeat.index - 1 }}"
+            - parallel:
+                - alias: Avvia registrazione camera
+                  service: camera.record
+                  data:
+                    filename: "/config/www/immagini_allarme/{{ states[camera[var_index]].object_id}}/{{now().strftime('%d-%m-%Y--%H:%M') }}.mp4"
+                    duration: 30
+                  target:
+                    entity_id: "{{ camera[var_index] }}"
+                - alias: INVIA NOTIFICA
+                  event: customizations
+                  event_data:
+                    types: notify_alarm
+                    notify: cctv
+                    for_each: >
+                      {% from 'personal.jinja' import persons %}
+                      {% set output = namespace(state_home=[]) %}
+                        {% for dict in persons()|from_json if states[dict.person].state != 'home' %}
+                          {% set output.state_home = output.state_home + ['notify.'+dict['notify'] ] %}
+                        {% endfor %}
+                        {{ output.state_home }}
+                    message: "{{ states[camera[var_index]].name }}"
+                    title: "---CCTV---"
+                    notification_icon: "mdi:cctv"
+                    image: "/api/camera_proxy/{{ camera[var_index] }}"
+                    action1: "URI"
+                    title1: "Apri live"
+                    uri1: "entityId:{{ camera[var_index] }}"
+                    action2: "URI"
+                    title2: "Apri Registrazione"
+                    uri2: "/media-browser/browser/%2Cmedia-source%3A%2F%2Fmedia_source%2Flocale%2Fimmagini_allarme"

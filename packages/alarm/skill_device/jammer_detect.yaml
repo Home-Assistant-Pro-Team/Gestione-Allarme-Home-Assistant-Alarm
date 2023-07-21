@@ -9,36 +9,35 @@ input_number:
     unit_of_measurement: "Voti"
 
 template:
-
   - select:
       - name: "Jammer detect entities"
         state: "Disabilitato"
-        options: >
+        options: >-
           {% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
           {% set output = namespace(numbers=[]) %}
-          {% set domain = states.sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'signal_strength')%}
-          {% for states in domain  if states.state != 'unavailable' and states.state != 'unknown' -%}
-            {%- set output.numbers = output.numbers + [states.name ] -%}
-              {%- if loop.last -%} 
-              {%- endif -%}
-          {%- endfor %}
-            {{['RESET'] + output.numbers}}
+          {% set domain = states.sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'signal_strength') %}
+          {% for states in domain if states.state != 'unavailable' and states.state != 'unknown' %}
+            {% set output.numbers = output.numbers + [states.name ] %}
+              {% if loop.last %} 
+              {% endif %}
+          {% endfor %}
+            {{ ['RESET'] + output.numbers }}
         select_option:
-        - event: customizations
-          event_data:
-            types: jammer_detect
-            sensor_select: '{{option}}'
+          - event: customizations
+            event_data:
+              types: jammer_detect
+              sensor_select: "{{ option }}"
 
   - trigger:
-    - platform: event
-      event_type: customizations
-      event_data:
-        types: jammer_detect
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: jammer_detect
     sensor:
       - name: Lista sensori jummer
         state: "{{ trigger.event.data.sensor_select }}"
         attributes:
-          print_list_group: >
+          print_list_group: >-
             {% set option = trigger.event.data.sensor_select %}
             {% set lists = this.attributes.print_list_group %}
             {% if option == 'RESET' %}
@@ -55,7 +54,7 @@ template:
 
   - sensor:
       - name: Jammer detect count entities
-        state: "{{state_attr('sensor.lista_sensori_jummer','print_list_group')|count}}"
+        state: "{{ state_attr('sensor.lista_sensori_jummer', 'print_list_group')|count }}"
         unit_of_measurement: "Voti"
 
 automation:
@@ -63,30 +62,30 @@ automation:
     id: cb5687088f82426289e16ed344945eea
     trigger:
       - platform: template
-        value_template: "{{ state_attr('sensor.jammer_detect_trigger_entities','offline')|int(0) >= states('input_number.jammer_detect_high_availability_vote')|int(0) }}"
+        value_template: "{{ state_attr('sensor.jammer_detect_trigger_entities', 'offline')|int(0) >= states('input_number.jammer_detect_high_availability_vote')|int(0) }}"
     condition:
-    - condition: template
-      value_template: >
+      - condition: template
+        value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
           {% set alarm = (state_alarm()|from_json)['alarm'] %}
-          {{  is_state(alarm,'armed_away') }}
+          {{  is_state(alarm, 'armed_away') }}
     action:
-    - alias: INVIA NOTIFICA
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: detect_jummer
-        tag: detect_jummer
-        critical: 1.0
-        title: "--Detect Jummer"
-        message: >
-          {% set offline = expand(state_attr('sensor.lista_sensori_jummer','print_list_group'))|selectattr('state', 'in', ['unknown','unavailable'])|map(attribute='name')|list %}
-          {% if offline|length != 0 %}
-            {% if offline|count > 4 %}
-              {{'Possibile impiego di jammer per dispositivi offline: ' + offline|count|string }}
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          notify: detect_jummer
+          tag: detect_jummer
+          critical: 1.0
+          title: "--Detect Jummer"
+          message: >
+            {% set offline = expand(state_attr('sensor.lista_sensori_jummer','print_list_group'))|selectattr('state', 'in', ['unknown','unavailable'])|map(attribute='name')|list %}
+            {% if offline|length != 0 %}
+              {% if offline|count > 4 %}
+                {{ 'Possibile impiego di jammer per dispositivi offline: ' + offline|count|string }}
+              {% else %}
+                {{ 'Possibile impiego di jammer per dispositivi offline:' + offline|join(', ') }}
+              {% endif %}
             {% else %}
-              {{'Possibile impiego di jammer per dispositivi offline:' + offline|join(', ') }}
-            {%endif%}
-          {% else %}
-            Errore invio notifica
-          {% endif %}
+              Errore invio notifica
+            {% endif %}

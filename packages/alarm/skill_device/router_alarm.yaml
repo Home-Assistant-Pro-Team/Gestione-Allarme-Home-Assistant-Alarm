@@ -1,29 +1,29 @@
 homeassistant:
   customize:
     package.node_anchors:
-        UPS: &ups binary_sensor.fritz_box_6890_lte_connection
+      router: &router binary_sensor.fritz_box_6890_lte_connection
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 
 automation:
-- alias: Stato Internet
-  id: internet.state
-  trigger:
-  - platform: state
-    entity_id: *ups
-  action:
-    - alias: INVIA NOTIFICA
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: stato_router
-        tag: stato_router
-        title: --CONNESSIONE--
-        message: >
-          {% if trigger.to_state.state == 'on'  %} 
-            {{'Connessione internet tornata a funzionare alle '+ as_local(states[trigger.entity_id].last_changed).strftime("%H:%M")}}
-          {%else%} 
-            {{'Connessione Assente attivo fallback LTE dalle '+ as_local(states[trigger.entity_id].last_changed).strftime("%H:%M")}}
-          {%endif%}
+  - alias: Stato Internet
+    id: internet.state
+    trigger:
+      - platform: state
+        entity_id: *router
+    action:
+      - alias: INVIA NOTIFICA
+        event: customizations
+        event_data:
+          types: notify_alarm
+          notify: stato_router
+          tag: stato_router
+          title: --CONNESSIONE--
+          message: >-
+            {% if trigger.to_state.state == 'on' %} 
+              {{ 'Connessione internet tornata a funzionare alle ' + as_local(states[trigger.entity_id].last_changed).strftime("%H:%M") }}
+            {% else %} 
+              {{ 'Connessione Assente attivo fallback LTE dalle ' + as_local(states[trigger.entity_id].last_changed).strftime("%H:%M") }}
+            {% endif %}

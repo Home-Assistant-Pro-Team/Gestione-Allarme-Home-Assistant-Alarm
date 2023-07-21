@@ -92,8 +92,8 @@ styles:
       - top: 66px
     back:
       - position: absolute
-      - left: '-54px'
-      - top: '-206px'
+      - left: "-54px"
+      - top: "-206px"
 custom_fields:
   notte:
     card:
@@ -109,7 +109,7 @@ custom_fields:
           data:
             content: Vuoi attivare allarme notte?
             right_button: SI
-            left_button: 'NO'
+            left_button: "NO"
             right_button_action:
               service: browser_mod.sequence
               data:
@@ -139,7 +139,7 @@ custom_fields:
           data:
             content: Vuoi attivare allarme globale?
             right_button: SI
-            left_button: 'NO'
+            left_button: "NO"
             right_button_action:
               service: browser_mod.sequence
               data:
@@ -160,7 +160,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 1
+        "n": 1
   n2:
     card:
       type: custom:button-card
@@ -169,7 +169,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 2
+        "n": 2
   n3:
     card:
       type: custom:button-card
@@ -178,7 +178,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 3
+        "n": 3
   n4:
     card:
       type: custom:button-card
@@ -187,7 +187,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 4
+        "n": 4
   n5:
     card:
       type: custom:button-card
@@ -196,7 +196,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 5
+        "n": 5
   n6:
     card:
       type: custom:button-card
@@ -205,7 +205,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 6
+        "n": 6
   n7:
     card:
       type: custom:button-card
@@ -214,7 +214,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 7
+        "n": 7
   n8:
     card:
       type: custom:button-card
@@ -223,7 +223,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 8
+        "n": 8
   n9:
     card:
       type: custom:button-card
@@ -232,7 +232,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 9
+        "n": 9
   n0:
     card:
       type: custom:button-card
@@ -241,7 +241,7 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': 0
+        "n": 0
   ok:
     card:
       type: custom:button-card
@@ -260,11 +260,11 @@ custom_fields:
         - alarm_number
         - aciton_number
       variables:
-        'n': canc
+        "n": canc
   states:
     card:
       type: custom:button-card
-      template: display 
+      template: display
       entity: sensor.stato_allarme
       label: |
         [[[
@@ -290,7 +290,7 @@ custom_fields:
       type: custom:button-card
       styles:
         card:
-          - box-shadow: '-1px -1px 1px #373737, 1px 1px 3px black'
+          - box-shadow: "-1px -1px 1px #373737, 1px 1px 3px black"
           - height: 15px
           - width: 15px
           - background-color: |
@@ -303,7 +303,7 @@ custom_fields:
                   return 'red' ;
                 else if (states['sensor.stato_allarme'].state === 'Disattivato' ) 
                   return '#f8f8e7';
-              ]]]  
+              ]]]
       style:
         .: |
           ha-card {
@@ -323,9 +323,7 @@ custom_fields:
             autoclose: false
             style: |
               --popup-min-width: 300px;
-            title: Detect Jummer
             timeout: 60000
-            dismissable: true
             content:
               type: custom:button-card
               template: no_background
@@ -386,7 +384,7 @@ custom_fields:
                     name: Controllo offline
                     template: no_background
                     state:
-                      - value: 'off'
+                      - value: "off"
                         styles:
                           card:
                             - border-color: var(--paper-slider-container-color)
@@ -444,12 +442,12 @@ custom_fields:
                               - width: 55px
                               - background-color: GhostWhite
                             icon:
-                              - value: 'on'
+                              - value: "on"
                                 styles:
                                   icon:
                                     - color: var(--state-icon-active-color)
                           state:
-                            - value: 'off'
+                            - value: "off"
                               styles:
                                 card:
                                   - background-color: var(--paper-slider-active-color)
@@ -466,9 +464,7 @@ custom_fields:
             autoclose: false
             style: |
               --popup-min-width: 600px;
-            title: Impostazioni
             timeout: 60000
-            dismissable: true
             content:
               type: custom:layout-card
               layout_type: grid-layout
@@ -503,6 +499,199 @@ custom_fields:
                     template: popup_setting
                     variables:
                       icon: mdi:power-plug-off
+                - type: custom:button-card
+                  entity: input_select.setting_zone_entity
+                  name: Imposta zone
+                  template: popup_setting
+                  variables:
+                    icon: mdi:alpha-z-box-outline
+                  state:
+                    - value: Dispositivi
+                      styles:
+                        card:
+                          - border-color: var(--paper-slider-container-color)
+                        name:
+                          - color: var(--paper-slider-active-color)
+                  custom_fields:
+                    icona:
+                      card:
+                        state:
+                          - value: Zone
+                            styles:
+                              icon:
+                                - color: var(--state-icon-active-color)
+                          - value: Dispositivi
+                            styles:
+                              card:
+                                - background-color: var(--paper-slider-active-color)
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        autoclose: false
+                        style: |
+                          --popup-min-width: 600px;
+                        timeout: 60000
+                        content:
+                          type: vertical-stack
+                          cards:
+                            - type: custom:button-card
+                              name: IMPOSTAZIONI ZONE
+                              styles:
+                                card:
+                                  - height: 1.2em
+                                name:
+                                  - font-size: 120%
+                              tap_action:
+                                action: none
+                              style: |
+                                ha-card {  
+                                  background: none;
+                                  border: 100px; 
+                                  border-radius: 0px;
+                                  }
+                            - type: custom:button-card
+                              style: |
+                                ha-card {  
+                                  background: none;
+                                  border: 100px; 
+                                  border-radius: 0px;
+                                  }
+                              styles:
+                                grid:
+                                  - grid-template-areas: |
+                                      " text button "
+                              custom_fields:
+                                button:
+                                  card:
+                                    type: custom:button-card
+                                    entity: button.confirmed_zone_alarm
+                                    name: PRESS
+                                    template: pressione
+                                    show_icon: false
+                                    styles:
+                                      card:
+                                        - height: 3.2em
+                                        - box-shadow: '-3px -3px 3px #373737, 3px 3px 3px black'
+                                        - width: 4.4em
+                                      name:
+                                        - font-size: 80%
+                                    tap_action:
+                                      action: call-service
+                                      service: button.press
+                                      service_data:
+                                        entity_id: button.confirmed_zone_alarm
+                                text:
+                                  card:
+                                    type: entities
+                                    entities:
+                                      - entity: input_text.setting_name_zone_alarm
+                                        icon: mdi:format-text
+                                        card_mod:
+                                          style:
+                                            hui-generic-entity-row $: |
+                                              state-badge {
+                                                display: none;
+                                              }
+                                    style: |
+                                      ha-card {  
+                                        background: none;
+                                        border: 100px; 
+                                        border-radius: 0px;
+                                        }
+                            - type: horizontal-stack
+                              cards:
+                                - type: custom:button-card
+                                  name: Scegli zona
+                                  styles:
+                                    card:
+                                      - height: 1.2em
+                                    name:
+                                      - color: var(--secondary-text-color)
+                                      - font-size: 80%
+                                  tap_action:
+                                    action: none
+                                  style: |
+                                    ha-card {  
+                                      background: none;
+                                      border: 100px; 
+                                      border-radius: 0px;
+                                      }
+                                - type: custom:button-card
+                                  name: Scegli sensore
+                                  styles:
+                                    card:
+                                      - height: 1.2em
+                                    name:
+                                      - color: var(--secondary-text-color)
+                                      - font-size: 80%
+                                  tap_action:
+                                    action: none
+                                  style: |
+                                    ha-card {  
+                                      background: none;
+                                      border: 100px; 
+                                      border-radius: 0px;
+                                      }
+                            - type: horizontal-stack
+                              cards:
+                                - type: entities
+                                  style: |
+                                    ha-card {  
+                                      background: none;
+                                      border: 100px; 
+                                      border-radius: 0px;
+                                      }
+                                  entities:
+                                    - entity: select.seleziona_zona_allarme_setting
+                                      card_mod:
+                                        style:
+                                          ha-select $ mwc-menu $: |
+                                            mwc-list {
+                                              max-height: 196px;
+                                            }
+                                          hui-generic-entity-row $: |
+                                            state-badge {
+                                              display: none;
+                                            }
+                                - type: entities
+                                  style: |
+                                    ha-card {  
+                                      background: none;
+                                      border: 100px; 
+                                      border-radius: 0px;
+                                      }
+                                  entities:
+                                    - entity: select.aggiungi_o_rimuovi_sensori_alle_zone
+                                      card_mod:
+                                        style:
+                                          ha-select $ mwc-menu $: |
+                                            mwc-list {
+                                              max-height: 196px;
+                                            }
+                                          hui-generic-entity-row $: |
+                                            state-badge {
+                                              display: none;
+                                            }
+                            - type: markdown
+                              content: >
+                                {% set sensori_allarme =
+                                states['sensor.lista_sensori_allarme_per_zone'].attributes %}
+                                  {%- for zona in range(10) -%}
+                                    {% set zona_nome = sensori_allarme['zona' ~ zona] %}
+                                    {% set sensori = sensori_allarme['sensor_zona' ~ zona] %}
+                                    {%- if zona_nome %}
+                                      {{- zona_nome|string + ': ' + sensori|join(', ') }}
+                                    {%- endif -%}    
+                                  {% endfor %}
+                              style: |
+                                ha-card {  
+                                  background: none;
+                                  border: 100px; 
+                                  border-radius: 0px;
+                                  }
+
                 - type: conditional
                   conditions:
                     - entity: automation.tag_nfc_alarm
@@ -625,17 +814,6 @@ custom_fields:
                       icon: mdi:home-off-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.azioni_personalizzate_per_allarme_globale
-                      state_not: unavailable
-                  card:
-                    type: custom:button-card
-                    entity: automation.azioni_personalizzate_per_allarme_globale
-                    name: Azioni scattato
-                    template: popup_setting
-                    variables:
-                      icon: mdi:home-alert-outline
-                - type: conditional
-                  conditions:
                     - entity: automation.disattivazione_automatica_rietro_familiare
                       state_not: unavailable
                   card:
@@ -645,6 +823,17 @@ custom_fields:
                     template: popup_setting
                     variables:
                       icon: mdi:home-off-outline
+                - type: conditional
+                  conditions:
+                    - entity: automation.azioni_personalizzate_per_allarme_globale
+                      state_not: unavailable
+                  card:
+                    type: custom:button-card
+                    entity: automation.azioni_personalizzate_per_allarme_globale
+                    name: Azioni scattato
+                    template: popup_setting
+                    variables:
+                      icon: mdi:home-alert-outline
                 - type: conditional
                   conditions:
                     - entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
@@ -734,7 +923,7 @@ custom_fields:
                     variables:
                       icon: mdi:gesture-swipe
                 - type: conditional
-                  conditions: 
+                  conditions:
                     - entity: automation.notify_alarm_voip
                       state_not: unavailable
                   card:
@@ -745,7 +934,7 @@ custom_fields:
                     variables:
                       icon: mdi:phone-voip
                 - type: conditional
-                  conditions: 
+                  conditions:
                     - entity: automation.notify_alarm_media_player
                       state_not: unavailable
                   card:
@@ -756,7 +945,7 @@ custom_fields:
                     variables:
                       icon: mdi:speaker-wireless
                 - type: conditional
-                  conditions: 
+                  conditions:
                     - entity: automation.notify_alarm_push
                       state_not: unavailable
                   card:
@@ -766,6 +955,7 @@ custom_fields:
                     template: popup_setting
                     variables:
                       icon: mdi:cellphone-sound
+
   sensor_away:
     card:
       type: custom:button-card
@@ -779,60 +969,344 @@ custom_fields:
             autoclose: false
             style: |
               --popup-min-width: 385px;
-            title: Sensori Fuori Casa
             timeout: 60000
-            dismissable: true
             content:
-              type: custom:button-card
-              template: no_background
-              styles:
-                card:
-                  - min-height: 550px
-                custom_fields:
-                  n1:
-                    - position: absolute
-                    - left: '-3%'
-                    - width: 370px
-                    - top: 0px
-                  n2:
-                    - position: absolute
-                    - top: 80px
-              custom_fields:
-                n1:
+              type: vertical-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: input_select.setting_zone_entity
+                      state: Dispositivi
                   card:
-                    type: entities
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                        }
-                    entities:
-                      - entity: select.aggiungi_o_rimuovi_sensore_allarme_globale
-                n2:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:button-card
+                        name: Modalità allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: input_select.setting_zone_entity
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: custom:button-card
+                        name: SELEZIONARE I SENSORI PER ALLARME GLOBALE
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - font-size: 105%
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.aggiungi_o_rimuovi_sensore_allarme_globale
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        content: >
+                          {% set active = 
+                          (expand(state_attr('sensor.lista_sensori_allarme_globale_attiv' ,
+                          'print_list_group'))|map(attribute='entity_id')|list)%}  {% set
+                          trigger =  (expand(state_attr('sensor.lista_sensori_allarme_global'
+                          ,
+                          'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
+                          {%for triggers in trigger %}  **{{states[triggers].name}}** 
+                          DISATTIVATO {%endfor%}  {%-set trigger =
+                          expand(state_attr('sensor.lista_sensori_allarme_global' ,
+                          'print_list_group'))|map(attribute='entity_id')|list%}  {% for
+                          entity in trigger if entity in active%} 
+                          **{{states[entity].name}}:**  {{states[entity].state}} {% else %}
+                          Non risultano sensori abilitati{%endfor%}
+                        card_mod:
+                          style: |
+                            :host {
+                              --ha-card-border-width: 0;
+                              --ha-card-background: none;
+                              text-align: left;
+                            }
+                      - type: custom:button-card
+                        name: Rimuovi sensori solo per prossimo allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.rimuovi_sensori_solo_per_prossimo_allarme_globale
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        content: >
+                          {% set trigger =
+                          (expand(state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme',
+                          'print_list_group'))|map(attribute='entity_id')|list) %} 
+
+                          {% for triggers in trigger %} 
+                            {{- states[triggers].name }}
+                          {% else %}
+
+                          Non risultano sensori disabilitati per il prossimo allarme
+
+                          {% endfor %}
+                        card_mod:
+                          style: |
+                            :host {
+                              --ha-card-border-width: 0;
+                              --ha-card-background: none;
+                              text-align: left;
+                            }
+                - type: conditional
+                  conditions:
+                    - entity: input_select.setting_zone_entity
+                      state: Zone
                   card:
-                    type: markdown
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                          text-align: left;
-                        }
-                    content: >
-                      {% set active = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_globale_attiv' , 'print_list_group'))|map(attribute='entity_id')|list)%} 
-                      {% set trigger = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
-                      {%for triggers in trigger %} 
+                    type: vertical-stack
+                    cards:
+                      - type: custom:button-card
+                        name: Modalità allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: input_select.setting_zone_entity
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: custom:button-card
+                        name: SELEZIONA ZONE PER ALLARME GLOBALE
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - font-size: 105%
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: custom:button-card
+                        name: Aggiungi o rimuovi zone allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.aggiungi_o_rimuvi_zone_allarme_globale
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        content: >-
+                          {% for t in state_attr('sensor.lista_zone_alarm_attive_away',
+                          'print_list_group') %}
 
-                      **{{states[triggers].name}}**  DISATTIVATO {%endfor%} 
-                      {%-set trigger =
-                      expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|map(attribute='entity_id')|list%} 
-                      {% for entity in trigger if entity in active%} 
+                          {%- if loop.first %}Abilitate:  {% else %}, {% endif -%}{{- t -}}
 
-                      **{{states[entity].name}}:**  {{states[entity].state}}  
-                      {%endfor%}
+                          {% else %}
+
+                          Non risultano zona abilitate
+
+                          {% endfor %}
+
+
+                          {% for t in state_attr('sensor.lista_sensori_allarme_zone_away',
+                          'print_list_group')|unique|list %}
+
+                          {%- if loop.first %}Lista sensori:  {% else %}, {% endif -%}{{-
+                          states[t].name -}}
+
+                          {% endfor %}
+                      - type: custom:button-card
+                        name: Rimuovi sensori solo per prossimo allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.rimuovi_sensori_solo_per_prossimo_allarme_zone_away
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        content: >
+                          {% for t in
+                          state_attr('sensor.sensori_rimossi_solo_per_il_prossimo_allarme_zone_away',
+                          'print_list_group') %}
+
+                          {%- if loop.first %}Disabilitato:  {% else %}, {% endif -%}{{-
+                          states[t].name -}}
+
+                          {% else %}
+
+                          Non risultano sensori disabilitati per il prossimo allarme
+
+                          {% endfor %}
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+
+
   sensor_night:
     card:
       type: custom:button-card
@@ -846,57 +1320,243 @@ custom_fields:
             autoclose: false
             style: |
               --popup-min-width: 385px;
-            title: Sensori allarme notte
             timeout: 60000
-            dismissable: true
             content:
-              type: custom:button-card
-              template: no_background
-              styles:
-                card:
-                  - min-height: 550px
-                custom_fields:
-                  n1:
-                    - position: absolute
-                    - left: '-3%'
-                    - width: 370px
-                    - top: 0px
-                  n2:
-                    - position: absolute
-                    - top: 80px
-              custom_fields:
-                n1:
+              type: vertical-stack
+              cards:
+                - type: conditional
+                  conditions:
+                    - entity: input_select.setting_zone_entity
+                      state: Dispositivi
                   card:
-                    type: entities
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                        }
-                    entities:
-                      - entity: select.aggiungi_o_rimuovi_sensore_allarme_notte
-                n2:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:button-card
+                        name: Modalità allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: input_select.setting_zone_entity
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: custom:button-card
+                        name: SELEZIONARE I SENSORI PER ALLARME NOTTE
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - font-size: 105%
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: custom:button-card
+                        name: Aggiungi o rimuovi zone allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.aggiungi_o_rimuovi_sensore_allarme_notte
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        content: >
+                          {% set active = 
+                          (expand(state_attr('sensor.lista_sensori_allarme_notte_attiv' ,
+                          'print_list_group'))|map(attribute='entity_id')|list)%}  {% set
+                          trigger =  (expand(state_attr('sensor.lista_sensori_allarme_notte' ,
+                          'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
+                          {%for triggers in trigger %} 
+
+                          **{{states[triggers].name}}**  DISATTIVATO {%endfor%}  {%-set
+                          trigger = expand(state_attr('sensor.lista_sensori_allarme_notte' ,
+                          'print_list_group'))|map(attribute='entity_id')|list%}  {% for
+                          entity in trigger if entity in active%} 
+
+                          **{{states[entity].name}}:**  {{states[entity].state}}   {%endfor%}
+                - type: conditional
+                  conditions:
+                    - entity: input_select.setting_zone_entity
+                      state: Zone
                   card:
-                    type: markdown
-                    card_mod:
-                      style: |
-                        :host {
-                          --ha-card-border-width: 0;
-                          --ha-card-background: none;
-                          text-align: left;
-                        }
-                    content: >
-                      {% set active = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_notte_attiv' , 'print_list_group'))|map(attribute='entity_id')|list)%} 
-                      {% set trigger = 
-                      (expand(state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group'))|rejectattr('entity_id','in',active)|map(attribute='entity_id')|list)%} 
-                      {%for triggers in trigger %} 
+                    type: vertical-stack
+                    cards:
+                      - type: custom:button-card
+                        name: Modalità allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: input_select.setting_zone_entity
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: custom:button-card
+                        name: SELEZIONARE ZONE PER ALLARME NOTTE
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - font-size: 105%
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: custom:button-card
+                        name: Aggiungi o rimuovi zone allarme
+                        styles:
+                          card:
+                            - height: 1.2em
+                          name:
+                            - color: var(--secondary-text-color)
+                            - font-size: 80%
+                            - justify-self: left
+                        tap_action:
+                          action: none
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                      - type: entities
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        entities:
+                          - entity: select.aggiungi_o_rimuovi_zone_allarme_notte
+                            card_mod:
+                              style:
+                                ha-select $ mwc-menu $: |
+                                  mwc-list {
+                                    max-height: 196px;
+                                  }
+                                hui-generic-entity-row $: |
+                                  state-badge {
+                                    display: none;
+                                  }
+                      - type: markdown
+                        style: |
+                          ha-card {  
+                            background: none;
+                            border: 100px; 
+                            border-radius: 0px;
+                            }
+                        content: >-
+                          {% for t in state_attr('sensor.lista_zone_alarm_attive_night',
+                          'print_list_group') %}
 
-                      **{{states[triggers].name}}**  DISATTIVATO {%endfor%} 
-                      {%-set trigger =
-                      expand(state_attr('sensor.lista_sensori_allarme_notte' , 'print_list_group'))|map(attribute='entity_id')|list%} 
-                      {% for entity in trigger if entity in active%} 
+                          {%- if loop.first %}Abilitate:  {% else %}, {% endif -%}{{- t -}}
 
-                      **{{states[entity].name}}:**  {{states[entity].state}}  
-                      {%endfor%}
+                          {% else %}
+
+                          Non risultano zona abilitate
+
+                          {% endfor %}
+
+
+                          {% for t in state_attr('sensor.lista_sensori_allarme_zone_night',
+                          'print_list_group')|unique|list %}
+
+                          {%- if loop.first %}Lista sensori:  {% else %}, {% endif -%}{{-
+                          states[t].name -}}
+
+                          {% endfor %}

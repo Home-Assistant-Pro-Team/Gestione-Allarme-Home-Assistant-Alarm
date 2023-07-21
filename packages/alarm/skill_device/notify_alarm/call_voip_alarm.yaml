@@ -1,154 +1,153 @@
 homeassistant:
   customize:
     package.node_anchors:
-        webhook_id:                                          &webhook_id    sip_call_webhook_id
-        registrar_uri (example fritz.box or 192.168.178.1):  &sip           fritz.box
+      webhook_id: &webhook_id sip_call_webhook_id
+      registrar_uri (example fritz.box or 192.168.178.1): &sip fritz.box
 
 automation:
-- alias: notify_alarm_voip
-  id: notify_alarm_voip
-  mode: queued
-  variables:
+  - alias: notify_alarm_voip
+    id: notify_alarm_voip
+    mode: queued
+    variables:
       code: >
         {% from 'alarm.jinja' import state_alarm %}
         {{ (state_alarm()|from_json)['code']}}
-  trigger:
-    - platform: event
-      event_type: customizations
-      event_data:
-        types: notify_alarm
-  action:
+    trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: notify_alarm
+    action:
       - or:
+          ###################################################################################
+          #  E' possibili selezionare le singole notifiche da abilitare
+          ###################################################################################
 
-###################################################################################
-#  E' possibili selezionare le singole notifiche da abilitare
-###################################################################################
+          # FILE: ARMED_AWAY
+          #- "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
+          #- "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
+          #- "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
+          - "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
 
-  # FILE: ARMED_AWAY
-        #- "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
-        #- "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
-        #- "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
-        - "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
+          # FILE: ARMED_NIGHT
+          #- "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
+          - "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
+          #- "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
 
-  # FILE: ARMED_NIGHT  
-        #- "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
-        - "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
-        #- "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
+          # FILE: CONTROL CODE
+          #- "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
+          - "{{trigger.event.data.notify == 'disattivato_con_codice_emergenza_solovoip'}}"
 
-  # FILE: CONTROL CODE
-        #- "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
-        - "{{trigger.event.data.notify == 'disattivato_con_codice_emergenza_solovoip'}}"
-        
-  # FILE: GENERAL DETACHED
-        #- "{{trigger.event.data.notify == 'detached_allarme_premuto_tasto'}}"
+          # FILE: GENERAL DETACHED
+          #- "{{trigger.event.data.notify == 'detached_allarme_premuto_tasto'}}"
 
-  # FILE: JAMMER DETECT
-        #- "{{trigger.event.data.notify == 'detect_jummer'}}"
+          # FILE: JAMMER DETECT
+          #- "{{trigger.event.data.notify == 'detect_jummer'}}"
 
-  # FILE: PERSON
-        #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
-        
-  # FILE: ROUTER
-        #- "{{trigger.event.data.notify == 'stato_router'}}"
-        
-  # FILE: UPS
-        - "{{trigger.event.data.notify == 'stato_ups'}}"
+          # FILE: PERSON
+          #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
 
-  # FILE: EXTERNAL BUTTON ALLARM
-        #- "{{trigger.event.data.notify == 'allarme_non_inserito_porta_aperta'}}"
+          # FILE: ROUTER
+          #- "{{trigger.event.data.notify == 'stato_router'}}"
 
-  # FILE: BATTERY STATE
-        #- "{{trigger.event.data.notify == 'stato_batterie'}}"
+          # FILE: UPS
+          - "{{trigger.event.data.notify == 'stato_ups'}}"
 
-  # FILE: INSERT ARMED NIGHT
-        #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+      # FILE: EXTERNAL BUTTON ALLARM
+      #- "{{trigger.event.data.notify == 'allarme_non_inserito_porta_aperta'}}"
 
-##############################################################
-#         DA QUESTO PUNTO NON MODIFICARE
-##############################################################
+      # FILE: BATTERY STATE
+      #- "{{trigger.event.data.notify == 'stato_batterie'}}"
 
-      - alias: Invia notifica allo script con messaggio. 
+      # FILE: INSERT ARMED NIGHT
+      #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+
+      ##############################################################
+      #         DA QUESTO PUNTO NON MODIFICARE
+      ##############################################################
+
+      - alias: Invia notifica allo script con messaggio.
         service: script.call_voip_alarm
-        data: 
+        data:
           message: "{{ trigger.event.data.message|default('Messaggio non impostato')  + trigger.event.data.continue_voip|default('') }}"
           for_each: >
-              {% if trigger.event.data.for_each is defined %}
-                {{trigger.event.data.for_each}}
-              {% else %}
-                {% from 'alarm.jinja' import person_alarm %}
-                {% set output = namespace(numbers=[]) %}
-                {%for d in person_alarm()|from_json if d['cellulare'] != 'none'%}
-                {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
-                {% endfor %}
-                {{output.numbers}}
-              {% endif %}
+            {% if trigger.event.data.for_each is defined %}
+              {{trigger.event.data.for_each}}
+            {% else %}
+              {% from 'personal.jinja' import persons %}
+              {% set output = namespace(numbers=[]) %}
+              {%for d in persons()|from_json if d['cellulare'] != 'none'%}
+              {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
+              {% endfor %}
+              {{output.numbers}}
+            {% endif %}
 
-- alias: "Azioni chiamata voip per disattivare allarme"
-  id: action_voip_disable_alarm
-  initial_state: true  
-  trigger:
-    - platform: webhook
-      webhook_id: *webhook_id
-      local_only: true
-      allowed_methods:
-        - POST
-  action:
-    - choose:
-        - alias: Abilita possibilità di disattivare allarme con chiamata cellulare
-          conditions:
-            - "{{ trigger.json.event == 'call_established'}}"
-          sequence:
-            - service: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.security_webhook
+  - alias: "Azioni chiamata voip per disattivare allarme"
+    id: action_voip_disable_alarm
+    initial_state: true
+    trigger:
+      - platform: webhook
+        webhook_id: *webhook_id
+        local_only: true
+        allowed_methods:
+          - POST
+    action:
+      - choose:
+          - alias: Abilita possibilità di disattivare allarme con chiamata cellulare
+            conditions:
+              - "{{ trigger.json.event == 'call_established'}}"
+            sequence:
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.security_webhook
 
-        - alias: Disattiva allarme con chiamata cellulare
-          conditions:
-            - "{{ trigger.json.event == 'entered_menu' }}"
-            - "{{ trigger.json.menu_id == 'disable_alarm' }}"
-            - "{{ is_state('input_boolean.security_webhook','on')}}"
-          sequence:
-            - alias: Interrompi script per chiamate perchè una persona ha risposto
-              service: script.turn_off
-              target:
-                entity_id: script.call_voip_alarm
-            - service: alarm_control_panel.alarm_disarm
-              data:
-                code: >
-                  {% from 'alarm.jinja' import state_alarm %}
-                  {{ (state_alarm()|from_json)['code']}}
-              target:
-                entity_id: >
-                  {% from 'alarm.jinja' import state_alarm %}
-                  {{ (state_alarm()|from_json)['alarm']}}
+          - alias: Disattiva allarme con chiamata cellulare
+            conditions:
+              - "{{ trigger.json.event == 'entered_menu' }}"
+              - "{{ trigger.json.menu_id == 'disable_alarm' }}"
+              - "{{ is_state('input_boolean.security_webhook','on')}}"
+            sequence:
+              - alias: Interrompi script per chiamate perchè una persona ha risposto
+                service: script.turn_off
+                target:
+                  entity_id: script.call_voip_alarm
+              - service: alarm_control_panel.alarm_disarm
+                data:
+                  code: >
+                    {% from 'alarm.jinja' import state_alarm %}
+                    {{ (state_alarm()|from_json)['code']}}
+                target:
+                  entity_id: >
+                    {% from 'alarm.jinja' import state_alarm %}
+                    {{ (state_alarm()|from_json)['alarm']}}
 
-        - alias: Blocca chiamate successive
-          conditions:
-            - "{{ trigger.json.event == 'entered_menu' }}"
-            - "{{ trigger.json.menu_id == 'block_call' }}"
-          sequence:
-            - alias: Interrompi script per chiamate perchè una persona ha risposto
-              service: script.turn_off
-              target:
-                entity_id: script.call_voip_alarm
+          - alias: Blocca chiamate successive
+            conditions:
+              - "{{ trigger.json.event == 'entered_menu' }}"
+              - "{{ trigger.json.menu_id == 'block_call' }}"
+            sequence:
+              - alias: Interrompi script per chiamate perchè una persona ha risposto
+                service: script.turn_off
+                target:
+                  entity_id: script.call_voip_alarm
 
-        - alias: Disabilita possibilità di disattivare allarme con chiamata cellulare
-          conditions:
-            - "{{ trigger.json.event == 'call_disconnected'}}"
-          sequence:
-            - service: input_boolean.turn_off
-              target:
-                entity_id: input_boolean.security_webhook
-            - alias: evento per indicare chiamata terminata allo script e far partire le successive
-              event: customizations
-              event_data:
-                types: call_alarm
+          - alias: Disabilita possibilità di disattivare allarme con chiamata cellulare
+            conditions:
+              - "{{ trigger.json.event == 'call_disconnected'}}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.security_webhook
+              - alias: evento per indicare chiamata terminata allo script e far partire le successive
+                event: customizations
+                event_data:
+                  types: call_alarm
 
 input_boolean:
   security_webhook:
@@ -158,56 +157,56 @@ script:
     alias: Chiamata voip per allarme
     mode: single
     variables:
-        sip: *sip
-        message: Attenzione allarme scattato! Inserire codice per disattivarlo o premi asterisco per bloccare le prossime chiamate
-        code: >
-          {% from 'alarm.jinja' import state_alarm %}
-          {{ (state_alarm()|from_json)['code']}}
-        for_each: >
-            {% from 'alarm.jinja' import person_alarm %}
-            {% set output = namespace(numbers=[]) %}
-            {%for d in person_alarm()|from_json if d['cellulare'] != 'none'%}
-            {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
-            {% endfor %}
-            {{output.numbers}}
+      sip: *sip
+      message: Attenzione allarme scattato! Inserire codice per disattivarlo o premi asterisco per bloccare le prossime chiamate
+      code: >
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['code']}}
+      for_each: >
+        {% from 'personal.jinja' import persons %}
+        {% set output = namespace(numbers=[]) %}
+        {%for d in persons()|from_json if d['cellulare'] != 'none'%}
+        {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
+        {% endfor %}
+        {{output.numbers}}
     sequence:
-    - repeat:
-        for_each: "{{for_each}}"
-        sequence:
-          - alias: Invia notifica
-            service: hassio.addon_stdin
-            data_template:
-              addon: c7744bff_ha-sip
-              input:
-                command: dial
-                number: sip:{{ repeat.item }}@{{sip}}
-                ring_timeout: 30
-                menu:
-                  message: "{{message}}"
-                  choices_are_pin: true
-                  timeout: 20
-                  choices:
-                    "{{code}}":
-                      id: disable_alarm
-                      message: Allarme disattivato. Arrivederci
-                      post_action: hangup
-                    "*":
-                      id: block_call
-                      message: Ok non verranno contattate altre persone. Arrivederci
-                      post_action: hangup
-                    default:
-                      id: wrong_code
-                      message: Codice inserito non valido
-                      post_action: return
-                    timeout:
-                      id: timeout
-                      message: Tempo scaduto. Arrivederci
-                      post_action: hangup
-          - wait_for_trigger:
-            - platform: event
-              event_type: customizations
-              event_data:
-                types: call_alarm
-            continue_on_timeout: true
-            timeout:
-              minutes: 1
+      - repeat:
+          for_each: "{{for_each}}"
+          sequence:
+            - alias: Invia notifica
+              service: hassio.addon_stdin
+              data_template:
+                addon: c7744bff_ha-sip
+                input:
+                  command: dial
+                  number: sip:{{ repeat.item }}@{{sip}}
+                  ring_timeout: 30
+                  menu:
+                    message: "{{message}}"
+                    choices_are_pin: true
+                    timeout: 20
+                    choices:
+                      "{{code}}":
+                        id: disable_alarm
+                        message: Allarme disattivato. Arrivederci
+                        post_action: hangup
+                      "*":
+                        id: block_call
+                        message: Ok non verranno contattate altre persone. Arrivederci
+                        post_action: hangup
+                      default:
+                        id: wrong_code
+                        message: Codice inserito non valido
+                        post_action: return
+                      timeout:
+                        id: timeout
+                        message: Tempo scaduto. Arrivederci
+                        post_action: hangup
+            - wait_for_trigger:
+                - platform: event
+                  event_type: customizations
+                  event_data:
+                    types: call_alarm
+              continue_on_timeout: true
+              timeout:
+                minutes: 1

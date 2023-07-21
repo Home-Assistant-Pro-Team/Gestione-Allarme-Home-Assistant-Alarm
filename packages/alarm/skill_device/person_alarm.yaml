@@ -1,10 +1,13 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Sensore Porta: &door binary_sensor.porta_blinadata
-        Lista familiari: &family 
-                              - person.marco
-                              - person.serena
+      Sensore Porta: &door binary_sensor.porta_blinadata
+      Lista familiari: &family
+        - person.marco
+        - person.serena
+      Lista notify per alert: &alert
+        - mobile_app_cellulare_marco
+        - mobile_app_samsung_s21
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
@@ -12,18 +15,18 @@ homeassistant:
 alert:
   not_home_battery:
     name: Avviso batterie con allarme inserito
-    message: >
-      {% from 'alarm.jinja' import person_alarm %}
+    message: >-
+      {% from 'personal.jinja' import persons %}
       {% set output = namespace(state_home=[],state_battery=[]) %}
       {# imposta le persone in casa #}
-      {%for d in person_alarm()|from_json if states[d.person].state == 'home'%}
+      {% for d in persons()|from_json if states[d.person].state == 'home' %}
         {%- set output.state_home = output.state_home + [d['person'] ] -%}
       {% endfor %}
       {# controlla che in casa ci siano 0 persone ma batterie scariche #}
-      {%for d in person_alarm()|from_json if output.state_home|count == 0 and states[d.battery].state|int < 15%}
-        {%- set output.state_battery = output.state_battery + [states[d['person'] ].name] -%}
+      {% for d in persons()|from_json if output.state_home|count == 0 and states[d.battery].state|int < 15 %}
+        {%- set output.state_battery = output.state_battery + [states[d['person']].name] -%}
       {% endfor %}
-        {{'Attenzione allarme inserito con telefono di '+ output.state_battery|join(' e ')+' scarico.' }}
+        {{ 'Attenzione allarme inserito con telefono di ' + output.state_battery|join(' e ') + ' scarico.' }}
     entity_id: sensor.stato_famiglia_allarme
     state: "not_home_battery"
     repeat: 5
@@ -32,33 +35,27 @@ alert:
       tag: not_home_battery
       actions:
         - action: "not_home_battery"
-          title: "Disattiva allarme" 
+          title: "Disattiva allarme"
         - action: "not_home_battery_ignore"
-          title: "Ignora" 
+          title: "Ignora"
     can_acknowledge: true
-    notifiers: >
-      {% from 'alarm.jinja' import person_alarm %}
-      {% set output = namespace(state_home=[]) %}
-        {%for dict in person_alarm()|from_json %}
-          {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-        {% endfor %}
-      {{output.state_home}}
+    notifiers: *alert
 
 template:
   - sensor:
       - name: Stato famiglia allarme
-        state: >
-          {% from 'alarm.jinja' import person_alarm %}
+        state: >-
+          {% from 'personal.jinja' import persons %}
           {% from 'alarm.jinja' import state_alarm %}
           {% set output = namespace(state_home=[],state_battery=[]) %}
           {% set alarm = (state_alarm()|from_json)['alarm'] %}
-            {%for d in person_alarm()|from_json if states[d.person].state == 'home'%}
+            {% for d in persons()|from_json if states[d.person].state == 'home' %}
               {# lista persone in casa #}
-              {%- set output.state_home = output.state_home + [d['person'] ] -%}
+              {% set output.state_home = output.state_home + [d['person']] %}
             {% endfor %}
-            {%for d in person_alarm()|from_json if states[d.battery].state|int < 15%}
+            {% for d in persons()|from_json if states[d.battery].state|int < 15 %}
               {# lista persone con batteria scarica #}
-              {%- set output.state_battery = output.state_battery + [d['person'] ] -%}
+              {%- set output.state_battery = output.state_battery + [d['person']] -%}
             {% endfor %}
           {# una sola persona in casa con batteria scarica #}
           {% if output.state_home|count == 1  %}
@@ -67,10 +64,10 @@ template:
                 home_battery
               {% else %}
                 home
-              {% endif%}
+              {% endif %}
             {% endfor %}
           {# nessuno in casa ma una persona con batteria scarica #}
-          {% elif output.state_home|count == 0 and output.state_battery|count > 0 and is_state(alarm,'armed_away') and is_state('input_boolean.alarm_battery_mobile','on')%}
+          {% elif output.state_home|count == 0 and output.state_battery|count > 0 and is_state(alarm,'armed_away') and is_state('input_boolean.alarm_battery_mobile', 'on') %}
             not_home_battery
           {# almeno una persona in casa batteria ok #}
           {% elif output.state_home|count > 0 %}
@@ -80,7 +77,7 @@ template:
             not_home
           {% else %}
             sconosciuto
-          {%endif%}
+          {% endif %}
 
 input_boolean:
   alarm_battery_mobile:
@@ -91,180 +88,177 @@ input_boolean:
   not_home_battery_disarmed:
 
 automation:
+  - alias: Attiva-Disattiva per presenza in casa
+    id: presence_allarm_auto
+    initial_state: true
+    variables:
+      alarm: >-
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['alarm'] }}
+    trigger:
+      - platform: state
+        entity_id: sensor.stato_famiglia_allarme
+      - platform: state
+        entity_id: input_boolean.modo_ospite
+        to: "off"
+        id: disable_mode_guest
+    action:
+      - choose:
+          - alias: >-
+              Imposta attivazione/disattivazione automatica in base alla presenza in casa. 
+              Controlla che in casa ci sia solo una persona ed ha il cellulare scarico
+            conditions:
+              - "{{ trigger.to_state.state == 'home_battery' and is_state('input_boolean.presence_person_active_alarm', 'on') and is_state(alarm, 'disarmed') and trigger.from_state.state is defined }}"
+            sequence:
+              - alias: Impedisci di inserire allarme globale per batteria scarica con 1 persona in casa
+                service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.presence_person_active_alarm
+              - alias: >-
+                  Imposta il check INTERVENTO stato batteria con persona in casa in ON. Interviene solo se input_boolean.presence_person_active_alarm attivo
+                  Serve ad indicare che attivazione/disattivazione automatica è stata disattivata per batteria scarica
+                service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.check_active_presence_person_active_alarm
+              - alias: Invia notifica push SOLO alla persone che si trovano in casa con telefono scarico solo PUSH
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  notify: persona_in_casa_tel_scarico
+                  tag: state_alarm
+                  critical: 1.0
+                  for_each: >-
+                    {% from 'personal.jinja' import persons %}
+                    {% set output = namespace(state_home=[]) %}
+                      {% for dict in persons()|from_json if states[dict.person].state == 'home' %}
+                        {% set output.state_home = output.state_home + ['notify.'+dict['notify']] %}
+                      {% endfor %}
+                      {{ output.state_home }}
+                  action1: None
+                  action2: None
+                  message: >-
+                    {% from 'personal.jinja' import persons %}
+                    {% for result in persons()|from_json if states[result.person].state == 'home' and states[result.battery].state|int < 50 %}
+                      {{ 'Mettere in carica il telefono di ' + states[result.person].name + ' batteria al ' + states[result.battery].state + ' %. Attivazione automatica allarme disattivata' }}
+                      {% break %}
+                    {% endfor %}
+              - alias: >-
+                  Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF
+                service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.not_home_battery_disarmed
 
-- alias: Attiva-Disattiva per presenza in casa
-  id: presence_allarm_auto
-  initial_state: true
-  variables:
-    alarm: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['alarm']}} 
-  trigger: 
-  - platform: state
-    entity_id: sensor.stato_famiglia_allarme
-  - platform: state
-    entity_id: input_boolean.modo_ospite
-    to: 'off'
-    id: disable_mode_guest
-  action:
-  - choose:
+          - alias: >-
+              Togli allarme globale per famigliare tornata a casa e 
+              controlla se attivazione/disattivazione automatica era stato disattivata per batteria scarica
+            conditions:
+              - "{{ trigger.to_state.state == 'home' }}"
+            sequence:
+              - alias: Riabilita controllo presenza
+                if: "{{ is_state('input_boolean.check_active_presence_person_active_alarm', 'on') }}"
+                then:
+                  - alias: Ripristina attivazione/disattivazione allarme automatico in base alla presenza
+                    service: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.presence_person_active_alarm
+                  - alias: >-
+                      Imposta il check INTERVENTO stato batteria con persona in casa in OFF 
+                      Serve ad indicare che attivazione/disattivazione automatica è stata riattivata per più persone in casa o batteria ok
+                    service: input_boolean.turn_off
+                    target:
+                      entity_id: input_boolean.check_active_presence_person_active_alarm
+              - alias: Disattiva allarme per rientro in casa
+                if: "{{ not (is_state(alarm, 'disarmed') or is_state(alarm, 'armed_night')) and is_state('input_boolean.presence_person_active_alarm', 'on') }}"
+                then:
+                  - service: alarm_control_panel.alarm_disarm
+                    data:
+                      code: >-
+                        {% from 'alarm.jinja' import state_alarm %}
+                        {{ (state_alarm()|from_json)['code'] }}
+                    target:
+                      entity_id: "{{ alarm }}"
+              - alias: >-
+                  Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF
+                service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.not_home_battery_disarmed
 
-    - alias: >
-        Imposta attivazione/disattivazione automatica in base alla presenza in casa. 
-        Controlla che in casa ci sia solo una persona ed ha il cellulare scarico
-      conditions: 
-         - "{{trigger.to_state.state == 'home_battery' and is_state('input_boolean.presence_person_active_alarm','on') and is_state(alarm,'disarmed') and trigger.from_state.state is defined}}"
-      sequence:
-        - alias: Impedisci di inserire allarme globale per batteria scarica con 1 persona in casa
-          service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.presence_person_active_alarm
-        - alias: >
-              Imposta il check INTERVENTO stato batteria con persona in casa in ON. Interviene solo se input_boolean.presence_person_active_alarm attivo
-              Serve ad indicare che attivazione/disattivazione automatica è stata disattivata per batteria scarica
-          service: input_boolean.turn_on
-          target:
-            entity_id: input_boolean.check_active_presence_person_active_alarm
-        - alias: Invia notifica push SOLO alla persone che si trovano in casa con telefono scarico solo PUSH
-          event: customizations
-          event_data:
-            types: notify_alarm
-            notify: persona_in_casa_tel_scarico
-            tag: state_alarm
-            critical: 1.0
-            for_each: >
-              {% from 'alarm.jinja' import person_alarm %}
-              {% set output = namespace(state_home=[]) %}
-                {%for dict in person_alarm()|from_json if states[dict.person].state == 'home'%}
-                  {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-                {% endfor %}
-                {{output.state_home}}
-            action1: None
-            action2: None
-            message: >
-              {% from 'alarm.jinja' import person_alarm %}
-              {% for result in person_alarm()|from_json if states[result.person].state == 'home' and states[result.battery].state|int < 50 %}
-                {{'Mettere in carica il telefono di '+states[result.person].name+' batteria al ' +states[result.battery].state +' %. Attivazione automatica allarme disattivata'}}
-                {% break %}
+          - alias: Inserisci allarme globale per famiglia fuori casa o disattivato modalità ospite con famiglia fuori casa
+            conditions:
+              - "{{ is_state('input_boolean.presence_person_active_alarm', 'on') and is_state(alarm, 'disarmed') }}"
+              - or:
+                  - "{{ trigger.to_state.state == 'not_home' or (trigger.to_state.state == 'not_home_battery' and is_state('input_boolean.not_home_battery_disarmed', 'off')) }}"
+                  - "{{ trigger.id == 'disable_mode_guest' and is_state('sensor.stato_famiglia_allarme', 'not_home') or ( is_state('sensor.stato_famiglia_allarme', 'not_home_battery') and is_state('input_boolean.not_home_battery_disarmed', 'off')) }}"
+            sequence:
+              - if: "{{ is_state('input_boolean.modo_ospite', 'on') }}"
+                then:
+                  - alias: INVIA NOTIFICA
+                    event: customizations
+                    event_data:
+                      types: notify_alarm
+                      #critical: 1.0
+                      tag: state_alarm
+                      notify: modalita_ospiti_no_armed
+                      message: La modalità ospite ha impedito l'inserimento dell'allarme fuori casa.
+                      title1: Inserisci allarme
+                      action1: armed_away
+                      title2: Modalità ospite OFF
+                      action2: ospite_off
+                else:
+                  - service: alarm_control_panel.alarm_arm_away
+                    target:
+                      entity_id: "{{ alarm }}"
+                  - alias: >-
+                      Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF
+                    service: input_boolean.turn_off
+                    target:
+                      entity_id: input_boolean.not_home_battery_disarmed
+
+  - alias: Disattivazione automatica rietro familiare
+    id: automatic_deactivation_of_family_reunion
+    variables:
+      alarm: >-
+        {% from 'alarm.jinja' import state_alarm %}
+        {{ (state_alarm()|from_json)['alarm']}}
+      door: *door
+    trigger:
+      - platform: state
+        entity_id: *family
+        from: "not_home"
+        to: "home"
+    condition: "{{ is_state( alarm , 'armed_night') }}"
+    action:
+      - alias: Invia notifica SOLO alla persona che rientra in casa
+        event: customizations
+        event_data:
+          types: notify_alarm
+          notify: rientro_in_casa_con_allarme_notte
+          tag: state_person
+          for_each: >-
+            {% from 'personal.jinja' import persons %}
+            {% set output = namespace(state_home=[]) %}
+              {% for dict in persons()|from_json if dict['person'] == trigger.entity_id %}
+                {% set output.state_home = output.state_home + ['notify.'+dict['notify']] %}
               {% endfor %}
-        - alias: >
-            Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF 
-          service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.not_home_battery_disarmed
-
-    - alias: > 
-        Togli allarme globale per famigliare tornata a casa e 
-        controlla se attivazione/disattivazione automatica era stato disattivata per batteria scarica
-      conditions:
-      - "{{trigger.to_state.state == 'home'}}"
-      sequence:
-      - alias: Riabilita controllo presenza
-        if: "{{ is_state('input_boolean.check_active_presence_person_active_alarm','on')}}"
-        then:
-          - alias: Ripristina attivazione/disattivazione allarme automatico in base alla presenza
-            service: input_boolean.turn_on
-            target:
-              entity_id: input_boolean.presence_person_active_alarm
-          - alias: >
-              Imposta il check INTERVENTO stato batteria con persona in casa in OFF 
-              Serve ad indicare che attivazione/disattivazione automatica è stata riattivata per più persone in casa o batteria ok
-            service: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.check_active_presence_person_active_alarm
-      - alias: Disattiva allarme per rientro in casa
-        if: "{{ not (is_state(alarm,'disarmed') or is_state(alarm,'armed_night')) and is_state('input_boolean.presence_person_active_alarm','on')}}"
-        then:
-          - service: alarm_control_panel.alarm_disarm
-            data:
-              code: >
-                {% from 'alarm.jinja' import state_alarm %}
-                {{ (state_alarm()|from_json)['code']}}
-            target:
-              entity_id: "{{ alarm}}"
-      - alias: >
-          Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF 
-        service: input_boolean.turn_off
+              {{ output.state_home }}
+          title: "--ALLARME RIENTRO--"
+          message: "{{ trigger.to_state.name|string + ', disattivo allarme notte preventivamente per il tuo rientro.' }}"
+      - service: alarm_control_panel.alarm_disarm
+        data:
+          code: >-
+            {% from 'alarm.jinja' import state_alarm %}
+            {{ (state_alarm()|from_json)['code'] }}
         target:
-          entity_id: input_boolean.not_home_battery_disarmed
-
-    - alias: Inserisci allarme globale per famiglia fuori casa o disattivato modalità ospite con famiglia fuori casa
-      conditions:
-      - "{{is_state('input_boolean.presence_person_active_alarm','on') and is_state(alarm,'disarmed') }}"
-      - or: 
-          - "{{trigger.to_state.state == 'not_home' or (trigger.to_state.state == 'not_home_battery' and is_state('input_boolean.not_home_battery_disarmed','off')) }}"
-          - "{{trigger.id == 'disable_mode_guest' and is_state('sensor.stato_famiglia_allarme','not_home') or ( is_state('sensor.stato_famiglia_allarme','not_home_battery') and is_state('input_boolean.not_home_battery_disarmed','off')) }}"
-      sequence:
-      - if: "{{is_state('input_boolean.modo_ospite','on')}}"
-        then: 
-          - alias: INVIA NOTIFICA
-            event: customizations
-            event_data:
-              types: notify_alarm
-              critical: 1.0
-              tag: state_alarm
-              notify: modalita_ospiti_no_armed
-              message: La modalità ospite ha impedito l'inserimento dell'allarme fuori casa.
-              title1: Inserisci allarme
-              action1: armed_away
-              title2: Modalità ospite OFF
-              action2: ospite_off
-        else:
-        - service: alarm_control_panel.alarm_arm_away
-          target:
-            entity_id: "{{ alarm}}"
-        - alias: >
-            Imposta il check INTERVENTO stato batteria con persona fuori casa che ha disattivato allarme in OFF 
-          service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.not_home_battery_disarmed
-
-- alias: Disattivazione automatica rietro familiare
-  id: automatic_deactivation_of_family_reunion
-  variables:
-    alarm: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['alarm']}}
-    door: *door
-  trigger:
-    - platform: state
-      entity_id: 
-        *family
-      from: "not_home"
-      to: "home"
-  condition: "{{is_state( alarm , 'armed_night')}}"
-  action:
-    - alias: Invia notifica SOLO alla persona che rientra in casa
-      event: customizations
-      event_data:
-        types: notify_alarm
-        notify: rientro_in_casa_con_allarme_notte
-        tag: state_person
-        for_each: >
-          {% from 'alarm.jinja' import person_alarm %}
-          {% set output = namespace(state_home=[]) %}
-            {%for dict in person_alarm()|from_json if dict['person'] == trigger.entity_id%}
-              {%- set output.state_home = output.state_home + ['notify.'+dict['notify'] ] -%}
-            {% endfor %}
-            {{output.state_home}}
-        title: "--ALLARME RIENTRO--"
-        message: "{{trigger.to_state.name}}, disattivo l'allarme notte preventivamente per il tuo rientro."
-    - service: alarm_control_panel.alarm_disarm
-      data:
-        code: >
-          {% from 'alarm.jinja' import state_alarm %}
-          {{ (state_alarm()|from_json)['code']}}
-      target:
-        entity_id: "{{ alarm}}"
-    - wait_for_trigger:
-        - platform: state
-          entity_id: *door
-          from: "on"
-          to: "off"
-          for:
-            seconds: 5
-      timeout:
-        minutes: 5
-    - service: alarm_control_panel.alarm_arm_night
-      target:
-        entity_id: "{{ alarm}}"
+          entity_id: "{{ alarm }}"
+      - wait_for_trigger:
+          - platform: state
+            entity_id: *door
+            from: "on"
+            to: "off"
+            for:
+              seconds: 5
+        timeout:
+          minutes: 5
+      - service: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: "{{ alarm }}"

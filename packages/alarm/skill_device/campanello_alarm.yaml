@@ -1,73 +1,72 @@
 homeassistant:
   customize:
     package.node_anchors:
-        Campanello: &doorbell switch.campanello
+      Campanello: &doorbell switch.campanello
 
 ##############################################################
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-- alias: Campanello come allarme
-  id: bell_for_alarm
-  mode: restart
-  variables:
-    alarm: >
-      {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['alarm']}}
-  trigger:
-    - platform: template
-      value_template: >
+  - alias: Campanello come allarme
+    id: bell_for_alarm
+    mode: restart
+    variables:
+      alarm: >
         {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'pending')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
-    - platform: template
-      value_template: >
-        {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'triggered')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
-    - platform: template
-      value_template: >
-        {% from 'alarm.jinja' import state_alarm %}
-        {%set alarm = (state_alarm()|from_json)['alarm'] %}
-        {{ is_state(alarm,'disarmed')  and now() < states[alarm].last_changed+ timedelta(seconds=1)}}
-  action:
-  - choose:
+        {{ (state_alarm()|from_json)['alarm']}}
+    trigger:
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - platform: template
+        value_template: >
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+    action:
+      - choose:
+          - alias: Primo avviso sensore scattato
+            conditions:
+              - "{{ trigger.to_state.state == 'pending' }}"
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: *doorbell
+              - delay:
+                  milliseconds: 100
+              - service: switch.turn_off
+                target:
+                  entity_id: *doorbell
 
-      - alias: Primo avviso sensore scattato
-        conditions:
-          - "{{trigger.to_state.state == 'pending'}}"
-        sequence:
-        - service: switch.turn_on
-          target:
-            entity_id: *doorbell
-        - delay:
-            milliseconds: 100
-        - service: switch.turn_off
-          target:
-            entity_id: *doorbell
+          - alias: Allarme scattato
+            conditions:
+              - "{{ trigger.to_state.state == 'triggered' }}"
+            sequence:
+              - repeat:
+                  until:
+                    - condition: template
+                      value_template: "{{ is_state(alarm, 'triggered') }}"
+                  sequence:
+                    - service: switch.toggle
+                      target:
+                        entity_id: *doorbell
+                    - delay:
+                        seconds: 1
+              - service: switch.turn_off
+                target:
+                  entity_id: *doorbell
 
-      - alias: Allarme scattato
-        conditions:
-          - "{{trigger.to_state.state == 'triggered'}}"
-        sequence:
-          - repeat:
-              until:
-                - condition: template
-                  value_template: "{{is_state(alarm , 'triggered')}}"
-              sequence:
-                - service: switch.toggle
-                  target:
-                    entity_id: *doorbell
-                - delay:
-                    seconds: 1
-          - service: switch.turn_off
-            target:
-              entity_id: *doorbell
-              
-      - alias: Allarme disattivato
-        conditions:
-          - "{{trigger.to_state.state == 'disarmed'}}"
-        sequence:
-        - service: switch.turn_off
-          target:
-            entity_id: *doorbell
+          - alias: Allarme disattivato
+            conditions:
+              - "{{ trigger.to_state.state == 'disarmed' }}"
+            sequence:
+              - service: switch.turn_off
+                target:
+                  entity_id: *doorbell
