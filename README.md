@@ -16,6 +16,15 @@ Per far funzionare l'allarme, è sufficiente utilizzare la cartella alarm_contro
 Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_panel" e offre una gestione più completa dell'allarme. Nelle sezioni successive, spiegheremo in dettaglio le funzioni di ciascuna parte del progetto.
 
 È importante notare che le uniche cartelle obbligatorie da utilizzare sono "Alarm control panel" e "custom_template", mentre gli altri file sono facoltativi. Tuttavia, se si dispone dei dispositivi richiesti, consigliamo l'utilizzo di tutti i file disponibili per migliorare le funzionalità dell'allarme.
+
+### **Supportaci**
+Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
+I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
+Grazie di cuore per il tuo sostegno!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
+
+
 ### **Indice**
 - [Requisiti](#requisiti)
 - [Intro](#intro)
@@ -443,7 +452,7 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 ### Versione: 2.0
 - Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
 - Separate informazioni person e media_player 
-- 
+
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
