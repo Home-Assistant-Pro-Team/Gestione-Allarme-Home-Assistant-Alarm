@@ -81,7 +81,7 @@ homeassistant:
     package.node_anchors:
         Allarme: &alarm alarm_control_panel.home_alarm
 ```
-La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". 
+La prima cosa da fare è caricare la cartella "custom_templates" nella directory "config". 
 
 Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
 - **alarm.jinja**
