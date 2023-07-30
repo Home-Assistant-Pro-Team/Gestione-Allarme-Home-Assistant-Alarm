@@ -7,18 +7,18 @@ automation:
         {% set id_power = (
             expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) +
             expand(state_attr('sensor.lista_sensori_allarme_notte', 'print_list_group')) +
-            expand('group.include_alarm_entities'))|map(attribute='entity_id')|map('device_id')|unique|list %}
+            expand('group.include_alarm_entities')) | map(attribute='entity_id') | map('device_id') | unique | list %}
         {% set ns = namespace(result =[]) %}
         {# Mostra solo dispositivi con batteria residua minore di 15 #}
-        {% for t in id_power if expand(device_entities(t))|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'battery')|map(attribute='state')|list|first|int < 15 %}
+        {% for t in id_power if expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | map(attribute='state') | list | first | int < 15 %}
         {# imposta enity_id delle entità batteria #}
-            {% set entity_battery= expand(device_entities(t))|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'battery')|map(attribute='entity_id')|list|first %}
+            {% set entity_battery= expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | map(attribute='entity_id') | list | first %}
                 {% set ns.result = ns.result + [{'name': states[entity_battery].name, 'battery_level': states[entity_battery].state}] %}
         {% else %}
             Nessuna
         {% endfor %}
         {% for d in ns.result -%}
-          {% -if  loop.first%}Batterie in esaurimento: {%endif %}
+          {% -if  loop.first%} Batterie in esaurimento: {%endif %}
             {{- d.name -}} {{ '(' + d.battery_level + '%)' }}
           {% -if not loop.last%},{%endif %}
         {% endfor %}

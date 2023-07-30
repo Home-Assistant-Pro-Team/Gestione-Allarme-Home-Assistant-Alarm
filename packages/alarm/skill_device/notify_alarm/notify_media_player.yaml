@@ -1,8 +1,13 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+      Dominio: &my_external_domain https://la_mia_casa.it
+
 automation:
   - alias: notify_alarm_media_player
     id: notify_alarm_media_player
-    mode: queued
     variables:
+      my_external_domain: *my_external_domain
       volume: 0.5
       alexa: >
         {% from 'personal.jinja' import media_players %}
@@ -24,38 +29,40 @@ automation:
           ###################################################################################
 
           # FILE: ARMED_AWAY
-          - "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
-          - "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
-          - "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
-          - "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
-          #- "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
-          - "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_inserimento' }}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_inserito' }}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_sensore_rilevato' }}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_scattato_media_player' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_scattato' }}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_disattivato' }}"
 
           # FILE: ARMED_NIGHT
-          - "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
-          - "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
-          - "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
-          - "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
-          - "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_inserimento' }}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_inserito' }}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_sensore_rilevato' }}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_scattato_media_player' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_scattato' }}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_disattivato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_chiusa_finestra' }}"
 
           # FILE: CONTROL CODE
-          #- "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
+          #- "{{ trigger.event.data.notify == 'tentativi_codici_superati' }}"
 
           # FILE: JAMMER DETECT
-          #- "{{trigger.event.data.notify == 'detect_jummer'}}"
+          #- "{{ trigger.event.data.notify == 'detect_jummer' }}"
 
           # FILE: PERSON
-          #- "{{trigger.event.data.notify == 'persona_in_casa_tel_scarico'}}"
-          #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
+          #- "{{ trigger.event.data.notify == 'persona_in_casa_tel_scarico' }}"
+          #- "{{ trigger.event.data.notify == 'modalita_ospiti_no_armed' }}"
 
           # FILE: BATTERY STATE
-          #- "{{trigger.event.data.notify == 'stato_batterie'}}"
+          #- "{{ trigger.event.data.notify == 'stato_batterie' }}"
 
           # FILE: INSERT ARMED NIGHT
-          - "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+          - "{{ trigger.event.data.notify == 'modalita_ospiti_no_armed_night' }}"
 
+          # FILE: presence_simulation
+          - "{{ trigger.event.data.notify == 'presence_simulation' }}"
       ##############################################################
       #         DA QUESTO PUNTO NON MODIFICARE
       ##############################################################
@@ -63,27 +70,46 @@ automation:
       - alias: Imposta volume Notifica
         service: media_player.volume_set
         data:
-          entity_id: "{{expand(google + alexa)|map(attribute='entity_id')|list}}"
-          volume_level: "{{ trigger.event.data.volume|default(volume) }}"
+          entity_id: "{{ expand(google + alexa) | map(attribute='entity_id') | list }}"
+          volume_level: "{{ trigger.event.data.volume | default(volume) }}"
 
       - alias: INVIA NOTIFICA
         parallel:
           - alias: Invia notifica ad Google
             if: >
-              {{google|count > 0}}
+              {{ google | count > 0 }}
             then:
-              - service: tts.google_translate_say
-                data:
-                  entity_id: "{{google}}"
-                  message: "{{ trigger.event.data.message |default('Messaggio non impostato')}}"
+              - if: "{{ trigger.event.data.mp3 is defined }}"
+                then:
+                  - service: media_player.play_media
+                    data:
+                      media_content_id: "{{ '/local/audio_allarme/' + trigger.event.data.message + '.mp3' }}"
+                      media_content_type: audio/mp3
+                    target:
+                      entity_id: "{{ trigger.event.data.target_google if trigger.event.data.target_google is defined else google }}"
+                else:
+                  - service: tts.google_translate_say
+                    data:
+                      entity_id: "{{ google }}"
+                      message: "{{ trigger.event.data.message | default('Messaggio non impostato') }}"
 
           - alias: Invia notifica ad Alexa
             if: >
-              {{alexa|count > 0}}
+              {{ alexa | count > 0 }}
             then:
-              service: notify.alexa_media
-              data:
-                target: "{{alexa}}"
-                data:
-                  method: spoken
-                message: "{{ trigger.event.data.message |default('Messaggio non impostato')}}"
+              - if: "{{ trigger.event.data.mp3 is defined }}"
+                then:
+                  - service: notify.alexa_media
+                    data:
+                      message: >-
+                        {{ "<audio src='" + my_external_domain + "/local/audio_allarme/" + trigger.event.data.message + ".mp3'/>" }}
+                      data:
+                        type: tts
+                      target: "{{ trigger.event.data.target_alexa if trigger.event.data.target_alexa is defined else alexa }}"
+                else:
+                  - service: notify.alexa_media
+                    data:
+                      target: "{{ alexa }}"
+                      data:
+                        method: spoken
+                      message: "{{ trigger.event.data.message | default('Messaggio non impostato') }}"

@@ -1,12 +1,12 @@
 #################################################################
 #                       Requisito importante:                   #
 #   i sensori finestra impostare corretto device class (window) #
-##############################################################  #
+#################################################################
 template:
   - select:
       - name: "Aggiungi o rimuovi zone allarme notte"
         state: "{{ '' }}"
-        options: "{{ ['RESET'] + state_attr('sensor.lista_zone_alarm_setting', 'print_list_group')|list }}"
+        options: "{{ ['RESET'] + state_attr('sensor.lista_zone_alarm_setting', 'print_list_group') | list }}"
         select_option:
           - event: customizations
             event_data:
@@ -27,13 +27,13 @@ template:
         state: "{{ trigger.event.data.sensor_select }}"
         attributes:
           print_list_group: >-
-            {% set option = trigger.event.data.sensor_select|string %}
+            {% set option = trigger.event.data.sensor_select | string %}
             {% set lists = this.attributes.print_list_group %}
             {% if option == 'RESET' %}
             {% elif option in lists %}
-              {{ lists|list|select('ne', option)|list }}
+              {{ lists | list | select('ne', option) | list }}
             {% else %}
-              {{ lists|list + [option] }}
+              {{ lists | list + [option] }}
             {% endif %}
 
   - sensor:
@@ -56,18 +56,18 @@ template:
       - platform: template
         value_template: >
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'armed_night') and is_state('input_boolean.alarm_triggered_state', 'off') }}
     sensor:
       - name: Lista sensori allarme zone attiv night
         state: >-
-          {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
-          {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
-            {{ (window + not_window)|count}}
+          {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_night', 'print_list_group')) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'window') | selectattr('state', 'eq', 'off') | map(attribute='entity_id') | list %}
+          {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group')) | selectattr('attributes.device_class', 'defined') | rejectattr('attributes.device_class', 'eq', 'window') | map(attribute='entity_id') | list %}
+            {{ (window + not_window) | count }}
         attributes:
           print_list_group: >
-            {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
-            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
+            {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group')) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'window') | selectattr('state', 'eq', 'off') | map(attribute='entity_id') | list %}
+            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group')) | selectattr('attributes.device_class', 'defined') | rejectattr('attributes.device_class', 'eq', 'window') | map(attribute='entity_id') | list %}
               {{ (window + not_window)}}
 
 automation:
@@ -78,22 +78,22 @@ automation:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'armed_night') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     condition:
       - "{{ is_state('input_select.setting_zone_entity', 'Zone') }}"
@@ -116,10 +116,10 @@ automation:
                   volume: 0.2
                   action2: None
                   message: >-
-                    {% set entities= expand(state_attr('sensor.sensor.lista_sensori_allarme_zone_night', 'print_list_group'))|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'window')|selectattr('state', 'eq', 'on')|map(attribute='name')|list %}
-                    {% if entities|length != 0 %}
-                      {% if entities|count > 2 %}
-                         {{ 'Allarme notte attivo tra 40 secondi. Esclusi ' + entities|count|string + ' sensori' }}
+                    {% set entities= expand(state_attr('sensor.sensor.lista_sensori_allarme_zone_night', 'print_list_group')) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'window') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+                    {% if entities | length != 0 %}
+                      {% if entities | count > 2 %}
+                         {{ 'Allarme notte attivo tra 40 secondi. Esclusi ' + entities | count | string + ' sensori' }}
                       {% else %}
                         {% for element in entities %}
                           {% if loop.first %}Allarme notte attivo tra 40 secondi. Escluso sensore: {% else %}, {% endif -%} {{-element-}}
@@ -164,9 +164,9 @@ automation:
                 event_data:
                   types: notify_alarm
                   notify: allarme_notte_scattato_media_player
-                  message: Attenzione. Allarme collegato alla centrale operativa. Pattuglia in arrivo!
-                  volume: 1
-
+                  volume: 0.2
+                  message: sirena
+                  mp3: true
           - alias: Allarme disattivato
             conditions:
               - "{{ trigger.to_state.state == 'disarmed' }}"
@@ -185,14 +185,14 @@ automation:
                   types: notify_alarm
                   notify: allarme_notte_disattivato
                   tag: state_alarm
-                  volume: "{{ 0.7 if is_state('input_boolean.alarm_triggered_state','on') else 0.3 }}"
+                  volume: "{{ 0.7 if is_state('input_boolean.alarm_triggered_state', 'on') else 0.3 }}"
                   action2: None
                   action1: None
                   message: >-
                     {% if is_state('input_boolean.alarm_triggered_state', 'on') %}
                       {{ 'Attenzione allarme notte scattato in vostra assenza il ' + as_local(states['input_boolean.alarm_triggered_state'].last_changed).strftime("%H:%M") + '. Allarme disattivato.' }}
                     {% else %}
-                      Allarme a zone disattivato. Buongiorno
+                      Allarme notte a zone disattivato. Buongiorno
                     {% endif %}
 
   - alias: Trigger Allarme Notte a zone
@@ -206,7 +206,7 @@ automation:
       - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_zone_attiv_night', 'print_list_group') }}"
       - >-
         {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
+        {% set alarm = (state_alarm() | from_json) ['alarm'] %}
         {{ states[alarm].state == 'armed_night' }}
     action:
       - alias: Fai scattare allarme quando un sensore passa allo stato on
@@ -218,7 +218,7 @@ automation:
             target:
               entity_id: >-
                 {% from 'alarm.jinja' import state_alarm %}
-                {{ (state_alarm()|from_json)['alarm'] }}
+                {{ (state_alarm() | from_json) ['alarm'] }}
           - alias: INVIA NOTIFICA
             event: customizations
             event_data:

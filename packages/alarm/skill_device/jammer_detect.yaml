@@ -13,9 +13,9 @@ template:
       - name: "Jammer detect entities"
         state: "Disabilitato"
         options: >-
-          {% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
+          {% set exclude = expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list %}
           {% set output = namespace(numbers=[]) %}
-          {% set domain = states.sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'signal_strength') %}
+          {% set domain = states.sensor | rejectattr('entity_id', 'in',exclude) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'signal_strength') %}
           {% for states in domain if states.state != 'unavailable' and states.state != 'unknown' %}
             {% set output.numbers = output.numbers + [states.name ] %}
               {% if loop.last %} 
@@ -42,11 +42,11 @@ template:
             {% set lists = this.attributes.print_list_group %}
             {% if option == 'RESET' %}
             {% else %}
-              {%- for device in states.sensor if device.name|lower == option|lower-%}
+              {%- for device in states.sensor if device.name | lower == option | lower-%}
                 {% if device.entity_id in lists%}
-                  {{lists|list|select('ne',device.entity_id)|list }}
+                  {{lists | list | select('ne',device.entity_id) | list }}
                 {%else%}
-                    {% set ns = namespace(entities=lists|list|select('ne', device.entity_id )|list)%}
+                    {% set ns = namespace(entities=lists | list | select('ne', device.entity_id ) | list)%}
                       {{ ns.entities + [device.entity_id] }}
                   {%- endif -%}
               {%- endfor -%}
@@ -54,7 +54,7 @@ template:
 
   - sensor:
       - name: Jammer detect count entities
-        state: "{{ state_attr('sensor.lista_sensori_jummer', 'print_list_group')|count }}"
+        state: "{{ state_attr('sensor.lista_sensori_jummer', 'print_list_group') | count }}"
         unit_of_measurement: "Voti"
 
 automation:
@@ -62,13 +62,13 @@ automation:
     id: cb5687088f82426289e16ed344945eea
     trigger:
       - platform: template
-        value_template: "{{ state_attr('sensor.jammer_detect_trigger_entities', 'offline')|int(0) >= states('input_number.jammer_detect_high_availability_vote')|int(0) }}"
+        value_template: "{{ state_attr('sensor.jammer_detect_trigger_entities', 'offline') | int(0) >= states('input_number.jammer_detect_high_availability_vote') | int(0) }}"
     condition:
       - condition: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
-          {{  is_state(alarm, 'armed_away') }}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm, 'armed_away') }}
     action:
       - alias: INVIA NOTIFICA
         event: customizations
@@ -79,12 +79,12 @@ automation:
           critical: 1.0
           title: "--Detect Jummer"
           message: >
-            {% set offline = expand(state_attr('sensor.lista_sensori_jummer','print_list_group'))|selectattr('state', 'in', ['unknown','unavailable'])|map(attribute='name')|list %}
-            {% if offline|length != 0 %}
-              {% if offline|count > 4 %}
-                {{ 'Possibile impiego di jammer per dispositivi offline: ' + offline|count|string }}
+            {% set offline = expand(state_attr('sensor.lista_sensori_jummer', 'print_list_group')) | selectattr('state', 'in', ['unknown', 'unavailable']) | map(attribute='name') | list %}
+            {% if offline | length != 0 %}
+              {% if offline | count > 4 %}
+                {{ 'Possibile impiego di jammer per dispositivi offline: ' + offline | count | string }}
               {% else %}
-                {{ 'Possibile impiego di jammer per dispositivi offline:' + offline|join(', ') }}
+                {{ 'Possibile impiego di jammer per dispositivi offline:' + offline | join(', ') }}
               {% endif %}
             {% else %}
               Errore invio notifica

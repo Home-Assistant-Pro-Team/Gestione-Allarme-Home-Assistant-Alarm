@@ -1,0 +1,284 @@
+timer:
+  delay_active_presence_simulation:
+    name: Ritardo avvio simulazione presenza
+    restore: true
+  delay_active_motion_simulation:
+    name: Ritardo azioni casa
+    restore: true
+
+input_number:
+  delay_active_presence_simulation:
+    name: Ritardo avvio simulazione presenza
+    mode: box
+    icon: mdi:timelapse
+    unit_of_measurement: "h"
+    min: 0
+    max: 48
+    step: 1
+
+input_boolean:
+  presence_simulation:
+    name: Simulazione presenza
+
+input_datetime:
+  presence_simulation_on:
+    has_date: false
+    has_time: true
+    name: Orario inizio simulazione presenza
+  presence_simulation_off:
+    has_date: false
+    has_time: true
+    name: Orario fine simulazione presenza
+
+template:
+  # LISTA MP3
+  - sensor:
+      - name: Lista mp3 simulazione presenza
+        state: "{{ states('automation.simulazione_presenza_allarme') }}"
+        attributes:
+          list_mp3: >-
+            {{
+              [
+                'audio1',
+                'audio2',
+                'audio3',
+                'audio4',
+              ] 
+            }}
+
+  # LIGHT
+  - select:
+      - name: "Aggiungi o rimuovi luci per simulazione presenza"
+        state: "{{ states('sensor.lista_luci_allarme_per_simulazione_presenza') }}"
+        options: >-
+          {% from 'alarm.jinja' import presence_simulation %}
+          {{ presence_simulation(states.light) }}
+        select_option:
+          - event: customizations
+            event_data:
+              types: presence_simulation_light
+              sensor_select: "{{ option }}"
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: presence_simulation_light
+    sensor:
+      - name: Lista luci allarme per simulazione presenza
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group, states.light) }}
+          print_list_name: >-
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
+  # COVER
+  - select:
+      - name: "Aggiungi o rimuovi cover per simulazione presenza"
+        state: "{{ states('sensor.lista_cover_allarme_per_simulazione_presenza') }}"
+        options: >-
+          {% from 'alarm.jinja' import presence_simulation %}
+          {{ presence_simulation(states.cover) }}
+        select_option:
+          - event: customizations
+            event_data:
+              types: presence_simulation_cover
+              sensor_select: "{{ option }}"
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: presence_simulation_cover
+    sensor:
+      - name: Lista cover allarme per simulazione presenza
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group, states.cover) }}
+          print_list_name: >-
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
+  # MEDIAPLAYER ALEXA, GOOGLE
+  - select:
+      - name: "Aggiungi o rimuovi media player per simulazione presenza"
+        state: "{{ states('sensor.lista_media_player_allarme_per_simulazione_presenza') }}"
+        options: >-
+          {% from 'personal.jinja' import media_players %}
+          {% set output = namespace(numbers=[]) %}
+          {% for d in media_players('cast').split() + media_players('alexa_media').split() %}
+            {% set output.numbers = output.numbers + [states[d].name ] %}
+          {% endfor %}
+            {{ ['RESET'] + output.numbers }}
+        select_option:
+          - event: customizations
+            event_data:
+              types: presence_simulation_media_player
+              sensor_select: "{{ option }}"
+
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: presence_simulation_media_player
+    sensor:
+      - name: Lista media player allarme per simulazione presenza
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group, states.media_player) }}
+          print_list_name: >-
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
+
+automation:
+  - alias: Simulazione presenza allarme
+    id: simulazione_presenza_allarme
+    initial_state: true
+    trigger:
+      - alias: Allarme inserito
+        platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm, 'armed_away') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+      - alias: Inizio simulazione presenza
+        platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.delay_active_presence_simulation
+      - alias: Step di simulazione presenza
+        platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.delay_active_motion_simulation
+      - alias: Allarme disattivato
+        platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+    action:
+      - alias: Timer generale per avvio gestione simulazione presenza
+        if:
+          - "{{ trigger.to_state.state == 'armed_away' and is_state('input_boolean.alarm_triggered_state', 'off') }}"
+          - "{{ is_state('input_boolean.presence_simulation', 'on') }}"
+        then:
+          - alias: Imposta timer per inizio simulazione presenza
+            service: timer.start
+            data:
+              duration:
+                hours: "{{ states('input_number.delay_active_presence_simulation') | int(default=0) }}"
+            target:
+              entity_id: timer.delay_active_presence_simulation
+          - delay:
+              minutes: 1
+          - alias: Salva stato luci e tapparelle selezionate
+            service: scene.create
+            data:
+              scene_id: light_cover_presence_simulation
+              snapshot_entities: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') + state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group') }}"
+
+      - alias: Avvio simulazione presenza
+        if:
+          - "{{ is_state('input_boolean.presence_simulation', 'on') }}"
+          - or:
+              - "{{ trigger.event.data.entity_id == 'timer.delay_active_presence_simulation' }}"
+              - "{{ trigger.event.data.entity_id == 'timer.delay_active_motion_simulation' }}"
+        then:
+          - alias: Imposta timer per ripetizione simulazione presenza
+            service: timer.start
+            data:
+              duration:
+                minutes: "{{ range(10, 59) | random }}"
+            target:
+              entity_id: timer.delay_active_motion_simulation
+          - if:
+              - alias: "Verifica se fascia oraria corretta"
+                condition: time
+                after: "input_datetime.presence_simulation_on"
+                before: "input_datetime.presence_simulation_off"
+
+            then:
+              # LUCI
+              - alias: "Verifica se dopo tramonto"
+                condition: state
+                entity_id: sun.sun
+                state: below_horizon
+              - alias: Spegni tutte le luci
+                service: light.turn_off
+                target:
+                  entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') }}"
+              - alias: Accendi un terzo (in eccesso) dello luci in modo casuale
+                repeat:
+                  count: "{{ (state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | count / 3 )| round(0) }}"
+                  sequence:
+                    - alias: Accenddi una luce casuale
+                      service: light.turn_on
+                      target:
+                        entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | random }}"
+              # COVER
+              - alias: Muovi la metà (in difetto) delle tapparelle ad una percentuale causale
+                repeat:
+                  count: >-
+                    {% set covers = state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group') | count %}
+                    {{ 1 if 0 < covers <= 1 else covers // 2 }}
+                  sequence:
+                    - alias: Imposta tapparelle ad una posizione casuale multipla di 10
+                      service: cover.set_cover_position
+                      data:
+                        position: "{{ range(11) | random * 10}}"
+                      target:
+                        entity_id: "{{ state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group') | random }}"
+              # MEDIA_PLAYER
+              - variables:
+                  alexa: >-
+                    {% set output = namespace(numbers=[]) %}
+                    {% for integrations in integration_entities('alexa_media') if integrations in state_attr('sensor.lista_media_player_allarme_per_simulazione_presenza', 'print_list_group') %}
+                      {% set output.numbers = output.numbers + [integrations] %}
+                    {% endfor %}
+                      {{output.numbers}}
+                  google: >-
+                    {% set output = namespace(numbers=[]) %}
+                    {% for integrations in integration_entities('cast') if integrations in state_attr('sensor.lista_media_player_allarme_per_simulazione_presenza', 'print_list_group') %}
+                      {% set output.numbers = output.numbers + [integrations] %}
+                    {% endfor %}
+                      {{output.numbers}}
+
+              - alias: Attiva i media player
+                event: customizations
+                event_data:
+                  types: notify_alarms
+                  notify: presence_simulation
+                  volume: 0.2
+                  message: "{{ state_attr('sensor.lista_mp3_simulazione_presenza', 'list_mp3') | random }}"
+                  mp3: true
+                  target_alexa: "{{ alexa }}"
+                  target_google: "{{ google }}"
+
+            else:
+              - alias: Spegni tutte le luci per notte
+                service: light.turn_off
+                target:
+                  entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') }}"
+              - alias: Chiudi le tapparelle per notte
+                service: cover.close_cover
+                target:
+                  entity_id: "{{ state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group')}}"
+
+      - alias: Ripristina stato precedente per allarme disattivato
+        if:
+          - "{{ trigger.to_state.state == 'disarmed' }}"
+        then:
+          - alias: Ripristina stato casa al momento dell'inserimento allarme
+            service: scene.turn_on
+            target:
+              entity_id: scene.light_cover_presence_simulation
+          - service: timer.cancel
+            data: {}
+            target:
+              entity_id:
+                - timer.delay_active_motion_simulation
+                - timer.delay_active_presence_simulation
