@@ -31,7 +31,7 @@ template:
           detached_on: >
             {% set ns = namespace(url_switch0=[], url_switch1=[], url_switch2=[], url_switch3=[], btn1_type=[], btn2_type=[], url_light0=[], url_roller=[], url_cover=[], url_white=[], url_color=[], url_relay0=[], url_relay1=[], url_relay2=[], url_relay3=[]) %}
             {% set entity_covers = integration_entities('shelly') | select('search', '^cover.') | map('device_id') | unique | reject('eq', None) | list %}
-            {% set entity_relay = integration_entities('shelly') | select('search', '(^switch. | ^light.)') | map('device_id') | unique | reject('eq', None) | list %}
+            {% set entity_relay = integration_entities('shelly') | select('search', '(^switch.|^light.)') | map('device_id') | unique | reject('eq', None) | list %}
             {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') %}
               {% set ns.url_cover = ns.url_cover + [device_attr(device, 'configuration_url') + '/settings/roller/0?btn_type=detached'] %}
             {% endfor %}
@@ -76,7 +76,7 @@ template:
           btn_type: >
             {% set ns = namespace( url_switch0=[], url_switch1=[], url_switch2=[], url_switch3=[],btn1_type=[],btn2_type=[], url_light0 =[], url_roller=[], url_cover=[],  url_white=[],url_color=[],  url_relay0=[],  url_relay1=[],  url_relay2=[],  url_relay3=[]) %}
             {% set entity_covers = integration_entities('shelly')  |  select('search', '^cover.')  |  map('device_id')  |  unique |  reject('eq',None) |  list %}
-            {% set entity_relay = integration_entities('shelly')  |  select('search', '(^switch. | ^light.)')  |  map('device_id')  |  unique |  reject('eq',None) |  list %}
+            {% set entity_relay = integration_entities('shelly')  |  select('search', '(^switch.|^light.)')  |  map('device_id')  |  unique |  reject('eq',None) |  list %}
             {% for device in entity_covers if is_device_attr(device, 'model', 'Shelly 2.5') or is_device_attr(device, 'model', 'Shelly 2') %}
               {% set ns.url_cover = ns.url_cover + [device_attr(device, 'configuration_url') + ('/settings/roller/0') ] %}
             {% endfor %}
