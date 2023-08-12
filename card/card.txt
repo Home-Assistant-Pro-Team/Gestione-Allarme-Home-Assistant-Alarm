@@ -351,6 +351,17 @@ custom_fields:
                         }
                     entities:
                       - entity: select.jammer_detect_entities
+                        card_mod:
+                          style:
+                            ha-select $ mwc-menu $: |
+                              mwc-list {
+                                max-height: 196px;
+                              }
+                            hui-generic-entity-row $: |
+                              state-badge {
+                                display: none;
+                              }
+
                 text_offline:
                   card:
                     type: markdown
@@ -745,6 +756,100 @@ custom_fields:
                     template: popup_setting
                     variables:
                       icon: mdi:cctv
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          autoclose: false
+                          style: |
+                            --popup-min-width: 600px;
+                          content:
+                            type: vertical-stack
+                            cards:
+                              - style: |
+                                  ha-card {  
+                                    background: none;
+                                    border: 100px; 
+                                    border-radius: 25px;
+                                    }
+                                type: custom:button-card
+                                entity: automation.cctv_allarme
+                                name: Notifica CCTV
+                                show_icon: false
+                                state:
+                                  - value: "off"
+                                    styles:
+                                      card:
+                                        - border-color: var(--paper-slider-container-color)
+                                      name:
+                                        - color: var(--paper-slider-active-color)
+                                styles:
+                                  name:
+                                    - justify-self: center
+                                  custom_fields:
+                                    icon:
+                                      - position: absolute
+                                  card:
+                                    - height: 55px
+                                    - box-shadow: >-
+                                        -5px -5px 5px var(--paper-slider-active-color), 5px 5px 5px
+                                        var(--paper-slider-container-color)
+                                custom_fields:
+                                  icon:
+                                    card:
+                                      type: custom:button-card
+                                      template: no_background
+                                      entity: input_boolean.presence_simulation
+                                      icon: mdi:motion-sensor
+                                      show_name: false
+                                      size: 56%
+                                      styles:
+                                        card:
+                                          - border-radius: 0%
+                                          - width: 45%
+                                          - margin-left: "-3%"
+                                          - background-color: GhostWhite
+                                        icon:
+                                          - width: calc(70% - 18px)
+                                          - value: "on"
+                                            styles:
+                                              icon:
+                                                - color: var(--state-icon-active-color)
+                                      state:
+                                        - value: "off"
+                                          styles:
+                                            card:
+                                              - background-color: var(--paper-slider-active-color)
+                              - type: entities
+                                style: |
+                                  ha-card {  
+                                    background: none;
+                                    border: 100px; 
+                                    border-radius: 0px;
+                                    }
+                                entities:
+                                  - entity: select.aggiungi_o_rimuovi_entita_camera
+                                    card_mod:
+                                      style:
+                                        ha-select $ mwc-menu $: |
+                                          mwc-list {
+                                            max-height: 196px;
+                                          }
+                                        hui-generic-entity-row $: |
+                                          state-badge {
+                                            display: none;
+                                          }
+                              - type: markdown
+                                style: |
+                                  ha-card {  
+                                    background: none;
+                                    border: 100px; 
+                                    border-radius: 0px;
+                                    }
+                                content: >-
+                                  **CCTV:** {{ expand(state_attr('sensor.lista_camera_allarme',
+                                  'print_list_group'))|map(attribute='name')|list|join(', ') }}
                 - type: conditional
                   conditions:
                     - entity: automation.stato_internet

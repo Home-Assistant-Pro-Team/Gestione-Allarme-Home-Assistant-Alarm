@@ -164,7 +164,7 @@ automation:
                 event_data:
                   types: notify_alarm
                   notify: allarme_notte_scattato_media_player
-                  volume: 0.2
+                  volume: 0.9
                   message: sirena
                   mp3: true
           - alias: Allarme disattivato

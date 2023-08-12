@@ -345,9 +345,8 @@ Se stai utilizzando un router Fritz!Box 6890 con fallback LTE, riceverai una not
 
 ![cctv](examples/cctv.png)
 
-Le telecamere vanno inserite nella lista degli anchor. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
+Dalla card occorre selezionare le telecamere dalle quali ricevere la notifica. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja che NON si trovano in casa, per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
 
-*Questo file è stato scritto e testato per dispositivi Android.*
 ## **Scene**
 #### **Action alarm**:
 
@@ -472,7 +471,8 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 
 ### Versione: 3.0
 - Riproduzione sirena.mp3 dai media_player in caso di triggered
-- Agginta funziona modalia simulazione presenmza per allarme globale
+- Aggiunta funzione modalità simulazione presenza per allarme globale
+- Scelta telecamere da UI per notifica 
 - Fix vari
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 

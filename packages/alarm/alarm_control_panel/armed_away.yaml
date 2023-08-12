@@ -179,7 +179,7 @@ automation:
                 event_data:
                   types: notify_alarm
                   notify: allarme_globale_scattato_media_player
-                  volume: 1
+                  volume: 0.9
                   message: sirena
                   mp3: true
 

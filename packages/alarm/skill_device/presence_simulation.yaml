@@ -43,6 +43,7 @@ template:
                 'audio2',
                 'audio3',
                 'audio4',
+                'audio5',
               ] 
             }}
 
@@ -100,7 +101,7 @@ template:
           print_list_name: >-
             {% from 'alarm.jinja' import list_sensor_name %}
             {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
-  # MEDIAPLAYER ALEXA, GOOGLE
+  # MEDIAPLAYER
   - select:
       - name: "Aggiungi o rimuovi media player per simulazione presenza"
         state: "{{ states('sensor.lista_media_player_allarme_per_simulazione_presenza') }}"
@@ -136,6 +137,7 @@ template:
 automation:
   - alias: Simulazione presenza allarme
     id: simulazione_presenza_allarme
+    mode: restart
     initial_state: true
     trigger:
       - alias: Allarme inserito
@@ -184,6 +186,10 @@ automation:
       - alias: Avvio simulazione presenza
         if:
           - "{{ is_state('input_boolean.presence_simulation', 'on') }}"
+          - >-
+            {% from 'alarm.jinja' import state_alarm %}
+            {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+            {{ is_state(alarm, 'armed_away') }}
           - or:
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_presence_simulation' }}"
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_motion_simulation' }}"
@@ -204,21 +210,23 @@ automation:
             then:
               # LUCI
               - alias: "Verifica se dopo tramonto"
-                condition: state
-                entity_id: sun.sun
-                state: below_horizon
-              - alias: Spegni tutte le luci
-                service: light.turn_off
-                target:
-                  entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') }}"
-              - alias: Accendi un terzo (in eccesso) dello luci in modo casuale
-                repeat:
-                  count: "{{ (state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | count / 3 )| round(0) }}"
-                  sequence:
-                    - alias: Accenddi una luce casuale
-                      service: light.turn_on
-                      target:
-                        entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | random }}"
+                if: 
+                  - condition: state
+                    entity_id: sun.sun
+                    state: below_horizon
+                then:
+                  - alias: Spegni tutte le luci
+                    service: light.turn_off
+                    target:
+                      entity_id: "{{ expand( state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group' )) | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list }}"
+                  - alias: Accendi un terzo (in eccesso) dello luci in modo casuale
+                    repeat:
+                      count: "{{ (state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | count / 3 )| round(0) }}"
+                      sequence:
+                        - alias: Accenddi una luce casuale
+                          service: light.turn_on
+                          target:
+                            entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | random }}"
               # COVER
               - alias: Muovi la metà (in difetto) delle tapparelle ad una percentuale causale
                 repeat:
@@ -250,9 +258,8 @@ automation:
               - alias: Attiva i media player
                 event: customizations
                 event_data:
-                  types: notify_alarms
+                  types: notify_alarm
                   notify: presence_simulation
-                  volume: 0.2
                   message: "{{ state_attr('sensor.lista_mp3_simulazione_presenza', 'list_mp3') | random }}"
                   mp3: true
                   target_alexa: "{{ alexa }}"
@@ -262,11 +269,11 @@ automation:
               - alias: Spegni tutte le luci per notte
                 service: light.turn_off
                 target:
-                  entity_id: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') }}"
+                  entity_id: "{{ expand( state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group' )) | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list }}"
               - alias: Chiudi le tapparelle per notte
                 service: cover.close_cover
                 target:
-                  entity_id: "{{ state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group')}}"
+                  entity_id: "{{ expand( state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group' )) | selectattr('state', 'eq', 'open') | map(attribute='entity_id') | list }}"
 
       - alias: Ripristina stato precedente per allarme disattivato
         if:
