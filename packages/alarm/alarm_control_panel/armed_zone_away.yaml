@@ -1,3 +1,8 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+# Requisito per un corretto funzionamento: sensori finestra con #
+# device class (window)                                         #
+#################################################################
 template:
   - select:
       - name: "Aggiungi o rimuvi zone allarme globale"

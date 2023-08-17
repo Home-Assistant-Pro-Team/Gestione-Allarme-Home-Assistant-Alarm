@@ -1,6 +1,7 @@
-#################################################
-# ATTENZIONE: file funzionante solo con la card #
-#################################################
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+# ATTENZIONE: file funzionante solo con la card                 #
+#################################################################
 
 input_number:
   control_code_alarm:

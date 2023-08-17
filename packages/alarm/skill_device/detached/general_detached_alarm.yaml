@@ -1,3 +1,6 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 automation:
   - id: press_btn_alarm_trigger
     alias: Notifica e trigger alarme alla pressione tasti

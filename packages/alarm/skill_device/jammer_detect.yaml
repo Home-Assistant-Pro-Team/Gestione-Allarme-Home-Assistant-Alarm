@@ -1,3 +1,6 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 input_number:
   jammer_detect_high_availability_vote:
     name: Jammer Detect HA vote soglia

@@ -1,6 +1,7 @@
 #################################################################
-#                       Requisito importante:                   #
-#   i sensori finestra impostare corretto device class (window) #
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+# Requisito per un corretto funzionamento: sensori finestra con #
+# device class (window)                                         #
 #################################################################
 template:
   - select:

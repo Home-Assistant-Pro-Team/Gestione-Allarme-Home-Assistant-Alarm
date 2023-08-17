@@ -1,19 +1,39 @@
-homeassistant:
-  customize:
-    package.node_anchors:
-      Lista videocamere: &camera
-        - camera.camcorridoio
-        - camera.camsala
-        - camera.timcam_ezviz
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
+template:
+  - select:
+      - name: "Aggiungi o rimuovi entità camera"
+        state: "{{ states('sensor.lista_camera_allarme') }}"
+        options: >-
+          {% from 'alarm.jinja' import presence_simulation %}
+          {{ presence_simulation(states.camera) }}
+        select_option:
+          - event: customizations
+            event_data:
+              types: camera_alarm
+              sensor_select: "{{ option }}"
+  - trigger:
+      - platform: event
+        event_type: customizations
+        event_data:
+          types: camera_alarm
+    sensor:
+      - name: Lista camera allarme 
+        state: "{{ trigger.event.data.sensor_select }}"
+        attributes:
+          print_list_group: >-
+            {% from 'alarm.jinja' import list_sensor_entity %}
+            {{ list_sensor_entity(trigger.event.data.sensor_select, this.attributes.print_list_group, states.camera) }}
+          print_list_name: >-
+            {% from 'alarm.jinja' import list_sensor_name %}
+            {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
-##############################################################
-#         DA QUESTO PUNTO NON MODIFICARE
-##############################################################
 automation:
   - alias: CCTV allarme
     id: notify_cctv_alarm
     variables:
-      camera: *camera
+      camera: "{{state_attr('sensor.lista_camera_allarme', 'print_list_group')}}"
     trigger:
       - platform: event
         event_type: customizations
@@ -24,7 +44,7 @@ automation:
           {% from 'alarm.jinja' import state_alarm %}
           {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{  is_state(alarm, 'triggered') }}
-        for: 
+        for:
           seconds: 20
       - platform: template
         value_template: >

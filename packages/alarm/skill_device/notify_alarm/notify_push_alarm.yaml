@@ -63,6 +63,9 @@ automation:
           # FILE: INSERT ARMED NIGHT
           - "{{ trigger.event.data.notify == 'modalita_ospiti_no_armed_night' }}"
 
+          # FILE: PRESENCE SIMULATION
+          - "{{ trigger.event.data.notify == 'presence_simulation_mobile' }}"
+
       ##############################################################
       #         DA QUESTO PUNTO NON MODIFICARE
       ##############################################################
@@ -146,6 +149,10 @@ automation:
         event_type: mobile_app_notification_action
         event_data:
           action: "triggered_notify_alarm"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "disable_presence_simulation"
     action:
       - choose:
           - alias: Modalità ospiti off
@@ -181,6 +188,21 @@ automation:
                   code: "{{ code }}"
                 target:
                   entity_id: "{{ alarm }}"
+
+          - alias: Disattiva Simulazione presenza
+            conditions:
+              - "{{ trigger.event.data.action == 'disable_presence_simulation' }}"
+            sequence:
+              - alias: Ripristina stato casa al momento dell'inserimento allarme
+                service: scene.turn_on
+                target:
+                  entity_id: scene.light_cover_presence_simulation
+              - service: timer.cancel
+                data: {}
+                target:
+                  entity_id:
+                    - timer.delay_active_motion_simulation
+                    - timer.delay_active_presence_simulation
 
           - alias: Fai scattare allarme
             conditions:

@@ -1,3 +1,6 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 automation:
   - id: battery_low
     alias: Batteria scarica dispositivi allarme

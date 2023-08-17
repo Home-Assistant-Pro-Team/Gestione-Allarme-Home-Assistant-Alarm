@@ -296,6 +296,8 @@ Prima di avviare la simulazione di presenza, è necessario stabilire un ritardo 
 
 Anche l'orario di fine della simulazione di presenza deve essere impostato correttamente. Questo determinerà quando il sistema interromperà tutte le azioni simulate. Quando si raggiunge l'orario di fine, il sistema smetterà di riprodurre i file audio sui media player, spegnerà le luci selezionate e chiuderà le tapparelle coinvolte nella simulazione.
 
+Quando la simulazione ha inizio, verrà inviata una notifica di avviso, offrendoti la possibilità di interrompere il processo e riportare lo stato della casa allo stato iniziale.
+
 #### **Led allarme**:
 Ho installato un LED accanto alla porta di casa per tenere sotto controllo lo stato del mio sistema di allarme. Il funzionamento del LED è il seguente:
 - Quando il sistema di allarme è disattivato, il LED rimane spento. Questo indica chiaramente che il sistema è inattivo e non è attivo alcun tipo di protezione.
@@ -471,7 +473,7 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 
 ### Versione: 3.0
 - Riproduzione sirena.mp3 dai media_player in caso di triggered
-- Aggiunta funzione modalità simulazione presenza per allarme globale
+- Aggiunta funzione modalità "simulazione presenza per allarme globale"
 - Scelta telecamere da UI per notifica 
 - Fix vari
 ### **Supportaci**

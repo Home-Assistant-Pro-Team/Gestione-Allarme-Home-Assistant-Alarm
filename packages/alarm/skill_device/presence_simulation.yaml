@@ -1,3 +1,6 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 timer:
   delay_active_presence_simulation:
     name: Ritardo avvio simulazione presenza
@@ -194,6 +197,17 @@ automation:
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_presence_simulation' }}"
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_motion_simulation' }}"
         then:
+          - alias: INVIA NOTIFICA
+            event: customizations
+            event_data:
+              types: notify_alarm
+              tag: presence_simulation
+              notify: presence_simulation_mobile
+              message: Avvio simulazione presenza
+              title1: Disattiva simulazione
+              action1: disable_presence_simulation
+              title2: Disattiva allarme
+              action2: disable_notify_alarm
           - alias: Imposta timer per ripetizione simulazione presenza
             service: timer.start
             data:
