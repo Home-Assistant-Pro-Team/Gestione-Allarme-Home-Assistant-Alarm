@@ -71,6 +71,12 @@ automation:
       ##############################################################
       #         DA QUESTO PUNTO NON MODIFICARE
       ##############################################################
+      - alias: Controlla che addon sia avviato
+        if: "{{ is_state('binary_sensor.ha_sip_in_esecuzione', 'off')}}"
+        then:
+          - service: hassio.addon_start
+            data:
+              addon: c7744bff_ha-sip
 
       - alias: Invia notifica allo script con messaggio.
         service: script.call_voip_alarm

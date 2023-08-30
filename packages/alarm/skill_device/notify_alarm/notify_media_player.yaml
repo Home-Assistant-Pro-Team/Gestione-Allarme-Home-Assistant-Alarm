@@ -6,6 +6,7 @@ homeassistant:
 automation:
   - alias: notify_alarm_media_player
     id: notify_alarm_media_player
+    mode: restart
     variables:
       my_external_domain: *my_external_domain
       volume: 0.5

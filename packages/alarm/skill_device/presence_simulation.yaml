@@ -22,6 +22,7 @@ input_number:
 input_boolean:
   presence_simulation:
     name: Simulazione presenza
+  check_presence_simulation:
 
 input_datetime:
   presence_simulation_on:
@@ -49,7 +50,6 @@ template:
                 'audio5',
               ] 
             }}
-
   # LIGHT
   - select:
       - name: "Aggiungi o rimuovi luci per simulazione presenza"
@@ -120,7 +120,6 @@ template:
             event_data:
               types: presence_simulation_media_player
               sensor_select: "{{ option }}"
-
   - trigger:
       - platform: event
         event_type: customizations
@@ -197,17 +196,6 @@ automation:
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_presence_simulation' }}"
               - "{{ trigger.event.data.entity_id == 'timer.delay_active_motion_simulation' }}"
         then:
-          - alias: INVIA NOTIFICA
-            event: customizations
-            event_data:
-              types: notify_alarm
-              tag: presence_simulation
-              notify: presence_simulation_mobile
-              message: Avvio simulazione presenza
-              title1: Disattiva simulazione
-              action1: disable_presence_simulation
-              title2: Disattiva allarme
-              action2: disable_notify_alarm
           - alias: Imposta timer per ripetizione simulazione presenza
             service: timer.start
             data:
@@ -215,16 +203,37 @@ automation:
                 minutes: "{{ range(10, 59) | random }}"
             target:
               entity_id: timer.delay_active_motion_simulation
-          - if:
+
+          - alias: Abilita boolean check ed invia notifica (solo la prima volta)
+            if: "{{ is_state('input_boolean.check_presence_simulation', 'off') }}"
+            then:
+              - alias: INVIA NOTIFICA
+                event: customizations
+                event_data:
+                  types: notify_alarm
+                  tag: presence_simulation
+                  notify: presence_simulation_mobile
+                  message: Avvio simulazione presenza
+                  title1: Disattiva simulazione
+                  action1: disable_presence_simulation
+                  title2: Disattiva allarme
+                  action2: disable_notify_alarm
+              - alias: Abilita boolean ceck
+                service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.check_presence_simulation
+          - alias: >-
+              Se fascia oraria corretta attiva avvia azione simulazioni presenza controllando orario per luci 
+              altrimenti chiudi tutte le tapparelle e segni le luci
+            if:
               - alias: "Verifica se fascia oraria corretta"
                 condition: time
                 after: "input_datetime.presence_simulation_on"
                 before: "input_datetime.presence_simulation_off"
-
             then:
               # LUCI
               - alias: "Verifica se dopo tramonto"
-                if: 
+                if:
                   - condition: state
                     entity_id: sun.sun
                     state: below_horizon
@@ -268,7 +277,6 @@ automation:
                       {% set output.numbers = output.numbers + [integrations] %}
                     {% endfor %}
                       {{output.numbers}}
-
               - alias: Attiva i media player
                 event: customizations
                 event_data:
@@ -292,6 +300,7 @@ automation:
       - alias: Ripristina stato precedente per allarme disattivato
         if:
           - "{{ trigger.to_state.state == 'disarmed' }}"
+          - "{{ is_state('input_boolean.check_presence_simulation', 'on') }}"
         then:
           - alias: Ripristina stato casa al momento dell'inserimento allarme
             service: scene.turn_on
@@ -303,3 +312,7 @@ automation:
               entity_id:
                 - timer.delay_active_motion_simulation
                 - timer.delay_active_presence_simulation
+          - alias: Disattiva boolean ceck
+            service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.check_presence_simulation
