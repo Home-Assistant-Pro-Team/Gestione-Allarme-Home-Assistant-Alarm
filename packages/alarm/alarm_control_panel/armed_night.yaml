@@ -65,23 +65,8 @@ automation:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
-          {{ is_state(alarm, 'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-      - platform: template
-        value_template: >-
-          {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
-          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-      - platform: template
-        value_template: >-
-          {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
-          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-      - platform: template
-        value_template: >-
-          {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
-          {{ is_state(alarm, 'armed_night') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+          {% set alarm_state = states[(state_alarm() | from_json)['alarm']] %}
+          {{ (alarm_state.state in ['arming', 'triggered', 'disarmed', 'armed_night']) and (now() < alarm_state.last_changed + timedelta(seconds=1)) }}
     condition:
       - "{{ is_state('input_select.setting_zone_entity', 'Dispositivi') }}"
     action:
