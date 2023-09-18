@@ -127,7 +127,9 @@ action_type_alarm:
   entity: sensor.stato_allarme
   size: 40%
   color: black
-  template: pressione
+  template: 
+    - pressione
+    - no_background
   show_icon: false
   state:
     - value: armed_night
@@ -160,8 +162,7 @@ action_type_alarm:
       if (states['sensor.stato_allarme'].state != 'Disattivato'){
       return 'on' ;
       }
-    ]]]
-      
+    ]]]     
 aciton_number:
   tap_action:
     action: call-service

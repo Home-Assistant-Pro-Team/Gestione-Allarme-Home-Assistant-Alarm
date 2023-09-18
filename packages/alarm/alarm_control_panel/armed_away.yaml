@@ -1,7 +1,8 @@
 #################################################################
-#                       Requisito importante:                   #
-#   i sensori finestra impostare corretto device class (window) #
-##############################################################  #
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+# Requisito per un corretto funzionamento: sensori finestra con #
+# device class (window)                                         #
+#################################################################
 template:
   - select:
       - name: "Aggiungi o rimuovi sensore allarme globale"
@@ -39,18 +40,18 @@ template:
       - platform: template
         value_template: >
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'armed_away') and is_state('input_boolean.alarm_triggered_state', 'off') }}
     sensor:
       - name: Lista sensori allarme globale attiv
         state: >-
-          {% set window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
-          {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
-            {{ (window + not_window)|count}}
+          {% set window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group')) | selectattr('attributes.device_class','defined') | selectattr('attributes.device_class','eq','window') | selectattr('state','eq','off') | map(attribute='entity_id') | list%}
+          {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group')) | selectattr('attributes.device_class','defined') | rejectattr('attributes.device_class','eq','window') | map(attribute='entity_id') | list %}
+            {{ (window + not_window) | count}}
         attributes:
           print_list_group: >
-            {% set window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|selectattr('attributes.device_class','defined')|selectattr('attributes.device_class','eq','window')|selectattr('state','eq','off')|map(attribute='entity_id')|list%}
-            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group'))|selectattr('attributes.device_class','defined')|rejectattr('attributes.device_class','eq','window')|map(attribute='entity_id')|list %}
+            {% set window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group')) | selectattr('attributes.device_class','defined') | selectattr('attributes.device_class','eq','window') | selectattr('state','eq','off') | map(attribute='entity_id') | list%}
+            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_global' , 'print_list_group')) | selectattr('attributes.device_class','defined') | rejectattr('attributes.device_class','eq','window') | map(attribute='entity_id') | list %}
               {{ (window + not_window)}}
 
   - select:
@@ -59,7 +60,7 @@ template:
         options: >-
           {% set output = namespace(numbers=[]) %}
           {% set list_sensor = expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) %}
-            {% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
+            {% for states in list_sensor if states.state != 'unavailable' and states.state != 'unknown' -%}
                 {%- set output.numbers = output.numbers + [states.name ] -%} {%- if loop.last -%} {%- endif -%}
             {%- endfor %}
             {{['RESET'] + output.numbers}}
@@ -77,7 +78,7 @@ template:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
             {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     sensor:
       - name: Sensori rimossi solo per il prossimo allarme
@@ -98,23 +99,23 @@ automation:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
             {{ is_state(alarm,'arming') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm,'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm,'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
-          {{ is_state(alarm,'armed_away') and now() < states[alarm].last_changed+ timedelta(seconds=1) }}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm,'armed_away') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     condition:
       - "{{ is_state('input_select.setting_zone_entity', 'Dispositivi') }}"
     action:
@@ -135,8 +136,8 @@ automation:
                   tag: state_alarm
                   action2: None
                   message: >-
-                    {% set entities= expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group'))|selectattr('attributes.device_class', 'defined')|selectattr('attributes.device_class', 'eq', 'window')|selectattr('state', 'eq', 'on')|map(attribute='name')|list %}
-                    {% if entities|length != 0 %}
+                    {% set entities= expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'window') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+                    {% if entities | length != 0 %}
                       {% for element in entities %}
                         {%- if loop.first %}Allarme attivo tra 40 secondi. Escluso sensore: {% else %}, {% endif -%} 
                           {{- element -}}
@@ -179,8 +180,9 @@ automation:
                 event_data:
                   types: notify_alarm
                   notify: allarme_globale_scattato_media_player
-                  volume: 1
-                  message: Attenzione. Allarme collegato alla centrale operativa. Pattuglia in arrivo!
+                  volume: 0.9
+                  message: sirena
+                  mp3: true
 
           - alias: Allarme disattivato
             conditions:
@@ -223,14 +225,14 @@ automation:
       - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }}"
       - >-
         {% from 'alarm.jinja' import state_alarm %}
-        {% set alarm = (state_alarm()|from_json)['alarm'] %}
+        {% set alarm = (state_alarm() | from_json) ['alarm'] %}
         {{ states[alarm].state == 'armed_away' }}
     action:
       - service: alarm_control_panel.alarm_trigger
         target:
           entity_id: >-
             {% from 'alarm.jinja' import state_alarm %}
-            {{ (state_alarm()|from_json)['alarm'] }}
+            {{ (state_alarm() | from_json) ['alarm'] }}
       - alias: INVIA NOTIFICA
         event: customizations
         event_data:

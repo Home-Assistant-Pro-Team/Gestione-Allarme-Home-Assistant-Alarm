@@ -1,7 +1,7 @@
 homeassistant:
   customize:
     package.node_anchors:
-      Sensore Porta: &door binary_sensor.porta_blinadata
+      Sensore Porta: &door binary_sensor.porta_blinadata_contact
       Lista familiari: &family
         - person.marco
         - person.serena
@@ -19,14 +19,14 @@ alert:
       {% from 'personal.jinja' import persons %}
       {% set output = namespace(state_home=[],state_battery=[]) %}
       {# imposta le persone in casa #}
-      {% for d in persons()|from_json if states[d.person].state == 'home' %}
+      {% for d in persons() | from_json if states[d.person].state == 'home' %}
         {%- set output.state_home = output.state_home + [d['person'] ] -%}
       {% endfor %}
       {# controlla che in casa ci siano 0 persone ma batterie scariche #}
-      {% for d in persons()|from_json if output.state_home|count == 0 and states[d.battery].state|int < 15 %}
+      {% for d in persons() | from_json if output.state_home | count == 0 and states[d.battery].state | int < 15 %}
         {%- set output.state_battery = output.state_battery + [states[d['person']].name] -%}
       {% endfor %}
-        {{ 'Attenzione allarme inserito con telefono di ' + output.state_battery|join(' e ') + ' scarico.' }}
+        {{ 'Attenzione allarme inserito con telefono di ' + output.state_battery | join(' e ') + ' scarico.' }}
     entity_id: sensor.stato_famiglia_allarme
     state: "not_home_battery"
     repeat: 5
@@ -48,17 +48,17 @@ template:
           {% from 'personal.jinja' import persons %}
           {% from 'alarm.jinja' import state_alarm %}
           {% set output = namespace(state_home=[],state_battery=[]) %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
-            {% for d in persons()|from_json if states[d.person].state == 'home' %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+            {% for d in persons() | from_json if states[d.person].state == 'home' %}
               {# lista persone in casa #}
               {% set output.state_home = output.state_home + [d['person']] %}
             {% endfor %}
-            {% for d in persons()|from_json if states[d.battery].state|int < 15 %}
+            {% for d in persons() | from_json if states[d.battery].state | int < 15 %}
               {# lista persone con batteria scarica #}
               {%- set output.state_battery = output.state_battery + [d['person']] -%}
             {% endfor %}
           {# una sola persona in casa con batteria scarica #}
-          {% if output.state_home|count == 1  %}
+          {% if output.state_home | count == 1  %}
             {% for battery in output.state_home %}
               {% if battery == output.state_battery[0] %}
                 home_battery
@@ -67,13 +67,13 @@ template:
               {% endif %}
             {% endfor %}
           {# nessuno in casa ma una persona con batteria scarica #}
-          {% elif output.state_home|count == 0 and output.state_battery|count > 0 and is_state(alarm,'armed_away') and is_state('input_boolean.alarm_battery_mobile', 'on') %}
+          {% elif output.state_home | count == 0 and output.state_battery | count > 0 and is_state(alarm, 'armed_away') and is_state('input_boolean.alarm_battery_mobile', 'on') %}
             not_home_battery
           {# almeno una persona in casa batteria ok #}
-          {% elif output.state_home|count > 0 %}
+          {% elif output.state_home | count > 0 %}
             home
           {# nessuno in casa batterie ok #}
-          {% elif output.state_home|count == 0 %}
+          {% elif output.state_home | count == 0 %}
             not_home
           {% else %}
             sconosciuto
@@ -94,7 +94,7 @@ automation:
     variables:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm'] }}
+        {{ (state_alarm() | from_json) ['alarm'] }}
     trigger:
       - platform: state
         entity_id: sensor.stato_famiglia_allarme
@@ -130,7 +130,7 @@ automation:
                   for_each: >-
                     {% from 'personal.jinja' import persons %}
                     {% set output = namespace(state_home=[]) %}
-                      {% for dict in persons()|from_json if states[dict.person].state == 'home' %}
+                      {% for dict in persons() | from_json if states[dict.person].state == 'home' %}
                         {% set output.state_home = output.state_home + ['notify.'+dict['notify']] %}
                       {% endfor %}
                       {{ output.state_home }}
@@ -138,7 +138,7 @@ automation:
                   action2: None
                   message: >-
                     {% from 'personal.jinja' import persons %}
-                    {% for result in persons()|from_json if states[result.person].state == 'home' and states[result.battery].state|int < 50 %}
+                    {% for result in persons() | from_json if states[result.person].state == 'home' and states[result.battery].state | int < 50 %}
                       {{ 'Mettere in carica il telefono di ' + states[result.person].name + ' batteria al ' + states[result.battery].state + ' %. Attivazione automatica allarme disattivata' }}
                       {% break %}
                     {% endfor %}
@@ -174,7 +174,7 @@ automation:
                     data:
                       code: >-
                         {% from 'alarm.jinja' import state_alarm %}
-                        {{ (state_alarm()|from_json)['code'] }}
+                        {{ (state_alarm() | from_json) ['code'] }}
                     target:
                       entity_id: "{{ alarm }}"
               - alias: >-
@@ -219,7 +219,7 @@ automation:
     variables:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm']}}
+        {{ (state_alarm() | from_json) ['alarm']}}
       door: *door
     trigger:
       - platform: state
@@ -237,17 +237,17 @@ automation:
           for_each: >-
             {% from 'personal.jinja' import persons %}
             {% set output = namespace(state_home=[]) %}
-              {% for dict in persons()|from_json if dict['person'] == trigger.entity_id %}
-                {% set output.state_home = output.state_home + ['notify.'+dict['notify']] %}
+              {% for dict in persons() | from_json if dict['person'] == trigger.entity_id %}
+                {% set output.state_home = output.state_home + ['notify.' + dict['notify']] %}
               {% endfor %}
               {{ output.state_home }}
           title: "--ALLARME RIENTRO--"
-          message: "{{ trigger.to_state.name|string + ', disattivo allarme notte preventivamente per il tuo rientro.' }}"
+          message: "{{ trigger.to_state.name | string + ', disattivo allarme notte preventivamente per il tuo rientro.' }}"
       - service: alarm_control_panel.alarm_disarm
         data:
           code: >-
             {% from 'alarm.jinja' import state_alarm %}
-            {{ (state_alarm()|from_json)['code'] }}
+            {{ (state_alarm() | from_json) ['code'] }}
         target:
           entity_id: "{{ alarm }}"
       - wait_for_trigger:

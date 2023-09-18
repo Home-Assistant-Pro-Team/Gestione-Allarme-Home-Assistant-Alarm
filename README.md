@@ -1,4 +1,4 @@
-`- Version: 2.0 -`
+`- Version: 3.0 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -46,6 +46,7 @@ Grazie di cuore per il tuo sostegno!
 		- [General code](#general-code)
 		- [With card](#with-card)
 		- [Keypad](#keypad--tastierino-esterno)
+	- [Presence simulation](#presence-simulation)
 	- [Detect jummer](#detect-jummer)
 	- [Led allarme](#led-allarme)
 	- [NFC](#nfc)
@@ -67,8 +68,16 @@ Grazie di cuore per il tuo sostegno!
 	- [External button alarm](#external-button-alarm)
 - [Card](#card)
 - [ChangeLog](#change-log)
+
+### **Supportaci**
+Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
+I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
+Grazie di cuore per il tuo sostegno!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
+
 ### **Requisiti**
-- [HomeAssitant release 2023.4 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
+- [HomeAssitant release 2023.9 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
 - [Cartella Package abilitata](https://www.home-assistant.io/docs/configuration/packages/)
 
 ### **Intro**
@@ -169,6 +178,7 @@ I file principali si trovano nella cartella *alarm_control_panel*
 	-  Lo stato di questo boolean viene utilizzato in altri file del pacchetto.
 - Viene creato il sensore delle zone con i relativi sensori associati.
 - Viene creato un boolean per gestire la modalità ospite
+- Viene creato un sensore per ottenere lo storico degli allarmi, che comprende il motivo dell'attivazione/disattivazione (persona o nome dell'automazione e simulazione di presenza) e i sensori che sono stati attivati
 - Vengono creati due gruppi: **exclude_alarm_entities ed include_alarm_entities**, che permettono di includere o escludere entità che non sono necessarie per il pacchetto o che non vengono rilevate automaticamente. Le entità sono utilizzate nei seguenti file:
 	- STATO BATTERIA DISPOSITIVI file: "battery_status_alarm": 
 		- È possibile aggiungere altri sensori per monitorare lo stato della batteria. 
@@ -196,7 +206,7 @@ I file principali si trovano nella cartella *alarm_control_panel*
 - È possibile escludere dai sensori selezionati solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
 - L'automazione si occupa di tutto: quando un sensore passa allo stato "on", viene automaticamente attivato il trigger corrispondente.
 - È possibile escludere o includere singoli sensori anche con allarme in corso dall'interfaccia utente (UI).
-- Nelle notifiche, viene sempre identificato l'ultimo sensore che ha effettivamente cambiato stato, indicando l'orario in cui ciò è avvenuto.
+- Nelle notifiche, viene sempre identificato l'ultimo sensore che ha effettivamente cambiato stato, indicando l'orario in cui ciò è avvenuto ed i mediaplayer riprodurranno l'audio di una sirena quando l'allarme passa allo stato triggered.
 - È possibile decidere quali sensori includere o escludere dalla lista utilizzata nella funzione "select" nel file "general_alarm", inserendo le entità nei gruppi exclude_alarm_entities e include_alarm_entities.
 
 *NB Assicurati di aver impostato correttamente l'attributo **device_class: window** sui dispositivi utilizzati per le finestre. Se non è impostato correttamente, lo stato della finestra non verrà rilevato correttamente e non verrà esclusa dal funzionamento dell'allarme se viene lasciata aperta ma verrà trattata come un sensore generico dell'allarme.*
@@ -207,10 +217,9 @@ Il comportamento dei file è identico a quello descritto in precedenza, tuttavia
 
 Le zone possono essere create tramite l'opzione 'Imposta zone' nelle impostazioni.
 
-NB: Per eliminare le zone precedentemente create, è sufficiente inserire la parola 'RESET' come se si stesse creando una nuova zona."
+NB: Per eliminare le zone precedentemente create, è sufficiente inserire la parola 'RESET' come se si stesse creando una nuova zona.
 
 Le zone vengono create da setting --> imposta zone
-NB: Per cancellare le zone le creata occorre inserire la parola RESET come se fosse una nuova zona
 
 ![setting_zone_alarm](examples/setting_zone_alarm.png)
 
@@ -265,7 +274,7 @@ Nella cartella sono presenti diversi file:
  	Questo file può essere utilizzato solo con la card fornita nel pacchetto. Durante l'utilizzo di questo file, è importante tenere a mente alcune considerazioni importanti. Per esempio, il codice dell'allarme ed il codice di emergenza possono iniziare con lo zero. Il file with_card esegue un controllo per i tentativi di inserimento del codice disarmo. Nel caso in cui il numero massimo di tentativi di codice errati venga superato, l'allarme passa allo stato di scattato ed iniviata una notifica. È anche possibile impostare un codice di emergenza che consente di disattivare l'allarme e inviare una notifica di allerta (voip e push) alle persone che NON si trovano in casa. Durante la sequenza, viene creato un evento per essere utilizzato come trigger in altre automazioni per esempio invio snapshoot telecamere. E' importante notare che utilizzando il codice dell'allarme, rende possibile modificare le impostazioni dalla card anche quando l'allarme è attivo e rimuovere il lock. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
 
  - #### **Keypad / tastierino esterno**: 
- 	Il pacchetto include un file readme e un esempio di utilizzo con 3x4 12 Key Matrixe ed EspHome. Il file keypad.yaml è essenziale per il corretto funzionamento dell'allarme. Digitando il codice di sblocco, è possibile attivare l'allarme globale e disattivare sia l'allarme globale che quello notturno. Il sistema effettua un controllo sui tentativi di inserimento del codice errato e invia una notifica se si supera il limite consentito. E' possibile definire un Codice di emergenza, che consente di disattivare l'allarme e inviare una notifica di pericolo (voip e push) solo alle persone che NON si trovano in casa.  Durante la sequenza, viene creato un evento che può essere utilizzato come trigger in altre automazioni, ad esempio per l'invio di snapshot delle telecamere in caso di emergenza. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente .
+ 	Il pacchetto include un file readme e un esempio di utilizzo con 3x4 12 Key Matrixe ed EspHome. Il file keypad.yaml è essenziale per il corretto funzionamento dell'allarme. Digitando il codice di sblocco, è possibile attivare l'allarme globale e disattivare sia l'allarme globale che quello notturno. Il sistema effettua un controllo sui tentativi di inserimento del codice errato e invia una notifica se si supera il limite consentito. E' possibile definire un Codice di emergenza, che consente di disattivare l'allarme e inviare una notifica di pericolo (voip e push) solo alle persone che NON si trovano in casa.  Durante la sequenza, viene creato un evento che può essere utilizzato come trigger in altre automazioni, ad esempio per l'invio di snapshot delle telecamere in caso di emergenza. È inoltre possibile configurare un codice di servizio che può essere condiviso, ad esempio, con il personale di pulizia, che può essere attivato e disattivato dall'interfaccia utente.
 #### **Detect jummer**:
 
 ![jummer](examples/jummer.png)
@@ -277,6 +286,27 @@ Per semplificare il processo, viene creato un template select che consente di ot
 Attraverso l'interfaccia utente (UI), è possibile inserire i dispositivi all'interno di gruppi specifici per una migliore organizzazione. Inoltre, l'interfaccia utente (UI) offre la possibilità di personalizzare il numero di dispositivi nel gruppo "jammer_detect_device" che vengono considerati in stato offline.
 
 *Per integrare i dispositivi Shelly, è necessario disporre di integrazione ufficiale e aver abilitato il sensore RSSI, mentre per i dispositivi che hanno EspHome occorre avere il sensore con   [platform: wifi_signal](https://esphome.io/components/sensor/wifi_signal.html)*
+
+#### **Presence simulation:**
+
+![presence_simulation](examples/presence_simulation.png)
+
+La simulazione di presenza con allarme globale è un sistema integrato nell'interfaccia utente che permette di creare l'illusione di presenza all'interno di una casa anche quando non ci sono persone. L'obiettivo principale di questa funzionalità è scoraggiare possibili intrusi o ladri.
+
+Durante la configurazione, è possibile selezionare le tapparelle che si desidera coinvolgere nella simulazione. Durante il periodo della simulazione, il sistema gestirà in modo casuale la metà delle tapparelle selezionate, muovendole a una percentuale casuale. Questo comportamento creerà l'impressione che qualcuno stia aprendo o chiudendo le finestre in modo non prevedibile, rendendo l'illusione di presenza più credibile.
+
+Inoltre, durante la simulazione, il sistema accenderà un terzo delle luci selezionate in modo casuale dopo il tramonto, creando l'illusione di attività all'interno della casa.
+
+Per quanto riguarda i media player, come Google e Alexa, il sistema riprodurrà casualmente file audio (mp3) caricati nella directory "config/www/audio_allarme". Questi suoni simulati, come conversazioni o musica, contribuiranno a creare un'atmosfera realistica all'interno della casa, aumentando ulteriormente l'efficacia della simulazione di presenza.
+
+Tutte queste azioni avverranno a intervalli casuali tra l'orario di inizio e di fine della simulazione, con una variabilità massima di 60 minuti. Questo garantirà che gli orari delle azioni simulate siano imprevedibili, rendendo più credibile l'illusione di una presenza umana e scoraggiando eventuali intrusi.
+
+Prima di avviare la simulazione di presenza, è necessario stabilire un ritardo in ore. Questo periodo di tempo rappresenta l'intervallo tra l'attivazione dell'allarme e l'inizio effettivo della simulazione di presenza. Ad esempio, se si imposta un ritardo di 5 ore e si attiva l'allarme alle 15:00, la simulazione inizierà alle 20:00, ma solo se questo orario è compreso tra l'orario di inizio e fine della simulazione. In caso contrario, il sistema aspetterà l'orario di inizio successivo per avviare la simulazione.
+
+Anche l'orario di fine della simulazione di presenza deve essere impostato correttamente. Questo determinerà quando il sistema interromperà tutte le azioni simulate. Quando si raggiunge l'orario di fine, il sistema smetterà di riprodurre i file audio sui media player, spegnerà le luci selezionate e chiuderà le tapparelle coinvolte nella simulazione.
+
+Quando la simulazione ha inizio, verrà inviata una notifica di avviso, offrendoti la possibilità di interrompere il processo e riportare lo stato della casa allo stato iniziale.
+
 #### **Led allarme**:
 Ho installato un LED accanto alla porta di casa per tenere sotto controllo lo stato del mio sistema di allarme. Il funzionamento del LED è il seguente:
 - Quando il sistema di allarme è disattivato, il LED rimane spento. Questo indica chiaramente che il sistema è inattivo e non è attivo alcun tipo di protezione.
@@ -326,9 +356,8 @@ Se stai utilizzando un router Fritz!Box 6890 con fallback LTE, riceverai una not
 
 ![cctv](examples/cctv.png)
 
-Le telecamere vanno inserite nella lista degli anchor. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
+Dalla card occorre selezionare le telecamere dalle quali ricevere la notifica. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja che NON si trovano in casa, per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
 
-*Questo file è stato scritto e testato per dispositivi Android.*
 ## **Scene**
 #### **Action alarm**:
 
@@ -442,14 +471,12 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 
 ## Change Log
 
-### Versione: 1.2
+### Versione: 2.0
 - FILE PERSONAL: I dati personali sono stati separati in un nuovo file nella cartella 'custom_templates' per le notifiche, consentendo un utilizzo unico in tutti i progetti del GitHub.
 - È stato aggiunto il trigger 'pending' per l'invio di notifiche CCTV.
 - I singoli template sono stati sostituiti con macro per ridurre la quantità di codice.
 - È possibile escludere determinati sensori solo per la modalità ARMED_AWAY durante un singolo inserimento dell'allarme, sia prima di attivarlo che dopo. Questa esclusione rimane in vigore fino a quando l'allarme viene disattivato.
 - Aggiunta funzione zona alla card
-
-### Versione: 2.0
 - Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
 - Separate informazioni person e media_player 
 

@@ -14,10 +14,10 @@ automation:
     variables:
       code: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['code']}}
+        {{ (state_alarm() | from_json) ['code'] }}
       alarm: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm']}}
+        {{ (state_alarm() | from_json) ['alarm'] }}
       porta: *porta
     mode: single
     trigger:
@@ -29,8 +29,8 @@ automation:
             conditions:
               - >
                 {% from 'alarm.jinja' import state_alarm %}
-                {% set code_porta = (state_alarm()|from_json)['code_porta'] %}
-                {{ states(trigger.entity_id)|int(0) == code_porta|int(0) }}
+                {% set code_porta = (state_alarm() | from_json) ['code_porta'] %}
+                {{ states(trigger.entity_id) | int(0) == code_porta | int(0) }}
               - "{{states(alarm) == 'disarmed' }}"
             sequence:
               - service: lock.unlock
@@ -38,14 +38,14 @@ automation:
                   entity_id: *lock
           - alias: Serratura con stato allarme
             conditions:
-              - "{{ states(trigger.entity_id)|int(0) == code|int(0) }}"
+              - "{{ states(trigger.entity_id) | int(0) == code|int(0) }}"
             sequence:
               - delay:
                   milliseconds: 500
               - if:
                   - "{{ states(alarm) == 'disarmed' }}"
                 then:
-                  - wait_template: "{{ is_state(porta, 'off') and is_states(alarm,'armed_away') }}"
+                  - wait_template: "{{ is_state(porta, 'off') and is_states(alarm, 'armed_away') }}"
                   - service: lock.lock
                     target:
                       entity_id: *lock

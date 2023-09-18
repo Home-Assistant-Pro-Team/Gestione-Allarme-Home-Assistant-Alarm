@@ -27,10 +27,10 @@ automation:
       - variables:
           alarm: >
             {% from 'alarm.jinja' import state_alarm %}
-            {{ (state_alarm()|from_json)['alarm'] }}
+            {{ (state_alarm() | from_json) ['alarm'] }}
           code: >
             {% from 'alarm.jinja' import state_alarm %}
-            {{ (state_alarm()|from_json)['code'] }}
+            {{ (state_alarm() | from_json) ['code'] }}
       - if:
           - >
             {{ states[alarm].state == 'disarmed' }}

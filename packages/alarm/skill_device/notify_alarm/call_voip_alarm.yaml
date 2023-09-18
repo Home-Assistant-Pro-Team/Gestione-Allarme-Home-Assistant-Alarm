@@ -11,7 +11,7 @@ automation:
     variables:
       code: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['code']}}
+        {{ (state_alarm()|from_json) ['code'] }}
     trigger:
       - platform: event
         event_type: customizations
@@ -24,68 +24,74 @@ automation:
           ###################################################################################
 
           # FILE: ARMED_AWAY
-          #- "{{trigger.event.data.notify == 'allarme_globale_inserimento'}}"
-          #- "{{trigger.event.data.notify == 'allarme_globale_inserito'}}"
-          #- "{{trigger.event.data.notify == 'allarme_globale_sensore_rilevato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_globale_scattato_media_player'}}"
-          - "{{trigger.event.data.notify == 'allarme_globale_scattato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_globale_disattivato'}}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_inserimento' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_inserito' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_sensore_rilevato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_scattato_media_player' }}"
+          - "{{ trigger.event.data.notify == 'allarme_globale_scattato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_globale_disattivato' }}"
 
           # FILE: ARMED_NIGHT
-          #- "{{trigger.event.data.notify == 'allarme_notte_inserimento'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_inserito'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_sensore_rilevato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_scattato_media_player'}}"
-          - "{{trigger.event.data.notify == 'allarme_notte_scattato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_disattivato'}}"
-          #- "{{trigger.event.data.notify == 'allarme_notte_chiusa_finestra'}}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_inserimento' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_inserito' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_sensore_rilevato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_scattato_media_player' }}"
+          - "{{ trigger.event.data.notify == 'allarme_notte_scattato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_disattivato' }}"
+          #- "{{ trigger.event.data.notify == 'allarme_notte_chiusa_finestra' }}"
 
           # FILE: CONTROL CODE
-          #- "{{trigger.event.data.notify == 'tentativi_codici_superati'}}"
-          - "{{trigger.event.data.notify == 'disattivato_con_codice_emergenza_solovoip'}}"
+          #- "{{ trigger.event.data.notify == 'tentativi_codici_superati' }}"
+          - "{{ trigger.event.data.notify == 'disattivato_con_codice_emergenza_solovoip' }}"
 
           # FILE: GENERAL DETACHED
-          #- "{{trigger.event.data.notify == 'detached_allarme_premuto_tasto'}}"
+          #- "{{ trigger.event.data.notify == 'detached_allarme_premuto_tasto' }}"
 
           # FILE: JAMMER DETECT
-          #- "{{trigger.event.data.notify == 'detect_jummer'}}"
+          #- "{{ trigger.event.data.notify == 'detect_jummer' }}"
 
           # FILE: PERSON
-          #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed'}}"
+          #- "{{ trigger.event.data.notify == 'modalita_ospiti_no_armed' }}"
 
           # FILE: ROUTER
-          #- "{{trigger.event.data.notify == 'stato_router'}}"
+          #- "{{ trigger.event.data.notify == 'stato_router' }}"
 
           # FILE: UPS
-          - "{{trigger.event.data.notify == 'stato_ups'}}"
+          - "{{ trigger.event.data.notify == 'stato_ups' }}"
 
-      # FILE: EXTERNAL BUTTON ALLARM
-      #- "{{trigger.event.data.notify == 'allarme_non_inserito_porta_aperta'}}"
+          # FILE: EXTERNAL BUTTON ALLARM
+          #- "{{ trigger.event.data.notify == 'allarme_non_inserito_porta_aperta' }}"
 
-      # FILE: BATTERY STATE
-      #- "{{trigger.event.data.notify == 'stato_batterie'}}"
+          # FILE: BATTERY STATE
+          #- "{{ trigger.event.data.notify == 'stato_batterie' }}"
 
-      # FILE: INSERT ARMED NIGHT
-      #- "{{trigger.event.data.notify == 'modalita_ospiti_no_armed_night'}}"
+          # FILE: INSERT ARMED NIGHT
+          #- "{{ trigger.event.data.notify == 'modalita_ospiti_no_armed_night' }}"
 
       ##############################################################
       #         DA QUESTO PUNTO NON MODIFICARE
       ##############################################################
+      - alias: Controlla che addon sia avviato
+        if: "{{ is_state('binary_sensor.ha_sip_in_esecuzione', 'off')}}"
+        then:
+          - service: hassio.addon_start
+            data:
+              addon: c7744bff_ha-sip
 
       - alias: Invia notifica allo script con messaggio.
         service: script.call_voip_alarm
         data:
-          message: "{{ trigger.event.data.message|default('Messaggio non impostato')  + trigger.event.data.continue_voip|default('') }}"
+          message: "{{ trigger.event.data.message | default('Messaggio non impostato') + trigger.event.data.continue_voip | default('') }}"
           for_each: >
             {% if trigger.event.data.for_each is defined %}
-              {{trigger.event.data.for_each}}
+              {{ trigger.event.data.for_each }}
             {% else %}
               {% from 'personal.jinja' import persons %}
               {% set output = namespace(numbers=[]) %}
-              {%for d in persons()|from_json if d['cellulare'] != 'none'%}
-              {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
+              {% for d in persons() | from_json if d['cellulare'] != 'none'%}
+              {%- set output.numbers = output.numbers + [d['cellulare']] -%}
               {% endfor %}
-              {{output.numbers}}
+              {{ output.numbers }}
             {% endif %}
 
   - alias: "Azioni chiamata voip per disattivare allarme"
@@ -101,7 +107,7 @@ automation:
       - choose:
           - alias: Abilita possibilità di disattivare allarme con chiamata cellulare
             conditions:
-              - "{{ trigger.json.event == 'call_established'}}"
+              - "{{ trigger.json.event == 'call_established' }}"
             sequence:
               - service: input_boolean.turn_on
                 target:
@@ -111,7 +117,7 @@ automation:
             conditions:
               - "{{ trigger.json.event == 'entered_menu' }}"
               - "{{ trigger.json.menu_id == 'disable_alarm' }}"
-              - "{{ is_state('input_boolean.security_webhook','on')}}"
+              - "{{ is_state('input_boolean.security_webhook', 'on')}}"
             sequence:
               - alias: Interrompi script per chiamate perchè una persona ha risposto
                 service: script.turn_off
@@ -121,11 +127,11 @@ automation:
                 data:
                   code: >
                     {% from 'alarm.jinja' import state_alarm %}
-                    {{ (state_alarm()|from_json)['code']}}
+                    {{ (state_alarm() | from_json) ['code'] }}
                 target:
                   entity_id: >
                     {% from 'alarm.jinja' import state_alarm %}
-                    {{ (state_alarm()|from_json)['alarm']}}
+                    {{ (state_alarm() | from_json) ['alarm']}}
 
           - alias: Blocca chiamate successive
             conditions:
@@ -139,7 +145,7 @@ automation:
 
           - alias: Disabilita possibilità di disattivare allarme con chiamata cellulare
             conditions:
-              - "{{ trigger.json.event == 'call_disconnected'}}"
+              - "{{ trigger.json.event == 'call_disconnected' }}"
             sequence:
               - service: input_boolean.turn_off
                 target:
@@ -161,17 +167,17 @@ script:
       message: Attenzione allarme scattato! Inserire codice per disattivarlo o premi asterisco per bloccare le prossime chiamate
       code: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['code']}}
+        {{ (state_alarm() | from_json) ['code'] }}
       for_each: >
         {% from 'personal.jinja' import persons %}
         {% set output = namespace(numbers=[]) %}
-        {%for d in persons()|from_json if d['cellulare'] != 'none'%}
+        {% for d in persons() | from_json if d['cellulare'] != 'none' %}
         {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
         {% endfor %}
-        {{output.numbers}}
+        {{ output.numbers }}
     sequence:
       - repeat:
-          for_each: "{{for_each}}"
+          for_each: "{{ for_each }}"
           sequence:
             - alias: Invia notifica
               service: hassio.addon_stdin
@@ -179,14 +185,14 @@ script:
                 addon: c7744bff_ha-sip
                 input:
                   command: dial
-                  number: sip:{{ repeat.item }}@{{sip}}
+                  number: sip:{{ repeat.item }}@{{ sip }}
                   ring_timeout: 30
                   menu:
-                    message: "{{message}}"
+                    message: "{{ message }}"
                     choices_are_pin: true
                     timeout: 20
                     choices:
-                      "{{code}}":
+                      "{{ code }}":
                         id: disable_alarm
                         message: Allarme disattivato. Arrivederci
                         post_action: hangup

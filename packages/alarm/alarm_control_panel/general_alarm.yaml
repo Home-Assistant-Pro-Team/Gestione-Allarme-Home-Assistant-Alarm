@@ -6,7 +6,7 @@ alarm_control_panel:
     trigger_time: 120
     code_template: >
       {% from 'alarm.jinja' import state_alarm %}
-      {{ (state_alarm()|from_json)['code'] }}
+      {{ (state_alarm() | from_json) ['code'] }}
     code_arm_required: false
 
 group:
@@ -14,9 +14,9 @@ group:
     name: Entità da escludere per pkg allarme
     entities:
       - binary_sensor.frigorifero_door_open
-      - binary_sensor.bedprecence_mattia
-      - binary_sensor.bedprecence_marco
-      - binary_sensor.bedprecence_serena
+      # - binary_sensor.bedprecence_mattia
+      # - binary_sensor.bedprecence_marco
+      # - binary_sensor.bedprecence_serena
       - sensor.miflora_signal_strength
       - light.luce_ingresso
       - cover.tenda_tavolo
@@ -46,13 +46,13 @@ template:
       - name: Stato allarme
         state: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}    
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}    
           {{ 
             { 
               'armed_away' : 'Allarme Globale',
               'armed_night' : 'Allarme Notte',
               'disarmed' : 'Disattivato',
-              'triggered': 'Scattato',
+              'triggered': 'Innescato',
               'pending': 'Scattato',
               'arming': 'In Attivazione'
             } 
@@ -65,8 +65,8 @@ template:
           - event: customizations
             event_data:
               types: setting_name_zone_alarm
-              zone_select: "{{ states('input_text.setting_name_zone_alarm')|title }}"
-          - if: "{{ states('input_text.setting_name_zone_alarm')|title == 'Reset'}}"
+              zone_select: "{{ states('input_text.setting_name_zone_alarm') | title }}"
+          - if: "{{ states('input_text.setting_name_zone_alarm') | title == 'Reset'}}"
             then:
               - service: select.select_option
                 data:
@@ -87,18 +87,18 @@ template:
         state: "{{ trigger.event.data.zone_select }}"
         attributes:
           print_list_group: >-
-            {% set option = trigger.event.data.zone_select|string %}
+            {% set option = trigger.event.data.zone_select | string %}
             {% set lists = this.attributes.print_list_group %}
             {% if option == 'Reset' %}
-            {% elif option|length > 0 and not option in lists %}
-              {{ lists|list + [option] }}
+            {% elif option | length > 0 and not option in lists %}
+              {{ lists | list + [option] }}
             {% else %}
               {{ lists }}
             {% endif %}
 
   - select:
       - name: "Seleziona zona allarme setting"
-        state: "{{ states('input_text.select_zone_alarm')|title }}"
+        state: "{{ states('input_text.select_zone_alarm') | title }}"
         options: "{{ state_attr('sensor.lista_zone_alarm_setting', 'print_list_group')}}"
         select_option:
           - service: input_text.set_value
@@ -128,55 +128,94 @@ template:
       - name: Lista sensori allarme per zone
         state: "{{ 'test' }}"
         attributes:
-          zona0: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[0]}}"
+          zona0: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [0] }}"
           sensor_zona0: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona0, trigger.event.data.sensor_select, 0) }}
-
-          zona1: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[1]}}"
+          zona1: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [1] }}"
           sensor_zona1: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona1, trigger.event.data.sensor_select, 1) }}
-
-          zona2: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[2]}}"
+          zona2: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [2] }}"
           sensor_zona2: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona2, trigger.event.data.sensor_select, 2) }}
-
-          zona3: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[3]}}"
+          zona3: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [3] }}"
           sensor_zona3: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona3, trigger.event.data.sensor_select, 3) }}
-
-          zona4: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[4]}}"
+          zona4: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [4] }}"
           sensor_zona4: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona4, trigger.event.data.sensor_select, 4) }}
-
-          zona5: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[5]}}"
+          zona5: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [5] }}"
           sensor_zona5: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona5, trigger.event.data.sensor_select, 5) }}
-
-          zona6: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[6]}}"
+          zona6: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [6] }}"
           sensor_zona6: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona6, trigger.event.data.sensor_select, 6) }}
-
-          zona7: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[7]}}"
+          zona7: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [7] }}"
           sensor_zona7: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona7, trigger.event.data.sensor_select, 7) }}
-
-          zona8: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[8]}}"
+          zona8: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [8] }}"
           sensor_zona8: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona8, trigger.event.data.sensor_select, 8) }}
-
-          zona9: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options')[9]}}"
+          zona9: "{{ state_attr('select.seleziona_zona_allarme_setting', 'options') [9] }}"
           sensor_zona9: >-
             {% from 'alarm.jinja' import zone_alarm %}
             {{ zone_alarm(this.attributes.sensor_zona9, trigger.event.data.sensor_select, 9) }}
+
+  - trigger:
+      - platform: state
+        entity_id: sensor.stato_allarme
+        not_to:
+          - "Scattato"
+        for:
+          seconds: 1
+      - platform: event
+        event_type: customizations
+        event_data:
+          notify: allarme_notte_sensore_rilevato
+      - platform: event
+        event_type: customizations
+        event_data:
+          notify: allarme_globale_sensore_rilevato
+      - platform: event
+        event_type: customizations
+        event_data:
+          notify: presence_simulation_mobile
+    sensor:
+      - name: History alarm
+        state: >-
+          {% if trigger.event is defined and (trigger.event.data.notify == 'allarme_notte_sensore_rilevato' or trigger.event.data.notify == 'allarme_globale_sensore_rilevato' or trigger.event.data.notify == 'presence_simulation_mobile' ) %}
+              {{ trigger.event.data.message |replace('Attenzione allarme in attivaziona da','') }}
+          {% elif trigger is defined and trigger.entity_id == 'sensor.stato_allarme' %}
+            {% set persons = states.person | selectattr('attributes.user_id', 'eq', trigger.to_state.context.user_id) | list %} 
+            {% set parents = states.automation | selectattr('context.parent_id', 'eq', trigger.to_state.context.parent_id) | list %} 
+            {% if persons | count == 1 %}
+               {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + persons[0].attributes.friendly_name }}           
+            {% elif parents | count == 1 %}
+               {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents[0].attributes.friendly_name }}
+            {% else %}
+              {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state }}
+            {% endif %}
+          {% else %}
+            Errore
+          {% endif %}
+        attributes:
+          hisory_2: "{{ this.state | default('In attesa') }}"
+          hisory_3: "{{ this.attributes.hisory_2 | default('In attesa') }}"
+          hisory_4: "{{ this.attributes.hisory_3 | default('In attesa') }}"
+          hisory_5: "{{ this.attributes.hisory_4 | default('In attesa') }}"
+          hisory_6: "{{ this.attributes.hisory_5 | default('In attesa') }}"
+          hisory_7: "{{ this.attributes.hisory_6 | default('In attesa') }}"
+          hisory_8: "{{ this.attributes.hisory_7 | default('In attesa') }}"
+          hisory_9: "{{ this.attributes.hisory_8 | default('In attesa') }}"
+          hisory_10: "{{ this.attributes.hisory_9 | default('In attesa') }}"
 
 input_text:
   setting_name_zone_alarm:
@@ -192,13 +231,8 @@ automation:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
-          {{ is_state(alarm, 'triggered') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
-      - platform: template
-        value_template: >-
-          {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
-          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
+          {% set alarm_state = states[(state_alarm() | from_json)['alarm']] %}
+          {{ (alarm_state.state in ['triggered', 'disarmed']) and (now() < alarm_state.last_changed + timedelta(seconds=1)) }}
     action:
       - if: "{{ trigger.to_state.state == 'triggered' }}"
         then:

@@ -29,17 +29,17 @@ automation:
     mode: parallel
     variables:
       all_light: *all_light
-      exclude: "{{ expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list }}"
+      exclude: "{{ expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list }}"
     trigger:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm = (state_alarm()|from_json)['alarm'] %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'pending') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - platform: state
         entity_id: input_boolean.alarm_triggered_state
@@ -56,7 +56,7 @@ automation:
           - alias: Accendere tutte le luci
             service: homeassistant.turn_on
             target:
-              entity_id: "{{ expand(all_light)|map(attribute='entity_id')|list }}"
+              entity_id: "{{ expand(all_light) | map(attribute='entity_id') | list }}"
 
       - alias: Allarme scattato (notifica nel file armed_away/night)
         if: "{{ trigger.to_state.state == 'on' }}"
@@ -64,23 +64,23 @@ automation:
           - alias: Spegni tutte le luci
             service: homeassistant.turn_off
             target:
-              entity_id: "{{ expand(all_light)|map(attribute='entity_id')|list }}"
+              entity_id: "{{ expand(all_light) | map(attribute='entity_id') | list }}"
           - alias: Chiudi tutte le tapparelle
             service: cover.close_cover
             data: {}
             target:
-              entity_id: "{{ states.cover|rejectattr('entity_id','in',exclude)|rejectattr('state','in',['unknown','unavailable'])|map(attribute='entity_id')|list }}"
+              entity_id: "{{ states.cover | rejectattr('entity_id', 'in', exclude) | rejectattr('state', 'in',['unknown', 'unavailable']) | map(attribute='entity_id') | list }}"
           - alias: Salva stato automazioni da disattivare
             service: scene.create
             data:
               scene_id: automation_action_armed
-              snapshot_entities: "{{ expand('group.automation_action_armed')|map(attribute='entity_id')|list }}"
+              snapshot_entities: "{{ expand('group.automation_action_armed') | map(attribute='entity_id') | list }}"
           - delay:
               seconds: 1
           - alias: Disattiva automazioni scelte
             service: automation.turn_off
             target:
-              entity_id: "{{ expand('group.automation_action_armed')|map(attribute='entity_id')|list }}"
+              entity_id: "{{ expand('group.automation_action_armed') | map(attribute='entity_id') | list }}"
 
       - alias: Allarme disattivato durante il pending (primo avviso)
         if: "{{ trigger.to_state.state == 'disarmed' and trigger.from_state.state == 'pending' }}"
@@ -94,12 +94,12 @@ automation:
               - service: homeassistant.turn_off
                 target:
                   entity_id: >-
-                    {{ expand(all_light)|rejectattr('entity_id','in',exclude)|map(attribute='entity_id')|list }}
+                    {{ expand(all_light) | rejectattr('entity_id', 'in' ,exclude) | map(attribute='entity_id') | list }}
             else:
               - service: homeassistant.turn_off
                 target:
                   entity_id: >-
-                    {{ expand(all_light)|map(attribute='entity_id')|list }}
+                    {{ expand(all_light) | map(attribute='entity_id') | list }}
 
       - alias: Allarme disattivato dopo essere scattato
         if: "{{ trigger.to_state.state == 'off'}}"

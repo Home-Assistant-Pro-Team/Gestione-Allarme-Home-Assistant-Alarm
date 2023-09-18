@@ -1,3 +1,6 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 rest_command:
   detached_shelly:
     url: "{{ urls | default(none) }}"

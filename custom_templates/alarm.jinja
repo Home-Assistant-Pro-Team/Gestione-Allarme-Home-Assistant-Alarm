@@ -30,29 +30,41 @@
 # Da qui in poi NON MODIFICARE
 ##################################################################
 
+# Simulazione presenza
+
+{% macro presence_simulation(dominios) %}
+	{% set output = namespace(numbers=[]) %}
+    {% set exclude = expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list %}
+	{% set include = dominios | selectattr('entity_id','in',expand('group.include_alarm_entities') | map(attribute='entity_id')) | list %}
+	{% set list_sensor = include + dominios | rejectattr('entity_id','in',exclude) | list %}
+		{% for entities in list_sensor if entities.state != 'unavailable' and states.state != 'unknown' -%}
+			{%- set output.numbers = output.numbers + [entities.name ] -%}
+		{%- endfor %}
+	{{ ['RESET'] + output.numbers }}
+{% endmacro %}
+
 # Lista sensori allarme zone night/away
 {% macro zone_sensor(sensor) %}
-	{% set zone_attive = state_attr(sensor,'print_list_group') %}
 	{% set output = namespace(numbers=[]) %}
 	{% set sensori_allarme = states['sensor.lista_sensori_allarme_per_zone'].attributes %}
 		{% for zona in range(10) %}
 			{% set zona_nome = sensori_allarme['zona' ~ zona] %}
 			{% set sensori = sensori_allarme['sensor_zona' ~ zona] %}
-				{% if zona_nome|string in zone_attive %}
-					{% set output.numbers = output.numbers + sensori|list %}
+				{% if zona_nome | string in state_attr(sensor,'print_list_group') %}
+					{% set output.numbers = output.numbers + sensori | list %}
 				{% endif %}
 		{% endfor %}
 			{{ output.numbers }}
 {% endmacro %}
 
-{% macro zone_alarm(lista, option, index) %}
-	{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[0]|length > 0 or option != 'RESET' %}
-		{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[index] == states('input_text.select_zone_alarm')|title %}
-			{% for device in states.binary_sensor if device.name|lower == option|lower %}
+{% macro zone_alarm(lista, option, index) %} 
+	{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[0] | length > 0 or option != 'RESET' %}
+		{% if state_attr('select.seleziona_zona_allarme_setting', 'options')[index] == states('input_text.select_zone_alarm') | title %}
+			{% for device in states.binary_sensor if device.name | lower == option | lower %}
 				{% if device.entity_id in lista %}
-					{{ lista|list|select('ne', device.entity_id)|list }}
+					{{ lista | list | select('ne', device.entity_id) | list }}
 				{% else %}
-					{% set ns = namespace(entities=lista|list|select('ne', device.entity_id)|list) %}
+					{% set ns = namespace(entities=lista | list | select('ne', device.entity_id) | list) %}
 					{{ ns.entities + [device.entity_id] }}
 				{% endif %}
 			{% endfor %}
@@ -63,14 +75,14 @@
 	{% endif %}		
 {% endmacro %}
 
-# Lista sensori per allarme applicato al select
+# Lista sensori per allarme applicato al select night/away
 {% macro select_alarm() %}
 	{% set output = namespace(numbers=[]) %}
-	{% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
-	{% set include = states.binary_sensor|selectattr('entity_id','in',expand('group.include_alarm_entities')|map(attribute='entity_id'))|list %}
-	{% set list_sensor = include + states.binary_sensor|rejectattr('entity_id','in',exclude)|selectattr('attributes.device_class', 'defined')
-		|selectattr('attributes.device_class','in',['window', 'vibration', 'opening', 'occupancy', 'moving', 'motion', 'lock', 'garage_door', 'door'])|list %}
-		{% for states in list_sensor  if states.state != 'unavailable' and states.state != 'unknown' -%}
+	{% set exclude = expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list %}
+	{% set include = states.binary_sensor | selectattr('entity_id','in',expand('group.include_alarm_entities') | map(attribute='entity_id')) | list %}
+	{% set list_sensor = include + states.binary_sensor | rejectattr('entity_id','in',exclude) | selectattr('attributes.device_class', 'defined')
+		 | selectattr('attributes.device_class','in',['window', 'vibration', 'opening', 'occupancy', 'moving', 'motion', 'lock', 'garage_door', 'door']) | list %}
+		{% for states in list_sensor if states.state != 'unavailable' and states.state != 'unknown' -%}
 		{%- set output.numbers = output.numbers + [states.name ] -%}
 			{%- if loop.last -%}
 			{%- endif -%}
@@ -78,16 +90,16 @@
 	{{ ['RESET'] + output.numbers }}
 {% endmacro %}
 
-{% macro list_sensor_entity(sensor_select, print_list_group) %}
-	{% set option = sensor_select %}
-	{% set lists = print_list_group %}
-	{% if option == 'RESET' %}
+# generale
+
+{% macro list_sensor_entity(sensor_select, print_list_group, dominios=states.binary_sensor) %}
+	{% if sensor_select == 'RESET' %}
 	{% else %}
-		{% for device in states.binary_sensor if device.name|lower == option|lower %}
-			{% if device.entity_id in lists %}
-				{{ lists|list|select('ne', device.entity_id)|list }}
+		{% for device in dominios if device.name | lower == sensor_select | lower %}
+			{% if device.entity_id in print_list_group %}
+				{{ print_list_group | list | select('ne', device.entity_id) | list }}
 			{%else%}
-				{% set ns = namespace(entities=lists|list|select('ne', device.entity_id)|list)%}
+				{% set ns = namespace(entities=print_list_group | list | select('ne', device.entity_id) | list)%}
 				{{ ns.entities + [device.entity_id] }}
 			{%- endif -%}
 		{%- endfor -%}
@@ -95,19 +107,17 @@
 {% endmacro %}
 
 {% macro list_sensor_name(sensor_select, print_list_group) %}
-	{% set option = sensor_select %}
-	{% set lists = print_list_group %}
-	{% if option == 'RESET' %}
-	{% elif option in lists%}
-		{{ lists|select('ne', option)|list }}
+	{% if sensor_select == 'RESET' %}
+	{% elif sensor_select in print_list_group%}
+		{{ print_list_group | select('ne', sensor_select) | list }}
 	{% else %}
-		{% set ns = namespace(entities=lists|select('ne',option)|list) %}
-		{{ ns.entities + [option] }}
+		{% set ns = namespace(entities=print_list_group | select('ne',sensor_select) | list) %}
+		{{ ns.entities + [sensor_select] }}
 	{% endif %}
 {% endmacro %}
 
 {% macro notify_sensor(sensor) %}
-  {%- set last_time = expand(state_attr(sensor, 'print_list_group'))|map(attribute='last_changed')|max %}
-  {%- set last_sensor = (states.binary_sensor|selectattr('attributes.device_class', 'defined')|selectattr('last_changed', 'eq', last_time)|list)[0] %}
-  	{{-  last_sensor.name + ' alle ore ' + as_local(last_time).strftime("%H:%M") }}
+  {%- set last_time = expand(state_attr(sensor, 'print_list_group')) | map(attribute='last_changed') | max %}
+  {%- set last_sensor = (states.binary_sensor | selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0] %}
+  	{{- last_sensor.name + ' alle ore ' + as_local(last_time).strftime("%H:%M") }}
 {% endmacro %}

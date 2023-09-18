@@ -11,13 +11,13 @@ automation:
           - >-
             {% from 'personal.jinja' import persons %}
             {% set output = namespace(state_home=[]) %}
-              {% for d in persons()|from_json if states[d.person].state == 'home' %}
+              {% for d in persons() | from_json if states[d.person].state == 'home' %}
                 {% set output.state_home = output.state_home + [d['person'] ] %}
               {% endfor %}
-            {{ output.state_home|count == 0 }}
+            {{ output.state_home | count == 0 }}
           - >-
             {% from 'alarm.jinja' import state_alarm %}
-            {{ states[(state_alarm()|from_json)['alarm']].state != 'disarmed' }}
+            {{ states[(state_alarm() | from_json) ['alarm']].state != 'disarmed' }}
     action:
       - alias: INVIA NOTIFICA
         event: customizations

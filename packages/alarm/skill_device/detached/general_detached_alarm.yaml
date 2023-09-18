@@ -1,24 +1,27 @@
+#################################################################
+#               NON OCCORRONO PERSONALIZZAZIONI                 #
+#################################################################
 automation:
   - id: press_btn_alarm_trigger
     alias: Notifica e trigger alarme alla pressione tasti
     variables:
       alarm: >
         {% from 'alarm.jinja' import state_alarm %}
-        {{ (state_alarm()|from_json)['alarm']}}
+        {{ (state_alarm() | from_json) ['alarm']}}
     trigger:
       - platform: event
         event_type: shelly.click
       - platform: event
         event_type: state_changed
     condition:
-      - "{{is_state(alarm,'armed_away') }}"
+      - "{{is_state(alarm, 'armed_away') }}"
       - or:
           - "{{ trigger.event.event_type == 'shelly.click'}}"
           - and:
               - >
-                {% set exclude = expand('group.exclude_alarm_entities')|map(attribute='entity_id')|list %}
-                {%- set last_time = states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined')| selectattr('attributes.device_class', 'eq','power')| map(attribute='last_changed')|max -%}
-                {%- set last_sensor = ((states.binary_sensor |rejectattr('entity_id','in',exclude)| selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0]) -%}
+                {% set exclude = expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list %}
+                {%- set last_time = states.binary_sensor | rejectattr('entity_id', 'in',exclude) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'power') | map(attribute='last_changed') | max -%}
+                {%- set last_sensor = ((states.binary_sensor | rejectattr('entity_id', 'in',exclude) | selectattr('attributes.device_class', 'defined') | selectattr('last_changed', 'eq', last_time) | list)[0]) -%}
                   {{-trigger.event.data.entity_id == last_sensor.entity_id and trigger.event.event_type == 'state_changed'-}}
               - or:
                   - "{{trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off'}}"
