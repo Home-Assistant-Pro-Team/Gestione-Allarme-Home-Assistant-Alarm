@@ -16,6 +16,15 @@ Per far funzionare l'allarme, è sufficiente utilizzare la cartella alarm_contro
 Tuttavia, questo progetto va oltre l'uso semplice della cartella "alarm_control_panel" e offre una gestione più completa dell'allarme. Nelle sezioni successive, spiegheremo in dettaglio le funzioni di ciascuna parte del progetto.
 
 È importante notare che le uniche cartelle obbligatorie da utilizzare sono "Alarm control panel" e "custom_template", mentre gli altri file sono facoltativi. Tuttavia, se si dispone dei dispositivi richiesti, consigliamo l'utilizzo di tutti i file disponibili per migliorare le funzionalità dell'allarme.
+
+### **Supportaci**
+Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
+I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
+Grazie di cuore per il tuo sostegno!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
+
+
 ### **Indice**
 - [Requisiti](#requisiti)
 - [Intro](#intro)
@@ -81,7 +90,7 @@ homeassistant:
     package.node_anchors:
         Allarme: &alarm alarm_control_panel.home_alarm
 ```
-La prima cosa da fare è caricare la cartella "custom_templates" nella directory "conf". 
+La prima cosa da fare è caricare la cartella "custom_templates" nella directory "config". 
 
 Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja" per adattarle alle proprie esigenze. 
 - **alarm.jinja**
@@ -471,13 +480,6 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
 - Separate informazioni person e media_player 
 
-### Versione: 3.0
-- Riproduzione sirena.mp3 dai media_player in caso di triggered
-- Aggiunta funzione modalità "simulazione presenza per allarme globale"
-- Scelta telecamere da UI per notifica 
-- Fix vari
-- Aggiunto storico stato allarme
-- Spostato jummer in settin
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
