@@ -142,11 +142,12 @@ automation:
     mode: restart
     initial_state: true
     trigger:
-      - platform: template
+      - alias: Allarme inserito
+        platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
-          {% set alarm_state = states[(state_alarm() | from_json)['alarm']] %}
-          {{ (alarm_state.state in ['armed_away', 'disarmed']) and (now() < alarm_state.last_changed + timedelta(seconds=1)) }}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm, 'armed_away') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
       - alias: Inizio simulazione presenza
         platform: event
         event_type: timer.finished
@@ -157,6 +158,12 @@ automation:
         event_type: timer.finished
         event_data:
           entity_id: timer.delay_active_motion_simulation
+      - alias: Allarme disattivato
+        platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {{ is_state(alarm, 'disarmed') and now() < states[alarm].last_changed + timedelta(seconds=1) }}
     action:
       - alias: Timer generale per avvio gestione simulazione presenza
         if:

@@ -68,7 +68,7 @@ Grazie di cuore per il tuo sostegno!
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
 
 ### **Requisiti**
-- [HomeAssitant release 2023.4 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
+- [HomeAssitant release 2023.9 ](https://www.home-assistant.io/blog/2023/04/05/release-20234/)
 - [Cartella Package abilitata](https://www.home-assistant.io/docs/configuration/packages/)
 
 ### **Intro**
@@ -169,6 +169,7 @@ I file principali si trovano nella cartella *alarm_control_panel*
 	-  Lo stato di questo boolean viene utilizzato in altri file del pacchetto.
 - Viene creato il sensore delle zone con i relativi sensori associati.
 - Viene creato un boolean per gestire la modalità ospite
+- Viene creato un sensore per ottenere lo storico degli allarmi, che comprende il motivo dell'attivazione/disattivazione (persona o nome dell'automazione e simulazione di presenza) e i sensori che sono stati attivati
 - Vengono creati due gruppi: **exclude_alarm_entities ed include_alarm_entities**, che permettono di includere o escludere entità che non sono necessarie per il pacchetto o che non vengono rilevate automaticamente. Le entità sono utilizzate nei seguenti file:
 	- STATO BATTERIA DISPOSITIVI file: "battery_status_alarm": 
 		- È possibile aggiungere altri sensori per monitorare lo stato della batteria. 
@@ -207,10 +208,9 @@ Il comportamento dei file è identico a quello descritto in precedenza, tuttavia
 
 Le zone possono essere create tramite l'opzione 'Imposta zone' nelle impostazioni.
 
-NB: Per eliminare le zone precedentemente create, è sufficiente inserire la parola 'RESET' come se si stesse creando una nuova zona."
+NB: Per eliminare le zone precedentemente create, è sufficiente inserire la parola 'RESET' come se si stesse creando una nuova zona.
 
 Le zone vengono create da setting --> imposta zone
-NB: Per cancellare le zone le creata occorre inserire la parola RESET come se fosse una nuova zona
 
 ![setting_zone_alarm](examples/setting_zone_alarm.png)
 
@@ -476,6 +476,8 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Aggiunta funzione modalità "simulazione presenza per allarme globale"
 - Scelta telecamere da UI per notifica 
 - Fix vari
+- Aggiunto storico stato allarme
+- Spostato jummer in settin
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
