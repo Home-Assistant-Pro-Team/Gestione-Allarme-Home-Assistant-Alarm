@@ -480,6 +480,15 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Aggiunto funzione allarme per zona (max 10) configurabili da UI. 
 - Separate informazioni person e media_player 
 
+### Versione: 3.0
+- Riproduzione sirena.mp3 dai media_player in caso di triggered
+- Aggiunta funzione modalità "simulazione presenza per allarme globale"
+- Scelta telecamere da UI per notifica 
+- Fix vari
+- Aggiunto storico stato allarme
+- Spostato jummer in settin
+
+
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
 I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
