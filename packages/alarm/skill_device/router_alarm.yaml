@@ -8,8 +8,8 @@ homeassistant:
 ##############################################################
 
 automation:
-  - alias: Stato Internet
-    id: internet.state
+  - alias: "Allarme: Stato Internet"
+    id: allarme_internet_state
     trigger:
       - platform: state
         entity_id: *router

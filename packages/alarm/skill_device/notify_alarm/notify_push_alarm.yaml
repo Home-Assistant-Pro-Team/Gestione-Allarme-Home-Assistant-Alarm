@@ -1,6 +1,6 @@
 automation:
-  - alias: notify_alarm_push
-    id: notify_alarm_push
+  - alias: "Allarme: notify_alarm_push"
+    id: allarme_notify_alarm_push
     mode: queued
     trigger:
       - platform: event
@@ -114,8 +114,8 @@ automation:
                       title: "{{ trigger.event.data.title2 | default('Fai Scattare') }}"
                       uri: "{{ trigger.event.data.uri2 | default(None) }}"
 
-  - alias: Action notify alarm
-    id: action_notify_alarm
+  - alias: "Allarme: Action notify alarm"
+    id: allarme_action_notify_alarm
     initial_state: true
     variables:
       alarm: >

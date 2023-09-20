@@ -88,8 +88,8 @@ input_boolean:
   not_home_battery_disarmed:
 
 automation:
-  - alias: Attiva-Disattiva per presenza in casa
-    id: presence_allarm_auto
+  - alias: "Allarme: Presenza in casa"
+    id: allarme_presence_allarm_auto
     initial_state: true
     variables:
       alarm: >-
@@ -214,8 +214,8 @@ automation:
                     target:
                       entity_id: input_boolean.not_home_battery_disarmed
 
-  - alias: Disattivazione automatica rietro familiare
-    id: automatic_deactivation_of_family_reunion
+  - alias: "Allarme: Disattivazione automatica rietro familiare"
+    id: allarme_automatic_deactivation_of_family_reunion
     variables:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}

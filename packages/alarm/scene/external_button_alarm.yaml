@@ -5,8 +5,8 @@ homeassistant:
 # Occorre personalizzare il trigger in base al button e l'integrazione usata
 
 automation:
-  - alias: "Permetti di aprire la porta con allarme notte inserito"
-    id: permit_alarm_night_door
+  - alias: "Allarme: Permetti di aprire la porta con allarme notte inserito"
+    id: allarme_permit_alarm_night_door
     variables:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}

@@ -486,7 +486,7 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Scelta telecamere da UI per notifica 
 - Fix vari
 - Aggiunto storico stato allarme
-- Spostato jummer in settin
+- Spostato jummer in setting
 
 
 ### **Supportaci**

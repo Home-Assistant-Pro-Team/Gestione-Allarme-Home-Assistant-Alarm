@@ -8,7 +8,7 @@ homeassistant:
 ##############################################################
 
 automation:
-  - alias: Allarme globale inserito spegni casa
+  - alias: "Allarme: globale inserito spegni casa"
     id: alarm_global_insert_turn_off
     variables:
       all_light: *all_light

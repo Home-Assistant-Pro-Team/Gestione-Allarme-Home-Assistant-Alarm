@@ -9,8 +9,8 @@ homeassistant:
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-  - alias: Gestione serratura con tastiera esterna
-    id: smart_lock_alarm_keypad
+  - alias: "Allarme: Gestione serratura con tastiera esterna"
+    id: allarme_smart_lock_alarm_keypad
     variables:
       code: >
         {% from 'alarm.jinja' import state_alarm %}

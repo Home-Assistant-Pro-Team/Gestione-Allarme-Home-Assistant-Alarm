@@ -198,8 +198,11 @@ template:
             {% set parents = states.automation | selectattr('context.parent_id', 'eq', trigger.to_state.context.parent_id) | list %} 
             {% if persons | count == 1 %}
                {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + persons[0].attributes.friendly_name }}           
-            {% elif parents | count == 1 %}
-               {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents[0].attributes.friendly_name }}
+            {% elif parents | count > 0 %}
+                {% for parents in parents if "Allarme: " in parents.attributes.friendly_name %}
+                  {{as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents.attributes.friendly_name | replace('Allarme: ','')}}
+                {% endfor %}
+              {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents[0].attributes.friendly_name }}
             {% else %}
               {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state }}
             {% endif %}
@@ -223,8 +226,8 @@ input_text:
   select_zone_alarm:
 
 automation:
-  - alias: Stato Trigger Allarme
-    id: state_trigger_alarm
+  - alias: "Allarme: Stato Trigger Allarme"
+    id: allarme_state_trigger_alarm
     initial_state: true
     mode: single
     trigger:

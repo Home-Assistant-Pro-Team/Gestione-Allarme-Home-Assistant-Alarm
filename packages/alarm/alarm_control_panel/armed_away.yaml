@@ -92,8 +92,8 @@ template:
             {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
 automation:
-  - id: Allarme globale
-    alias: Allarme globale
+  - alias: "Allarme: globale"
+    id: allarme_globale    
     initial_state: true
     trigger:
       - platform: template
@@ -127,7 +127,7 @@ automation:
               - alias: Attiva automazione Trigger Allarme Globale
                 service: automation.turn_on
                 target:
-                  entity_id: automation.trigger_allarme_globale
+                  entity_id: automation.allarme_trigger_allarme_globale
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -195,7 +195,7 @@ automation:
               - alias: Spegni automazione Trigger Allarme Globale per evitare continui trigger con allarme spento
                 service: automation.turn_off
                 target:
-                  entity_id: automation.trigger_allarme_globale
+                  entity_id: automation.allarme_trigger_allarme_globale
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -212,8 +212,8 @@ automation:
                       Allarme globale disattivato.
                     {% endif %}
 
-  - alias: Trigger Allarme Globale
-    id: trigger_alarm_global
+  - alias: "Allarme: Trigger Allarme Globale"
+    id: alarme_trigger_alarm_global
     mode: parallel
     trigger:
       - platform: event

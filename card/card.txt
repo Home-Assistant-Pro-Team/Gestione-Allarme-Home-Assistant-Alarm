@@ -951,11 +951,11 @@ custom_fields:
                       icon: mdi:nfc
                 - type: conditional
                   conditions:
-                    - entity: automation.disattiva_allarme_notte_automaticamente
+                    - entity: automation.allarme_disattiva_allarme_notte_automaticamente
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.disattiva_allarme_notte_automaticamente
+                    entity: automation.allarme_disattiva_allarme_notte_automaticamente
                     name: Notte OFF
                     template: popup_setting
                     variables:
@@ -1153,55 +1153,55 @@ custom_fields:
                                   }
                 - type: conditional
                   conditions:
-                    - entity: automation.tag_nfc_alarm
+                    - entity: automation.allarme_tag_nfc_alarm
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.tag_nfc_alarm
+                    entity: automation.allarme_tag_nfc_alarm
                     name: Tag NFC
                     template: popup_setting
                     variables:
                       icon: mdi:nfc
                 - type: conditional
                   conditions:
-                    - entity: automation.avviso_ups_batteria
+                    - entity: automation.allarme_avviso_ups_batteria
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.avviso_ups_batteria
+                    entity: automation.allarme_avviso_ups_batteria
                     name: Avviso UPS
                     template: popup_setting
                     variables:
                       icon: mdi:power-plug-off
                 - type: conditional
                   conditions:
-                    - entity: automation.notifica_e_trigger_alarme_alla_pressione_tasti
+                    - entity: automation.allarme_notifica_e_trigger_alarme_alla_pressione_tasti
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.notifica_e_trigger_alarme_alla_pressione_tasti
+                    entity: automation.allarme_notifica_e_trigger_alarme_alla_pressione_tasti
                     name: Notifica Pulsanti
                     template: popup_setting
                     variables:
                       icon: mdi:message-alert-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.detached_alarm
+                    - entity: automation.allarme_detached_alarm
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.detached_alarm
+                    entity: automation.allarme_detached_alarm
                     name: Blocco Pulsanti
                     template: popup_setting
                     variables:
                       icon: mdi:gesture-double-tap
                 - type: conditional
                   conditions:
-                    - entity: automation.cctv_allarme
+                    - entity: automation.allarme_cctv_allarme
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.cctv_allarme
+                    entity: automation.allarme_cctv_allarme
                     name: Image CCTV
                     template: popup_setting
                     variables:
@@ -1224,7 +1224,7 @@ custom_fields:
                                     border-radius: 25px;
                                     }
                                 type: custom:button-card
-                                entity: automation.cctv_allarme
+                                entity: automation.allarme_cctv_allarme
                                 name: Notifica CCTV
                                 show_icon: false
                                 state:
@@ -1302,32 +1302,32 @@ custom_fields:
                                   'print_list_group'))|map(attribute='name')|list|join(', ') }}
                 - type: conditional
                   conditions:
-                    - entity: automation.stato_internet
+                    - entity: automation.allarme_stato_internet
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.stato_internet
+                    entity: automation.allarme_stato_internet
                     template: popup_setting
                     variables:
                       icon: mdi:lan-pending
                 - type: conditional
                   conditions:
-                    - entity: automation.led_stato_allarme
+                    - entity: automation.allarme_led_stato_allarme
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.led_stato_allarme
+                    entity: automation.allarme_led_stato_allarme
                     name: Avviso Led
                     template: popup_setting
                     variables:
                       icon: mdi:led-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.campanello_come_allarme
+                    - entity: automation.allarme_campanello_come_allarme
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.campanello_come_allarme
+                    entity: automation.allarme_campanello_come_allarme
                     name: Campanello
                     template: popup_setting
                     variables:
@@ -1367,77 +1367,66 @@ custom_fields:
                       icon: mdi:home-off-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.disattivazione_automatica_rietro_familiare
+                    - entity: automation.allarme_disattivazione_automatica_rietro_familiare
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.disattivazione_automatica_rietro_familiare
+                    entity: automation.allarme_disattivazione_automatica_rietro_familiare
                     name: Rientro notturno
                     template: popup_setting
                     variables:
                       icon: mdi:home-off-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.azioni_personalizzate_per_allarme_globale
+                    - entity: automation.allarme_azioni_personalizzate_per_allarme_globale
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.azioni_personalizzate_per_allarme_globale
+                    entity: automation.allarme_azioni_personalizzate_per_allarme_globale
                     name: Azioni scattato
                     template: popup_setting
                     variables:
                       icon: mdi:home-alert-outline
                 - type: conditional
                   conditions:
-                    - entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
+                    - entity: automation.allarme_permetti_di_aprire_la_porta_con_allarme_notte_inserito
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.permetti_di_aprire_la_porta_con_allarme_notte_inserito
+                    entity: automation.allarme_permetti_di_aprire_la_porta_con_allarme_notte_inserito
                     name: Pulsante Porta
                     template: popup_setting
                     variables:
                       icon: mdi:door
                 - type: conditional
                   conditions:
-                    - entity: automation.gestione_serratura_con_impronta_digitale
+                    - entity: automation.allarme_gestione_serratura_con_tastiera_esterna
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.gestione_serratura_con_impronta_digitale
-                    name: Fingerprint SmartLock
-                    template: popup_setting
-                    variables:
-                      icon: mdi:door
-                - type: conditional
-                  conditions:
-                    - entity: automation.gestione_serratura_con_tastiera_esterna
-                      state_not: unavailable
-                  card:
-                    type: custom:button-card
-                    entity: automation.gestione_serratura_con_tastiera_esterna
+                    entity: automation.allarme_gestione_serratura_con_tastiera_esterna
                     name: Keypad SmartLock
                     template: popup_setting
                     variables:
                       icon: mdi:door
                 - type: conditional
                   conditions:
-                    - entity: automation.gestione_serratura_con_nfc
+                    - entity: automation.allarme_gestione_serratura_con_nfc
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.gestione_serratura_con_nfc
+                    entity: automation.allarme_gestione_serratura_con_nfc
                     name: NFC SmartLock
                     template: popup_setting
                     variables:
                       icon: mdi:door
                 - type: conditional
                   conditions:
-                    - entity: automation.batteria_scarica_dispositivi_allarme
+                    - entity: automation.allarme_batteria_scarica_dispositivi_allarme
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.batteria_scarica_dispositivi_allarme
+                    entity: automation.allarme_batteria_scarica_dispositivi_allarme
                     name: Batteria Sensori
                     template: popup_setting
                     variables:
@@ -1688,11 +1677,11 @@ custom_fields:
                       icon: mdi:door
                 - type: conditional
                   conditions:
-                    - entity: automation.sirena_allarme
+                    - entity: automation.allarme_sirena
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.sirena_allarme
+                    entity: automation.allarme_sirena
                     name: Sirena
                     template: popup_setting
                     variables:
@@ -1710,33 +1699,33 @@ custom_fields:
                       icon: mdi:gesture-swipe
                 - type: conditional
                   conditions:
-                    - entity: automation.notify_alarm_voip
+                    - entity: automation.allarme_notify_alarm_voip
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.notify_alarm_voip
+                    entity: automation.allarme_notify_alarm_voip
                     name: Chiamate voip
                     template: popup_setting
                     variables:
                       icon: mdi:phone-voip
                 - type: conditional
                   conditions:
-                    - entity: automation.notify_alarm_media_player
+                    - entity: automation.allarme_notify_alarm_media_player
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.notify_alarm_media_player
+                    entity: automation.allarme_notify_alarm_media_player
                     name: Notifiche MediaPlayer
                     template: popup_setting
                     variables:
                       icon: mdi:speaker-wireless
                 - type: conditional
                   conditions:
-                    - entity: automation.notify_alarm_push
+                    - entity: automation.allarme_notify_alarm_push
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.notify_alarm_push
+                    entity: automation.allarme_notify_alarm_push
                     name: Notifiche Push
                     template: popup_setting
                     variables:
@@ -1744,12 +1733,12 @@ custom_fields:
 
                 - type: conditional
                   conditions:
-                    - entity: automation.notify_alarm_push
+                    - entity: automation.allarme_jammer_detect_notifica
                       state_not: unavailable
                   card:
                     type: custom:button-card
-                    entity: automation.jammer_detect_notifica
-                    name: DETECT JUMMER
+                    entity: automation.allarme_jammer_detect_notifica
+                    name: Detect Jummer
                     template: popup_setting
                     variables:
                       icon: mdi:wifi-strength-1-alert
@@ -1829,7 +1818,7 @@ custom_fields:
                               setting_offline:
                                 card:
                                   type: custom:button-card
-                                  entity: automation.jammer_detect_notifica
+                                  entity: automation.allarme_jammer_detect_notifica
                                   name: Controllo offline
                                   show_icon: false
                                   template: no_background
@@ -1882,7 +1871,7 @@ custom_fields:
                                       card:
                                         type: custom:button-card
                                         template: no_background
-                                        entity: automation.jammer_detect_notifica
+                                        entity: automation.allarme_jammer_detect_notifica
                                         icon: mdi:wifi-strength-1-alert
                                         show_name: false
                                         size: 56%

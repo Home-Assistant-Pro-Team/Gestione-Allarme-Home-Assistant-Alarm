@@ -58,8 +58,8 @@ template:
             {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_notte', 'print_list_group')) | selectattr('attributes.device_class', 'defined') | rejectattr('attributes.device_class', 'eq', 'window') | map(attribute='entity_id') | list %}
               {{ (window + not_window) }}
 automation:
-  - id: Allarme Notte
-    alias: Allarme Notte
+  - alias: "Allarme: Notte"
+    id: allarme_notte    
     initial_state: true
     trigger:
       - platform: template
@@ -93,7 +93,7 @@ automation:
               - alias: Attiva automazione Trigger Allarme Notte
                 service: automation.turn_on
                 target:
-                  entity_id: automation.trigger_allarme_notte
+                  entity_id: automation.allarme_trigger_allarme_notte
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -166,7 +166,7 @@ automation:
               - alias: Spegni automazione Trigger Allarme Notte per evitare continui trigger con allarme spento
                 service: automation.turn_off
                 target:
-                  entity_id: automation.trigger_allarme_notte
+                  entity_id: automation.allarme_trigger_allarme_notte
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -183,8 +183,8 @@ automation:
                       Allarme disattivato. Buongiorno
                     {% endif %}
 
-  - alias: Trigger Allarme Notte
-    id: trigger_alarm_night
+  - alias: "Allarme: Trigger Allarme Notte"
+    id: allarme_trigger_alarm_night
     mode: parallel
     trigger:
       - platform: event

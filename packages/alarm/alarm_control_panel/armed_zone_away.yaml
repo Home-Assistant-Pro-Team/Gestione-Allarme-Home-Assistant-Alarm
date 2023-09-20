@@ -110,8 +110,8 @@ template:
             {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
 automation:
-  - id: allarme_home_a_zone
-    alias: Allarme Home a zone
+  - alias: "Allarme: Home a zone"
+    id: allarme_home_a_zone    
     initial_state: true
     trigger:
       - platform: template
@@ -145,7 +145,7 @@ automation:
               - alias: Attiva automazione Trigger Allarme Globale
                 service: automation.turn_on
                 target:
-                  entity_id: automation.trigger_allarme_zone
+                  entity_id: automation.allarme_trigger_allarme_zone
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -212,7 +212,7 @@ automation:
               - alias: Spegni automazione Trigger Allarme Globale per evitare continui trigger con allarme spento
                 service: automation.turn_off
                 target:
-                  entity_id: automation.trigger_allarme_zone
+                  entity_id: automation.allarme_trigger_allarme_zone
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -229,8 +229,8 @@ automation:
                       Allarme a zone globale disattivato.
                     {% endif %}
 
-  - alias: Trigger Allarme zone
-    id: trigger_allarme_zone
+  - alias: "Allarme: Trigger Allarme zone"
+    id: allarme_trigger_allarme_zone
     mode: parallel
     trigger:
       - platform: event

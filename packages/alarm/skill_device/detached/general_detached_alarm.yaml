@@ -2,8 +2,8 @@
 #               NON OCCORRONO PERSONALIZZAZIONI                 #
 #################################################################
 automation:
-  - id: press_btn_alarm_trigger
-    alias: Notifica e trigger alarme alla pressione tasti
+  - alias: "Allarme: Notifica e trigger alarme alla pressione tasti"
+    id: allarme_press_btn_alarm_trigger    
     variables:
       alarm: >
         {% from 'alarm.jinja' import state_alarm %}
@@ -43,8 +43,8 @@ automation:
         target:
           entity_id: "{{alarm}}"
 
-  - id: detached_alarm
-    alias: Detached alarm
+  - alias: "Allarme: Detached alarm"
+    id: allarme_detached_alarm
     mode: queued
     trigger:
       - platform: state

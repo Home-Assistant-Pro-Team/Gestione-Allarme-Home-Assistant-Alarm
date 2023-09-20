@@ -72,8 +72,8 @@ template:
               {{ (window + not_window)}}
 
 automation:
-  - id: Allarme a zone Notte
-    alias: Allarme a zone Notte
+  - alias: "Allarme: a zone Notte"
+    id: allarme_a_zone_notte
     initial_state: true
     trigger:
       - platform: template
@@ -107,7 +107,7 @@ automation:
               - alias: Attiva automazione Trigger Allarme Notte a zone
                 service: automation.turn_on
                 target:
-                  entity_id: automation.trigger_allarme_notte_a_zone
+                  entity_id: automation.allarme_trigger_allarme_notte_a_zone
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -179,7 +179,7 @@ automation:
               - alias: Spegni automazione Trigger Allarme Notte per evitare continui trigger con allarme spento
                 service: automation.turn_off
                 target:
-                  entity_id: automation.trigger_allarme_notte_a_zone
+                  entity_id: automation.allarme_trigger_allarme_notte_a_zone
               - alias: INVIA NOTIFICA
                 event: customizations
                 event_data:
@@ -196,8 +196,8 @@ automation:
                       Allarme notte a zone disattivato. Buongiorno
                     {% endif %}
 
-  - alias: Trigger Allarme Notte a zone
-    id: trigger_alarm_night_zone
+  - alias: "Allarme: Trigger Allarme Notte a zone"
+    id: allarme_trigger_alarm_night_zone
     mode: parallel
     trigger:
       - platform: event

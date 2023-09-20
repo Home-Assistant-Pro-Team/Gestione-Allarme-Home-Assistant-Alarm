@@ -38,7 +38,7 @@ template:
   # LISTA MP3
   - sensor:
       - name: Lista mp3 simulazione presenza
-        state: "{{ states('automation.simulazione_presenza_allarme') }}"
+        state: "{{ states('automation.allarme_simulazione_presenza_allarme') }}"
         attributes:
           list_mp3: >-
             {{
@@ -137,8 +137,8 @@ template:
             {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
 automation:
-  - alias: Simulazione presenza allarme
-    id: simulazione_presenza_allarme
+  - alias: "Allarme: Simulazione presenza allarme"
+    id: allarme_simulazione_presenza_allarme
     mode: restart
     initial_state: true
     trigger:

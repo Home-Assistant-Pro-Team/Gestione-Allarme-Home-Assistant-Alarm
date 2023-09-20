@@ -24,8 +24,8 @@ group:
 ##############################################################
 
 automation:
-  - alias: Azioni personalizzate per allarme globale
-    id: action_pending_triggered
+  - alias: "Allarme: Azioni personalizzate per allarme globale"
+    id: allarme_action_pending_triggered
     mode: parallel
     variables:
       all_light: *all_light

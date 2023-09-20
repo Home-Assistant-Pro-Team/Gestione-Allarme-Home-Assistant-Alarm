@@ -140,8 +140,8 @@ template:
                       message: "{{ 'Allarme!!! Troppi tentativi di inserimento codice rilevati alle ore ' + (now().strftime('%H:%M'))|string }}"
 
 automation:
-  - alias: "set code allarm button"
-    id: 9ecc864d0389dce1cd6528e40a40ec81
+  - alias: "Allarme: set code allarm button"
+    id: allarme_set_code_allarm_button
     initial_state: true
     mode: single
     trigger:

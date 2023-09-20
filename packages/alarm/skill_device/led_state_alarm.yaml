@@ -7,8 +7,8 @@ homeassistant:
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-  - alias: Led Stato Allarme
-    id: led_state_alarm
+  - alias: "Allarme: Led Stato Allarme"
+    id: allarme_led_state_alarm
     mode: single
     trigger:
       - platform: template

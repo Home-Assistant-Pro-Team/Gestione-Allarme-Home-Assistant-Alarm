@@ -9,8 +9,8 @@ homeassistant:
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-  - alias: Sirena allarme
-    id: siren_alarm
+  - alias: "Allarme: Sirena"
+    id: allarme_sirena
     mode: restart
     variables:
       alarm: >

@@ -61,8 +61,8 @@ template:
         unit_of_measurement: "Voti"
 
 automation:
-  - alias: Jammer Detect notifica
-    id: cb5687088f82426289e16ed344945eea
+  - alias: "Allarme: Jammer Detect notifica"
+    id: allarme_jammer_detect_notifica
     trigger:
       - platform: template
         value_template: "{{ state_attr('sensor.jammer_detect_trigger_entities', 'offline') | int(0) >= states('input_number.jammer_detect_high_availability_vote') | int(0) }}"

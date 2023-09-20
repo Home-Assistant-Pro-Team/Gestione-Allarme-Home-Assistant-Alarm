@@ -9,8 +9,8 @@ input_boolean:
     name: Inverno estate
 
 automation:
-  - id: armed_night_auto_disarmed
-    alias: Disattiva allarme notte automaticamente
+  - alias: "Allarme: Disattiva allarme notte automaticamente"
+    id: allarme_armed_night_auto_disarmed
     variables:
       # PERSONSONALIZZARE AREA
       area: "{{ area_entities('camera') + area_entities('cameretta') }}"

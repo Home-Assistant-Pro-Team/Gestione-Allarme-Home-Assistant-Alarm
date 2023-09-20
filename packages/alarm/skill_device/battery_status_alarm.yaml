@@ -2,8 +2,8 @@
 #               NON OCCORRONO PERSONALIZZAZIONI                 #
 #################################################################
 automation:
-  - id: battery_low
-    alias: Batteria scarica dispositivi allarme
+  - id: allarme_battery_low
+    alias: "Allarme: Batteria scarica dispositivi allarme"
     variables:
       battery: >
         {# lista di tutti i device_id scelti per allarme e sensori presenti nel group.include_alarm_entities (esempio utile per serratura) #}

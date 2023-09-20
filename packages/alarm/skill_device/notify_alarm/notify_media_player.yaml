@@ -4,8 +4,8 @@ homeassistant:
       Dominio: &my_external_domain https://la_mia_casa.it
 
 automation:
-  - alias: notify_alarm_media_player
-    id: notify_alarm_media_player
+  - alias: "Allarme: notify alarm media player"
+    id: allarme_notify_alarm_media_player
     mode: restart
     variables:
       my_external_domain: *my_external_domain

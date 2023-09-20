@@ -1,8 +1,8 @@
 # Occorre personalizzare il trigger. Nell'esempio è usato Tecnoware
 
 automation:
-  - id: Avviso UPS Batteria
-    alias: Avviso UPS Batteria
+  - alias: "Allarme: Avviso UPS Batteria"
+    id: allarme_avviso_ups_batteria
     trigger:
       - platform: state
         entity_id: sensor.tecnoware_status

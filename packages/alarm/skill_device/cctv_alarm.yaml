@@ -30,8 +30,8 @@ template:
             {{ list_sensor_name(trigger.event.data.sensor_select, this.attributes.print_list_name) }}
 
 automation:
-  - alias: CCTV allarme
-    id: notify_cctv_alarm
+  - alias: "Allarme: CCTV allarme"
+    id: allarme_notify_cctv_alarm
     variables:
       camera: "{{state_attr('sensor.lista_camera_allarme', 'print_list_group')}}"
     trigger:

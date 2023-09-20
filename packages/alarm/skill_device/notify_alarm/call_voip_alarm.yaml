@@ -5,8 +5,8 @@ homeassistant:
       registrar_uri (example fritz.box or 192.168.178.1): &sip fritz.box
 
 automation:
-  - alias: notify_alarm_voip
-    id: notify_alarm_voip
+  - alias: "Allarme: notify_alarm_voip"
+    id: allarme_notify_alarm_voip
     mode: queued
     variables:
       code: >
@@ -94,8 +94,8 @@ automation:
               {{ output.numbers }}
             {% endif %}
 
-  - alias: "Azioni chiamata voip per disattivare allarme"
-    id: action_voip_disable_alarm
+  - alias: "Allarme: Azioni chiamata voip per disattivare allarme"
+    id: allarme_action_voip_disable_alarm
     initial_state: true
     trigger:
       - platform: webhook

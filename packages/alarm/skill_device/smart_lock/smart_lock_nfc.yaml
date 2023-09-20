@@ -10,8 +10,8 @@ homeassistant:
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-  - alias: Gestione serratura con nfc
-    id: smart_lock_alarm_nfc
+  - alias: "Allarme: Gestione serratura con nfc"
+    id: allarme_smart_lock_alarm_nfc
     trigger:
       - platform: event
         event_type: tag_scanned

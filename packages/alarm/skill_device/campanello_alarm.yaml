@@ -7,8 +7,8 @@ homeassistant:
 #         DA QUESTO PUNTO NON MODIFICARE
 ##############################################################
 automation:
-  - alias: Campanello come allarme
-    id: bell_for_alarm
+  - alias: "Allarme: Campanello come allarme"
+    id: allarme_bell_for_alarm
     mode: restart
     variables:
       alarm: >
