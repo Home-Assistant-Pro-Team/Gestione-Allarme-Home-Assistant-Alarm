@@ -200,9 +200,9 @@ template:
                {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + persons[0].attributes.friendly_name }}           
             {% elif parents | count > 0 %}
                 {% for parents in parents if "Allarme: " in parents.attributes.friendly_name %}
-                  {{as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents.attributes.friendly_name | replace('Allarme: ','')}}
+                  {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents.attributes.friendly_name | replace('Allarme: ','')}}
+                    {% break %} 
                 {% endfor %}
-              {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state + ' da: ' + parents[0].attributes.friendly_name }}
             {% else %}
               {{ as_local(now()).strftime("%H:%M -> ") + trigger.to_state.state }}
             {% endif %}
