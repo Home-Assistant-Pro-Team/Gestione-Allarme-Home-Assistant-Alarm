@@ -6,30 +6,33 @@ automation:
     alias: "Allarme: Batteria scarica dispositivi allarme"
     variables:
       battery: >
+        {% set ns = namespace(result =[]) %}
         {# lista di tutti i device_id scelti per allarme e sensori presenti nel group.include_alarm_entities (esempio utile per serratura) #}
         {% set id_power = (
             expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) +
             expand(state_attr('sensor.lista_sensori_allarme_notte', 'print_list_group')) +
+            expand(state_attr('sensor.lista_sensori_allarme_zone_away', 'print_list_group')) +
+            expand(state_attr('sensor.lista_sensori_allarme_zone_night', 'print_list_group')) +
             expand('group.include_alarm_entities')) | map(attribute='entity_id') | map('device_id') | unique | list %}
-        {% set ns = namespace(result =[]) %}
         {# Mostra solo dispositivi con batteria residua minore di 15 #}
-        {% for t in id_power if expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | map(attribute='state') | list | first | int < 15 %}
+        {% for t in id_power if expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | selectattr("state", 'is_number') | map(attribute='state') | list | first | int < 15 %}
         {# imposta enity_id delle entità batteria #}
-            {% set entity_battery= expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | map(attribute='entity_id') | list | first %}
+            {% set entity_battery= expand(device_entities(t)) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') | selectattr("state", 'is_number') | map(attribute='entity_id') | list | first %}
                 {% set ns.result = ns.result + [{'name': states[entity_battery].name, 'battery_level': states[entity_battery].state}] %}
+        {% endfor %}
+        {%if ns.result == [] %}
+          Nessuna
+        {% elif ns.result | count  > 4 %}
+          Controllare {{  ns.result | count }} device per patterie scariche
         {% else %}
-            Nessuna
-        {% endfor %}
-        {% for d in ns.result -%}
-          {% -if  loop.first%} Batterie in esaurimento: {%endif %}
-            {{- d.name -}} {{ '(' + d.battery_level + '%)' }}
-          {% -if not loop.last%},{%endif %}
-        {% endfor %}
+          Batteria scarica: {{ ns.result | map(attribute='name') | join(', ') }}
+        {% endif %}
     trigger:
       - platform: time
         at: "13:00:00"
-    condition: "{{ battery != 'Nessuna' }}"
     action:
+      - condition: template
+        value_template: "{{ battery != 'Nessuna' }}"
       - alias: INVIA NOTIFICA
         event: customizations
         event_data:
