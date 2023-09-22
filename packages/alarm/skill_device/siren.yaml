@@ -58,9 +58,6 @@ automation:
                     - service: switch.turn_on
                       target:
                         entity_id: *siren
-              - service: switch.turn_off
-                target:
-                  entity_id: *siren
           - alias: Allarme disattivato
             conditions:
               - "{{ trigger.to_state.state == 'disarmed' }}"
