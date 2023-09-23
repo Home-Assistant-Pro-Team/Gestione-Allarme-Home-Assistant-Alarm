@@ -55,7 +55,7 @@ template:
         event_data:
           types: update_armed_night_zone
       - platform: template
-        value_template: >
+        value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
           {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'armed_night') and is_state('input_boolean.alarm_triggered_state', 'off') }}
@@ -157,7 +157,7 @@ automation:
                   action2: None
                   title2: None
                   continue_voip: ". Inserire codice per disattivarlo o premi asterisco per bloccare le prossime chiamate"
-                  message: >
+                  message: >-
                     {% from 'alarm.jinja' import notify_sensor %}
                     {{ 'Allarme!!! Propabile infrazione. Ultimo sensore rilevato: ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_night') }}
               - alias: INVIA NOTIFICA media_player
@@ -228,7 +228,7 @@ automation:
               #critical: 1.0
               message: >-
                 {% from 'alarm.jinja' import notify_sensor %}
-                {{ 'Attenzione allarme in attivaziona da ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_night') }}
+                {{ 'Attenzione allarme in attivazione da ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_night') }}
       - alias: Inserisci finestra che passa dallo stato aperta a chiusa dopo 10 minuti con allarme inserito
         if:
           - "{{ trigger.event.data.entity_id not in state_attr('sensor.lista_sensori_allarme_zone_attiv_night', 'print_list_group') }}"

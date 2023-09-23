@@ -215,7 +215,7 @@ automation:
               #critical: 1.0
               message: >-
                 {% from 'alarm.jinja' import notify_sensor %}
-                {{ 'Attenzione allarme in attivaziona da ' + notify_sensor('sensor.lista_sensori_allarme_notte_attiv') }}
+                {{ 'Attenzione allarme in attivazione da ' + notify_sensor('sensor.lista_sensori_allarme_notte_attiv') }}
       - alias: Inserisci finestra che passa dallo stato aperta a chiusa dopo 10 minuti con allarme inserito
         if:
           - "{{ trigger.event.data.entity_id not in state_attr('sensor.lista_sensori_allarme_notte_attiv', 'print_list_group') }}"

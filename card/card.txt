@@ -1250,7 +1250,7 @@ custom_fields:
                                     card:
                                       type: custom:button-card
                                       template: no_background
-                                      entity: input_boolean.presence_simulation
+                                      entity: automation.allarme_cctv_allarme
                                       icon: mdi:motion-sensor
                                       show_name: false
                                       size: 56%

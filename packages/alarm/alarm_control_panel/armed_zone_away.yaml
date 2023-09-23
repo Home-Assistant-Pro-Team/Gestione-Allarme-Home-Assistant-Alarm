@@ -258,4 +258,4 @@ automation:
           notify: allarme_globale_sensore_rilevato
           message: >-
             {% from 'alarm.jinja' import notify_sensor %}
-            {{ 'Attenzione allarme in attivaziona da ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_away') }}
+            {{ 'Attenzione allarme in attivazione da ' + notify_sensor('sensor.lista_sensori_allarme_zone_attiv_away') }}
