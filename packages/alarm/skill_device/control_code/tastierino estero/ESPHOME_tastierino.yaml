@@ -1,6 +1,8 @@
 substitutions:
   esp_devicename: Pad Allarme
   deviceidname: pad-allarme
+#  ${esp_devicename}
+#  $deviceidname
 
 ################################################################################
 esphome:
@@ -13,8 +15,9 @@ esphome:
 wifi:
   ssid: "LAN SOLO"
   password: !secret wifi_password
+  fast_connect: true
   manual_ip:
-    static_ip: 192.168.178.144
+    static_ip: 192.168.178.145
     gateway: 192.168.178.1
     subnet: 255.255.255.0
 
@@ -58,7 +61,7 @@ switch:
     inverted: true
     id: BLU
 
-################################################
+################################################################################
 ##                  PAD
 ################################################
 matrix_keypad:
@@ -75,7 +78,7 @@ matrix_keypad:
   keys: "123456789*0#"
   has_diodes: false
 
-################################################
+################################################################################
 ##                  Key Collector
 ################################################
 key_collector:
@@ -96,6 +99,10 @@ key_collector:
       - switch.turn_on: BLU
       - delay: 100ms 
       - switch.turn_off: BLU
+
+ #     - text_sensor.template.publish:
+ #         id: keypadp
+ #         state: !lambda "return x.c_str();" 
 
     on_timeout:
       - logger.log:
@@ -173,7 +180,7 @@ key_collector:
           format: "input timeout: '%s', started by '%c'"
           args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
 
-################################################
+################################################################################
 ##                  Binary Sensor
 ################################################
 binary_sensor:
@@ -208,7 +215,7 @@ binary_sensor:
     name: "Allarme Scattato"
     internal: true
     lambda: |-
-      if (id(alarm).state == "on") {
+      if (id(alarm_state).state == "on") {
         return true;
       } else {
         return false;
@@ -217,7 +224,7 @@ binary_sensor:
       - while:
           condition:
             lambda: |-
-              if (id(alarm).state == "on") {
+              if (id(alarm_state).state == "on") {
                 return true;
               } else {
                 return false;
@@ -282,14 +289,15 @@ binary_sensor:
                       - switch.turn_off: VERDE
                       - delay: 100ms
 
-################################################
+################################################################################
 ##                  Sensor
 ################################################
 sensor:
   - platform: wifi_signal
     name: "${esp_devicename} WiFi Signal"
+    update_interval: 10s
 
-################################################
+################################################################################
 ##                  Text Sensor
 ################################################
 text_sensor:
@@ -313,7 +321,7 @@ text_sensor:
 
   - platform: homeassistant
     name: "alarm"
-    id: alarm
+    id: alarm_state
     entity_id: input_boolean.allarme_scattato
     internal: true
 
