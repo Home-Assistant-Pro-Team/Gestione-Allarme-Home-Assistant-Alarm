@@ -1,9 +1,7 @@
-# 02-06-23
 homeassistant:
   customize:
     package.node_anchors:
         Sirena1: &siren1 switch.sirena
-        Sirena2: &siren2 switch.sirena_zigbee
 
 
 ##############################################################
@@ -53,34 +51,49 @@ automation:
           conditions:
             - "{{trigger.to_state.state == 'triggered'}}"
           sequence:
-            - repeat:
-                until:
-                  - condition: template
-                    value_template: "{{is_state(alarm , 'triggered')}}"
-                sequence:
-                  - service: switch.turn_on
-                    target:
-                      entity_id: *siren1
-                  - service: switch.turn_on
-                    target:
-                      entity_id: *siren2
-            - service: switch.turn_off
+            - service: switch.turn_on
               target:
                 entity_id: *siren1
-            - service: switch.turn_off
-              target:
-                entity_id: *siren2
+
+
         - alias: Allarme disattivato
           conditions:
-            - "{{trigger.to_state.state == 'disarmed'}}"
+            - "{{trigger.to_state.state != 'triggered'}}"
           sequence:
           - alias: Spegni sirena
             service: switch.turn_off
             target:
               entity_id: *siren1
-          - alias: Spegni sirena
-            service: switch.turn_off
-            target:
-              entity_id: *siren2
 
 
+################################################################################
+##                  Script
+###################################################
+script:
+  sirena_zigbee_turn_on:
+    sequence:
+      - service: mqtt.publish
+        data:
+          topic: 'zigbee2mqtt/SirenaZigbee/set'
+          payload: '{"warning": {"duration": 120, "mode": "burglar", "level": "very_high", "strobe": true}}'
+
+
+  sirena_zigbee_turn_off:
+    sequence:
+      - service: mqtt.publish
+        data:
+          topic: 'zigbee2mqtt/SirenaZigbee/set'
+          payload: '{"warning": {"duration": 5, "mode": "stop", "level": "low", "strobe": true}}'
+
+################################################################################
+##                  MQTT
+###################################################
+mqtt:
+  switch:
+    - unique_id: "sirena_zigbee"
+      name: Sirena Zigbee
+      state_topic: "zigbee2mqtt/SirenaZigbee/set"
+      availability_topic: "zigbee2mqtt/bridge/state"
+      payload_off: '{"warning": {"duration": 5, "mode": "stop", "level": "low", "strobe": true}}'
+      payload_on: '{"warning": {"duration": 120, "mode": "burglar", "level": "very_high", "strobe": true}}'
+      command_topic: "zigbee2mqtt/SirenaZigbee/set"
