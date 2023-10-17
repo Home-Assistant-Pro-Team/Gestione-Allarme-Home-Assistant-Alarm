@@ -5,7 +5,7 @@ homeassistant:
 # Occorre personalizzare il trigger in base al button e l'integrazione usata
 
 automation:
-  - alias: "Allarme: Permetti di aprire la porta con allarme notte inserito"
+  - alias: "Allarme: Smart Button"
     id: allarme_permit_alarm_night_door
     variables:
       alarm: >-
@@ -17,7 +17,7 @@ automation:
         entity_id: sensor.tasto_porta_ingresso_action
         to: "single"
     condition:
-      - "{{ is_states(alarm, 'armed_night') }}"
+      - "{{ is_state(alarm, 'armed_night') }}"
     action:
       - alias: Disattiva Allarme
         service: alarm_control_panel.alarm_disarm
@@ -28,6 +28,12 @@ automation:
         target:
           entity_id: "{{ alarm }}"
 
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.avviso_porta_ingresso_aperta
+            - input_boolean.avviso_porta_ingresso_chiusa_male
+
       - alias: Attendi che la porta venga chiusa
         wait_for_trigger:
           - platform: state
@@ -35,20 +41,26 @@ automation:
             from: "on"
             to: "off"
         timeout:
-          minutes: 1
+          minutes: 5
+
+      - service: input_boolean.turn_on
+        target:
+          entity_id:
+            - input_boolean.avviso_porta_ingresso_aperta
+            - input_boolean.avviso_porta_ingresso_chiusa_male
+            - input_boolean.avviso_porta_ingresso_chiusa_male_timer
 
       - if:
           - "{{ wait.trigger.to_state.state == 'off' }}"
         then:
           - alias: Inserisci allarme notte se qualcuno è rimasto a letto e ci sono più di una persona in casa
             service: >-
-              {% set bed_presence = (states.binary_sensor | selectattr('entity_id', 'search', '.bedprecence_') | selectattr('state', 'eq', 'on') | list) | count != 0 %}
               {% from 'personal.jinja' import persons %}
               {% set output = namespace(state_home=[]) %}
               {% for d in persons() | from_json if states[d.person].state == 'home' %}
               {% set output.state_home = output.state_home + [d['person']] %}
               {% endfor %}
-              {{ 'alarm_control_panel.alarm_arm_night' if output.state_home | count > 1 and output.state_home | count > 1 and bed_presence else 'alarm_control_panel.alarm_arm_away' }}
+              {{ 'alarm_control_panel.alarm_arm_night' if output.state_home | count > 1 else 'alarm_control_panel.alarm_arm_away' }}
             target:
               entity_id: "{{ alarm }}"
         else:
