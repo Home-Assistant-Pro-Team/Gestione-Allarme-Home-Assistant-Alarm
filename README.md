@@ -208,6 +208,7 @@ I file principali si trovano nella cartella *alarm_control_panel*
 - È possibile escludere o includere singoli sensori anche con allarme in corso dall'interfaccia utente (UI).
 - Nelle notifiche, viene sempre identificato l'ultimo sensore che ha effettivamente cambiato stato, indicando l'orario in cui ciò è avvenuto ed i mediaplayer riprodurranno l'audio di una sirena quando l'allarme passa allo stato triggered.
 - È possibile decidere quali sensori includere o escludere dalla lista utilizzata nella funzione "select" nel file "general_alarm", inserendo le entità nei gruppi exclude_alarm_entities e include_alarm_entities.
+- Se un dispositivo media player (ad eccezione degli altoparlanti Google e Alexa) o una o più luci vengono accesi in un'area, i sensori delle porte e delle finestre presenti in quell'area vengono disattivati. Questo consente di aprire e chiudere le finestre durante la notte senza far scattare l'allarme notturno. Quando tutti i dispositivi vengono spenti in quella zona, la lista dei sensori viene aggiornata, mantenendo esclusi i sensori delle finestre che sono stati lasciati aperti.
 
 *NB Assicurati di aver impostato correttamente l'attributo **device_class: window** sui dispositivi utilizzati per le finestre. Se non è impostato correttamente, lo stato della finestra non verrà rilevato correttamente e non verrà esclusa dal funzionamento dell'allarme se viene lasciata aperta ma verrà trattata come un sensore generico dell'allarme.*
 
@@ -358,6 +359,12 @@ Se stai utilizzando un router Fritz!Box 6890 con fallback LTE, riceverai una not
 
 Dalla card occorre selezionare le telecamere dalle quali ricevere la notifica. Quando scatta l'allarme viene effettuata una registrazione di 30 secondi ed inviata una notifica a tutti i destinatari inseriti nell'elenco dei notify in alarm.jinja che NON si trovano in casa, per ogni telecamera. La notifica include uno screenshot della telecamera e due pulsanti di azione: il primo permette di visualizzare il live della telecamera, mentre il secondo consente di accedere alla cartella per riprodurre la registrazione appena effettuata.
 
+NB: Le cartella locale si abilita aggiungendo quanto segue in configuration.yaml.
+
+	
+	homeassistant:
+	  media_dirs:
+	    locale: "/config/www" #LOCALE
 ## **Scene**
 #### **Action alarm**:
 
@@ -487,6 +494,7 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Fix vari
 - Aggiunto storico stato allarme
 - Spostato jummer in setting
+- Aggiunta possibilità di aprire e chiudere le porte e finestre in signole stanze con allarme notte inserito. 
 
 
 ### **Supportaci**
