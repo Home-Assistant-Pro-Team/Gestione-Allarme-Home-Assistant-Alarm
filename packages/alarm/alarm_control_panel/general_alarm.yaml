@@ -58,31 +58,6 @@ template:
             } 
               [states(alarm)] 
           }}
-          
-      - name: Allarme Sensori Offline
-        state: >-
-          {% set offline_device = (
-             expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) +
-             expand(state_attr('sensor.lista_sensori_allarme_notte', 'print_list_group')) +
-             expand(state_attr('sensor.lista_sensori_allarme_zone_away', 'print_list_group')) +
-             expand(state_attr('sensor.lista_sensori_allarme_zone_night', 'print_list_group')) +
-             expand('group.include_alarm_entities')) | map(attribute='entity_id') | unique | list %}
-          {{ expand(offline_device) |selectattr('state','in',['unavailable']) |map(attribute='name') |list |count}}
-        attributes:
-          Dispositivi: >
-            {% set offline_device = (
-              expand(state_attr('sensor.lista_sensori_allarme_global', 'print_list_group')) +
-              expand(state_attr('sensor.lista_sensori_allarme_notte', 'print_list_group')) +
-              expand(state_attr('sensor.lista_sensori_allarme_zone_away', 'print_list_group')) +
-              expand(state_attr('sensor.lista_sensori_allarme_zone_night', 'print_list_group')) +
-              expand('group.include_alarm_entities')) | map(attribute='entity_id') | unique | list %}
-            {% set device = ( expand(offline_device) |selectattr('state','in',['unavailable']) |map(attribute='name') |list)%}
-            {% if device == [] %}
-              Nessuno
-            {% else %}
-              {{ expand(offline_device) |selectattr('state','in',['unavailable']) |map(attribute='name') |list }}
-            {% endif %}
-
 
   - button:
       - name: confirmed_zone_alarm

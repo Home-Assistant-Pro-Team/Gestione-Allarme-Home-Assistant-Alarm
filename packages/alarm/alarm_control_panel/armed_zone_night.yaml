@@ -57,6 +57,16 @@ template:
       - platform: template
         value_template: >-
           {% from 'alarm.jinja' import state_alarm %}
+          {% set output = namespace(media=[]) %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}
+          {% set lista = expand(states.media_player, states.light) | rejectattr('state', 'in', ['unknown', 'unavailable']) | map(attribute='entity_id') | list %}
+          {% for entities in lista if not is_device_attr(entities, 'manufacturer', 'Google Inc.') and not is_device_attr(entities, 'manufacturer', 'Amazon') %}
+            {% set output.media = output.media + [entities] %}
+          {% endfor %}
+          {{ is_state(alarm, 'armed_night') and is_state('input_boolean.alarm_triggered_state', 'off') and now() < expand(output.media) | map(attribute='last_changed') | max + timedelta(milliseconds=250) }}
+      - platform: template
+        value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
           {% set alarm = (state_alarm() | from_json) ['alarm'] %}
           {{ is_state(alarm, 'armed_night') and is_state('input_boolean.alarm_triggered_state', 'off') }}
     sensor:
@@ -212,7 +222,16 @@ automation:
     action:
       - alias: Fai scattare allarme quando un sensore passa allo stato on
         if:
-          - "{{ trigger.event.data.entity_id in state_attr('sensor.lista_sensori_allarme_zone_attiv_night', 'print_list_group') }}"
+          - >-
+            {# Il sensore deve far parte della lista ed in più non deve essere in una stanza "abitata" #}
+            {% set output = namespace(media=[]) %}
+            {% set lista = expand(states.media_player, states.light)| rejectattr('state', 'in', ['unknown', 'unavailable', 'off']) | map(attribute='entity_id') | list %}
+            {% for entities in lista if not is_device_attr(entities, 'manufacturer', 'Google Inc.') and not is_device_attr(entities, 'manufacturer', 'Amazon') %}
+              {% set output.media = output.media + area_entities(area_name(entities)) %}
+            {% endfor %}
+            {% set window = expand(state_attr('sensor.lista_sensori_allarme_zone_night', 'print_list_group')) | rejectattr('entity_id', 'in', output.media) | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'in', ['window','door']) | map(attribute='entity_id') | list %}
+            {% set not_window = expand(state_attr('sensor.lista_sensori_allarme_zone_night' , 'print_list_group')) | selectattr('attributes.device_class', 'defined') | rejectattr('attributes.device_class', 'in', ['window','door']) | map(attribute='entity_id') | list %}
+              {{ trigger.event.data.entity_id in (window + not_window) }}
           - "{{ trigger.event.data.new_state.state == 'on' and trigger.event.data.old_state.state == 'off' }}"
         then:
           - service: alarm_control_panel.alarm_trigger

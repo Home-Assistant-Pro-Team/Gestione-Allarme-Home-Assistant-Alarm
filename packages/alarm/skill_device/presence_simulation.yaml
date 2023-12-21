@@ -183,7 +183,7 @@ automation:
             service: scene.create
             data:
               scene_id: light_cover_presence_simulation
-              snapshot_entities: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') + state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group') }}"
+              snapshot_entities: "{{ state_attr('sensor.lista_luci_allarme_per_simulazione_presenza', 'print_list_group') | list + state_attr('sensor.lista_cover_allarme_per_simulazione_presenza', 'print_list_group') | list }}"
 
       - alias: Avvio simulazione presenza
         if:

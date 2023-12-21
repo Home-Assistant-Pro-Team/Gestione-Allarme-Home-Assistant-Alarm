@@ -6,7 +6,7 @@ homeassistant:
 automation:
   - alias: "Allarme: notify alarm media player"
     id: allarme_notify_alarm_media_player
-    mode: restart
+    mode: parallel
     variables:
       my_external_domain: *my_external_domain
       volume: 0.5
