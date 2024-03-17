@@ -1,4 +1,4 @@
-`- Version: 3.0 -`
+`- Version: 3.1 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -494,7 +494,10 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 - Fix vari
 - Aggiunto storico stato allarme
 - Spostato jummer in setting
-- Aggiunta possibilità di aprire e chiudere le porte e finestre in signole stanze con allarme notte inserito. 
+- Aggiunta possibilità di aprire e chiudere le porte e finestre in signole stanze con allarme notte inserito.
+
+### Versione: 3.1
+- Aggiunto recupero e ripristino volumi media_player
 
 
 ### **Supportaci**
