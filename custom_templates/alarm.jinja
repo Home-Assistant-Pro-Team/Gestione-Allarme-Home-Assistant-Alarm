@@ -50,7 +50,7 @@
 		{% for zona in range(10) %}
 			{% set zona_nome = sensori_allarme['zona' ~ zona] %}
 			{% set sensori = sensori_allarme['sensor_zona' ~ zona] %}
-				{% if zona_nome | string in state_attr(sensor,'print_list_group') %}
+				{% if zona_nome | string in state_attr(sensor,'print_list_group') | reject('in',['None','unknown', 'unavailable']) | list %}
 					{% set output.numbers = output.numbers + sensori | list %}
 				{% endif %}
 		{% endfor %}
@@ -84,8 +84,6 @@
 		 | selectattr('attributes.device_class','in',['window', 'vibration', 'opening', 'occupancy', 'moving', 'motion', 'lock', 'garage_door', 'door']) | list %}
 		{% for states in list_sensor if states.state != 'unavailable' and states.state != 'unknown' -%}
 		{%- set output.numbers = output.numbers + [states.name ] -%}
-			{%- if loop.last -%}
-			{%- endif -%}
 		{%- endfor %}
 	{{ ['RESET'] + output.numbers }}
 {% endmacro %}

@@ -7,7 +7,7 @@ template:
   - select:
       - name: "Aggiungi o rimuvi zone allarme globale"
         state: "{{ '' }}"
-        options: "{{ ['RESET'] + state_attr('sensor.lista_zone_alarm_setting', 'print_list_group') | list }}"
+        options: "{{ ['RESET'] + state_attr('sensor.lista_zone_alarm_setting', 'print_list_group') | reject('in',['None','unknown', 'unavailable']) | list }}"
         select_option:
           - event: customizations
             event_data:
@@ -172,6 +172,7 @@ automation:
                 event: customizations
                 event_data:
                   types: notify_alarm
+                  cancella: true
                   tag: state_alarm
                   notify: allarme_globale_inserito
                   message: "Allarme a zone globale inserito"
@@ -222,6 +223,7 @@ automation:
                   volume: "{{ 0.9 if is_state('input_boolean.alarm_triggered_state', 'on') else 0.5 }}"
                   action2: None
                   action1: None
+                  cancella: true
                   message: >-
                     {% if is_state('input_boolean.alarm_triggered_state', 'on') %}
                       {{ 'Attenzione allarme scattato in vostra assenza il ' + as_local(states['input_boolean.alarm_triggered_state'].last_changed).strftime("%d/%m/%Y %H:%M") + '. Allarme disattivato.' }}

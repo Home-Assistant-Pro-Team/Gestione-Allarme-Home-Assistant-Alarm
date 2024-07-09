@@ -62,7 +62,7 @@ automation:
                 - alias: Avvia registrazione camera
                   service: camera.record
                   data:
-                    filename: "/config/www/immagini_allarme/{{ states[camera[var_index]].object_id}}/{{now().strftime('%d-%m-%Y--%H:%M') }}.mp4"
+                    filename: "/config/www/immagini_allarme/{{ states[camera[var_index]].object_id }}/{{ now().strftime('%d-%m-%Y--%H:%M') }}.mp4"
                     duration: 30
                   target:
                     entity_id: "{{ camera[var_index] }}"

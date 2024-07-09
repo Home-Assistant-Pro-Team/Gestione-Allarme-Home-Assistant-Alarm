@@ -1,34 +1,21 @@
 {% macro persons() %}
- [
- 	{
- 		"person": "person.marco",
- 		"battery": "sensor.cellulare_marco_battery_level",
-        "notify": "mobile_app_cellulare_marco",
-		"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-		"cellulare": "333333333333"
-  	},
-  	{
-  		"person": "person.serena",
-  		"battery": "sensor.cellulare_serena_livello_della_batteria",
-        "notify": "mobile_app_samsung_s21",
-		"sveglia": "none",
-		"cellulare": "3333333333"
-  	}
- ]
-{% endmacro %}
-##############################################################
-{% macro media_players(type) %}
-	{% set list_media = 
-		[
-			'media_player.camera',
-			'media_player.studio',
-			'media_player.googlehome_cameretta',
-			'media_player.googlehome_bagno',
-			'media_player.googlehome_cucina',
-			'media_player.googlehome_salone'
-		]
-	%}
-	{% for integrations in integration_entities(type) if integrations in list_media %}
-		{{ integrations }}
+{% set numero = { 
+	'person.marco' : '331xxxxxxx',
+	'person.tata' : '334xxxxxxxx' 
+				} %}
+{% set id_device_mobile = integration_entities('mobile_app') | map('device_id') | reject ('eq', None) | unique  | list %} 
+{% set list_person_with_tracker = states.person | selectattr('attributes.device_trackers', 'defined') | map(attribute='entity_id') | list %}
+	[
+	{% for persons in list_person_with_tracker if state_attr(persons, 'device_trackers')  | select( 'in', integration_entities('mobile_app')) | list | count > 0  %}
+	{% set ids = state_attr(persons, 'device_trackers')| map('device_id')| select( 'in', id_device_mobile)| unique |first %}
+		{
+			"person": "{{ persons }}",
+			"battery": "{{ expand(ids | device_entities)  | selectattr('attributes.device_class', 'eq', 'battery') | map(attribute='entity_id') |first | default('none') }}",
+			"notify": "mobile_app_{{ device_attr(ids, 'name') | slugify }}",
+			"sveglia": "{{ expand(ids | device_entities)  | selectattr('attributes.device_class', 'eq', 'timestamp') | map(attribute='entity_id') |first | default('none') }}",
+			"cellulare": "{{numero.get(persons, 'none') }}"
+		}
+	{%- if loop.first %},{% endif -%}
 	{% endfor %}
+	]
 {% endmacro %}

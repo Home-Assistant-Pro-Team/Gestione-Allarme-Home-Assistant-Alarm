@@ -4,7 +4,7 @@ homeassistant:
       Sensore Porta: &door binary_sensor.porta_blinadata_contact
       Lista familiari: &family
         - person.marco
-        - person.serena
+        - person.tata
       Lista notify per alert: &alert
         - mobile_app_cellulare_marco
         - mobile_app_samsung_s21

@@ -51,7 +51,7 @@ template:
             { 
               'armed_away' : 'Allarme Globale',
               'armed_night' : 'Allarme Notte',
-              'disarmed' : 'Disattivato',
+              'disarmed' : 'Disattivo',
               'triggered': 'Innescato',
               'pending': 'Scattato',
               'arming': 'In Attivazione'
@@ -98,6 +98,7 @@ template:
 
   - select:
       - name: "Seleziona zona allarme setting"
+        unique_id: "Seleziona zona allarme setting"
         state: "{{ states('input_text.select_zone_alarm') | title }}"
         options: "{{ state_attr('sensor.lista_zone_alarm_setting', 'print_list_group')}}"
         select_option:
@@ -190,15 +191,25 @@ template:
           notify: presence_simulation_mobile
       - platform: template
         value_template: >-
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}   
           {% set code_card = 'sensor.counter_code_error'  %}
-          {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state('sensor.stato_allarme','Disattivato') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
+          {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state(alarm, 'disarmed') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
+        # value_template: >-
+        #   {% set code_card = 'sensor.counter_code_error'  %}
+        #   {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state('sensor.stato_allarme','Disattivo') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
         for:
           seconds: 1
         id: control_code
       - platform: template
         value_template: >-
-          {% set code_card = 'sensor.counter_code_error_keypad' %}
-          {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state('sensor.stato_allarme','Disattivato') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
+          {% from 'alarm.jinja' import state_alarm %}
+          {% set alarm = (state_alarm() | from_json) ['alarm'] %}   
+          {% set code_card = 'sensor.counter_code_error_keypad'  %}
+          {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state(alarm, 'disarmed') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
+        # value_template: >-
+        #   {% set code_card = 'sensor.counter_code_error_keypad' %}
+        #   {{ states(code_card) != 'unknown' and not is_state(code_card,'0') and not is_state('sensor.stato_allarme','Disattivo') and now() < states[code_card].last_changed + timedelta(seconds=2) }}
         for:
           seconds: 1
         id: control_code
@@ -212,9 +223,9 @@ template:
           {% elif trigger is defined and trigger.entity_id == 'sensor.stato_allarme' %}
             {% set persons = states.person | selectattr('attributes.user_id', 'eq', trigger.to_state.context.user_id) | list %} 
             {% set parents = expand(states.automation, states.button) | selectattr('context.parent_id', 'eq', trigger.to_state.context.parent_id) | list %} 
-                {% if persons | count == 1 and trigger.to_state.state in ['In Attivazione', 'Disattivato'] %}
+                {% if persons | count == 1 and trigger.to_state.state in ['In Attivazione', 'Disattivo'] %}
                     {{ as_local(now()).strftime("%d/%m %H:%M -> ") + trigger.to_state.state + ' da: ' + persons[0].attributes.friendly_name }}           
-                {% elif parents | count > 0 and trigger.to_state.state in ['In Attivazione', 'Disattivato'] %}
+                {% elif parents | count > 0 and trigger.to_state.state in ['In Attivazione', 'Disattivo'] %}
                     {% for parent in parents if "Allarme: " in parent.attributes.friendly_name %}
                         {{ as_local(now()).strftime("%d/%m %H:%M -> ") + trigger.to_state.state + ' da: ' + parent.attributes.friendly_name | replace('Allarme: ','')}}
                     {% break %} 

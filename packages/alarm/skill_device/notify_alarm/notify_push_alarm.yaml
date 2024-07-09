@@ -113,6 +113,16 @@ automation:
                     - action: "{{ trigger.event.data.action2 | default('triggered_notify_alarm') }}"
                       title: "{{ trigger.event.data.title2 | default('Fai Scattare') }}"
                       uri: "{{ trigger.event.data.uri2 | default(None) }}"
+      - alias: Elimina notifica push
+        if: "{{ trigger.event.data.cancella is defined }}"
+        then:
+          - delay:
+              seconds: 5
+          - service: "notify.notify"
+            data:
+              message: "clear_notification"
+              data:
+                tag: "{{ trigger.event.data.tag | default(None) }}"
 
   - alias: "Allarme: Action notify alarm"
     id: allarme_action_notify_alarm

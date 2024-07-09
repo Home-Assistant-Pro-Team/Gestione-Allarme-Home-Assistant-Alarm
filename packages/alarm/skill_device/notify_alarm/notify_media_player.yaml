@@ -10,14 +10,8 @@ automation:
     variables:
       my_external_domain: *my_external_domain
       volume: 0.5
-      alexa: >
-        {% from 'personal.jinja' import media_players %}
-        {% set media = media_players('alexa_media').split() %}
-        {{ media}}
-      google: >
-        {% from 'personal.jinja' import media_players %}
-        {% set media = media_players('cast').split() %}
-        {{ media}}
+      alexa: "{{ states.media_player | selectattr('attributes.source','eq','Local Speaker') | map(attribute='entity_id') | select('in', integration_entities('alexa_media')) | list }}"
+      google: "{{ states.media_player | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'speaker') | map(attribute='entity_id') | select('in', integration_entities('cast')) | list }}"
       volume_media_player: "{{ state_attr('sensor.volumi_media_player', 'list_device').values() | list }}"
     trigger:
       - platform: event

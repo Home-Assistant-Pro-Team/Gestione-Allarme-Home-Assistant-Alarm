@@ -172,7 +172,7 @@ script:
         {% from 'personal.jinja' import persons %}
         {% set output = namespace(numbers=[]) %}
         {% for d in persons() | from_json if d['cellulare'] != 'none' %}
-        {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
+          {%- set output.numbers = output.numbers + [ d['cellulare'] ] -%}
         {% endfor %}
         {{ output.numbers }}
     sequence:

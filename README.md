@@ -1,4 +1,4 @@
-`- Version: 3.1 -`
+`- Version: 3.2 -`
 
 # Gestione Allarme HomeAssiatant Alarm control panel 
 
@@ -124,51 +124,19 @@ Inoltre, è necessario personalizzare le entità presenti nel file "alarm.jinja"
 
 - **personal.jinja**
 
-	Questo file sarà utilizzato per altri progetti all'interno di questo repository GitHub. Nel file, impostiamo dati personali che verranno utilizzati in tutti i progetti. È sufficiente inserire le proprie entità rispettando l'indentazione JSON.
-
-	Vediamo come personalizzarlo. Anche se non tutte le informazioni sono necessarie per questo pacchetto, è consigliabile compilare tutti i campi per poter sfruttarlo appieno in altri progetti.
-
-	In questa sezione, definiamo le entità e i sensori per ogni persona. Se non si desidera associare un numero di cellulare o un sensore di sveglia a una persona specifica, è sufficiente assegnare il valore "none" nella sezione corrispondente del file. Per aggiungere o rimuovere persone dalla lista di dizionari, è necessario prestare attenzione alla sintassi JSON.
+	Questo file è utilizzato per altri progetti all'interno di questo repository GitHub. Nel file, impostiamo dati personali che verranno utilizzati in tutti i progetti.
+	
+	Solo nel caso si vogliano usare utilizzare le chiamate voip è necessario complilare manualmente il dizionario 'person.xx' : 'numero'.
 
 	```
 	{% macro persons() %}
-	[
-		{
-			"person": "person.marco",
-			"battery": "sensor.cellulare_marco_battery_level",
-			"notify": "mobile_app_cellulare_marco",
-			"sveglia": "sensor.cellulare_marco_prossimo_allarme",
-			"cellulare": "331000000"
-		},
-		{
-			"person": "person.serena",
-			"battery": "sensor.cellulare_serena_livello_della_batteria",
-			"notify": "mobile_app_samsung_s21",
-			"sveglia": "none",
-			"cellulare": "335000000"
-		}
-	]
-	{% endmacro%}
+	{% set numero = { 
+	'person.marco' : '33100000',
+	'person.tata' : '3340000000' 
+			} %}
+	.............
 	```
-	In questa sezione, elencheremo i nostri media player utilizzati per le notifiche. Assicurati di inserire correttamente i media player selezionati per le notifiche Alexa e TTS (ad esempio, Google), seguendo attentamente la sintassi corretta.
 
-	```
-	{% macro media_players(type) %}
-		{% set list_media = 
-			[
-				'media_player.camera',
-				'media_player.studio',
-				'media_player.googlehome_cameretta',
-				'media_player.googlehome_bagno',
-				'media_player.googlehome_cucina',
-				'media_player.googlehome_salone'
-			]
-		%}
-		{% for integrations in integration_entities(type) if integrations in list_media %}
-			{{ integrations }}
-		{% endfor %}
-	{% endmacro %}
-	```
 ## **Alarm control panel**:
 I file principali si trovano nella cartella *alarm_control_panel*
 #### **General alarm**:
@@ -499,6 +467,11 @@ Questo progetto è aperto ai contributi. Se vuoi fornire feedback, segnalare un 
 ### Versione: 3.1
 - Aggiunto recupero e ripristino volumi media_player
 
+### Versione: 3.2
+- I media player Alexa e Google ora vengono riconosciuti automaticamente, senza la necessità di inserirli manualmente nella lista.
+- Le entità "person" e i relativi sensori associati (notifiche di servizio, sensore della batteria, sensore della sveglia) vengono ora riconosciuti automaticamente. È necessario specificare il numero di telefono da associare all'entità "person" solo se si desidera utilizzare le chiamate VoIP (opzionale).
+- Le notifiche di attivazione e disattivazione dell'allarme vengono ora cancellate automaticamente dopo 5 minuti
+- Tolti errori nel log generati in avvio homeassistant
 
 ### **Supportaci**
 Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 

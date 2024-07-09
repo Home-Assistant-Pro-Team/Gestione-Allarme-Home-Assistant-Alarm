@@ -12,9 +12,8 @@ template:
   - sensor:
       - name: Cambio volume media player
         state: >-
-          {% from 'personal.jinja' import media_players %}
-          {% set google = media_players('cast').split() %}
-          {% set alexa = media_players('alexa_media').split() %}
+          {% set google = states.media_player | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'speaker') | map(attribute='entity_id') | select('in', integration_entities('cast')) | list %}
+          {% set alexa = states.media_player | selectattr('attributes.source','eq','Local Speaker') | map(attribute='entity_id') | select('in', integration_entities('alexa_media')) | list %}
           {{ expand(alexa + google) | map(attribute='attributes.volume_level') |select('defined') | list}}
   - trigger:
       - platform: state
@@ -25,8 +24,8 @@ template:
         attributes:
           list_device: >-
             {% from 'personal.jinja' import media_players %}
-            {% set alexa = media_players('alexa_media').split() %}
-            {% set google = media_players('cast').split() %}
+            {% set google = states.media_player | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'speaker') | map(attribute='entity_id') | select('in', integration_entities('cast')) | list %}
+            {% set alexa = states.media_player |selectattr('attributes.source','eq','Local Speaker') | map(attribute='entity_id') | select('in', integration_entities('alexa_media')) | list %}
             {% set this_entity = state_attr('sensor.volumi_media_player','list_device') %}
             {
               {%- for key in alexa + google %}

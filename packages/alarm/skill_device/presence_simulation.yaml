@@ -109,9 +109,10 @@ template:
       - name: "Aggiungi o rimuovi media player per simulazione presenza"
         state: "{{ states('sensor.lista_media_player_allarme_per_simulazione_presenza') }}"
         options: >-
-          {% from 'personal.jinja' import media_players %}
+          {% set google = states.media_player | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'speaker') | map(attribute='entity_id') | select('in', integration_entities('cast')) | list %}
+          {% set alexa = states.media_player | selectattr('attributes.source','eq','Local Speaker') | map(attribute='entity_id') | select('in', integration_entities('alexa_media')) | list %}
           {% set output = namespace(numbers=[]) %}
-          {% for d in media_players('cast').split() + media_players('alexa_media').split() %}
+          {% for d in google + alexa %}
             {% set output.numbers = output.numbers + [states[d].name ] %}
           {% endfor %}
             {{ ['RESET'] + output.numbers }}

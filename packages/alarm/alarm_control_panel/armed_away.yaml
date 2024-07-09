@@ -157,6 +157,7 @@ automation:
                   tag: state_alarm
                   notify: allarme_globale_inserito
                   message: "Allarme globale inserito"
+                  cancella: true
                   action2: None
 
           - alias: Allarme scattato
@@ -205,6 +206,7 @@ automation:
                   volume: "{{ 0.9 if is_state('input_boolean.alarm_triggered_state', 'on') else 0.5 }}"
                   action2: None
                   action1: None
+                  cancella: true
                   message: >-
                     {% if is_state('input_boolean.alarm_triggered_state', 'on') %}
                       {{ 'Attenzione allarme scattato in vostra assenza il ' + as_local(states['input_boolean.alarm_triggered_state'].last_changed).strftime("%d/%m/%Y %H:%M") + '. Allarme disattivato.' }}

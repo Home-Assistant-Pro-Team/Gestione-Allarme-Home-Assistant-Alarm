@@ -18,7 +18,7 @@ automation:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}
         {{ (state_alarm() | from_json) ['alarm'] }}
-      exclude: "{{ expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list }}"
+      exclude: "{{ expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list + area_entities('box') }}"
     trigger:
       - alias: Sveglia cellulare della persona il casa
         platform: template
@@ -68,8 +68,8 @@ automation:
                 target:
                   entity_id: cover.camera_porta_finestra
 
-  - id: armed_night_auto_insert
-    alias: Inserimento allarme notte automatico
+  - id: allarme_armed_night_auto_insert
+    alias: "Allarme: Inserimento allarme notte automatico"
     variables:
       # PERSONSONALIZZARE AREA
       area: "{{ area_entities('camera') + area_entities('cameretta') }}"
@@ -78,7 +78,7 @@ automation:
       alarm: >-
         {% from 'alarm.jinja' import state_alarm %}
         {{ (state_alarm() | from_json) ['alarm'] }}
-      exclude: "{{ expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list }}"
+      exclude: "{{ expand('group.exclude_alarm_entities') | map(attribute='entity_id') | list + area_entities('box') }}"
     trigger:
       - alias: BedPresence occupati ed ultima stanza che rileva movimento (camera o cameretta)
         platform: template
